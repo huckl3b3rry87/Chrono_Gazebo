@@ -26,9 +26,170 @@
     <include>
       <uri>model://sun</uri>
     </include>
-    <include>
-      <uri>model://sun</uri>
-    </include>
+
+
+    <model name="office1">
+      <include>
+        <uri>model://office_building</uri>
+        <pose>10 15 0 0 0 0</pose>
+      </include>
+    </model>
+
+    <model name="office2">
+      <include>
+        <uri>model://office_building</uri>
+        <pose>30 15 0 0 0 0</pose>
+      </include>
+    </model>
+
+    <model name="office3">
+      <include>
+        <uri>model://office_building</uri>
+        <pose>50 15 0 0 0 0</pose>
+      </include>
+    </model>
+
+    <model name="office4">
+      <include>
+        <uri>model://office_building</uri>
+        <pose>10 -15 0 0 0 0</pose>
+      </include>
+    </model>
+
+    <model name="office5">
+      <include>
+        <uri>model://office_building</uri>
+        <pose>30 -15 0 0 0 0</pose>
+      </include>
+    </model>
+
+    <model name="office6">
+      <include>
+        <uri>model://office_building</uri>
+        <pose>50 -15 0 0 0 0</pose>
+      </include>
+    </model>
+
+
+    <model name="barrier1">
+      <include>
+        <uri>model://jersey_barrier</uri>
+        <pose>81.2 62 0 0 0 .5</pose>
+      </include>
+    </model>
+    <model name="barrier2">
+      <include>
+        <uri>model://jersey_barrier</uri>
+        <pose>85.2 54 0 0 0 .5</pose>
+      </include>
+    </model>
+
+
+    <model name="barrier18">
+      <include>
+        <uri>model://jersey_barrier</uri>
+        <pose>80.5 51.2 0 0 0 .3</pose>
+      </include>
+    </model>
+
+    <model name="barrier3">
+      <include>
+        <uri>model://jersey_barrier</uri>
+        <pose>76.6 60.3 0 0 0 0</pose>
+      </include>
+    </model>
+    <model name="barrier4">
+      <include>
+        <uri>model://jersey_barrier</uri>
+        <pose>75.1 50 0 0 0 0</pose>
+      </include>
+    </model>
+
+    <model name="barrier15">
+      <include>
+        <uri>model://jersey_barrier</uri>
+        <pose>72.2 60.9 0 0 0 -.3</pose>
+      </include>
+    </model>
+    <model name="barrier16">
+      <include>
+        <uri>model://jersey_barrier</uri>
+        <pose>69.7 51.2 0 0 0 -.3</pose>
+      </include>
+    </model>
+
+    <model name="barrier5">
+      <include>
+        <uri>model://jersey_barrier</uri>
+        <pose>68.3 63.1 0 0 0 -.5</pose>
+      </include>
+    </model>
+    <model name="barrier6">
+      <include>
+        <uri>model://jersey_barrier</uri>
+        <pose>64.2 54 0 0 0 -.5</pose>
+      </include>
+    </model>
+
+    <model name="barrier13">
+      <include>
+        <uri>model://jersey_barrier</uri>
+        <pose>64.8 66.2 0 0 0 -.78</pose>
+      </include>
+    </model>
+    <model name="barrier14">
+      <include>
+        <uri>model://jersey_barrier</uri>
+        <pose>59.2 58.2 0 0 0 -.78</pose>
+      </include>
+    </model>
+
+    <model name="barrier7">
+      <include>
+        <uri>model://jersey_barrier</uri>
+        <pose>61.3 70.6 0 0 0 -.79</pose>
+      </include>
+    </model>
+    <model name="barrier8">
+      <include>
+        <uri>model://jersey_barrier</uri>
+        <pose>55.2 63.1 0 0 0 -.79</pose>
+      </include>
+    </model>
+
+    <model name="barrier11">
+      <include>
+        <uri>model://jersey_barrier</uri>
+        <pose>58 75.4 0 0 0 -.87</pose>
+      </include>
+    </model>
+    <model name="barrier12">
+      <include>
+        <uri>model://jersey_barrier</uri>
+        <pose>51.5 68.3 0 0 0 -.96</pose>
+      </include>
+    </model>
+
+    <model name="barrier9">
+      <include>
+        <uri>model://jersey_barrier</uri>
+        <pose>55.1 80.1 0 0 0 -.96</pose>
+      </include>
+    </model>
+    <model name="barrier10">
+      <include>
+        <uri>model://jersey_barrier</uri>
+        <pose>47.7 73.4 0 0 0 -.96</pose>
+      </include>
+    </model>
+
+    <model name="gas_station">
+      <include>
+        <uri>model://gas_station</uri>
+        <pose>123 105 0 0 0 0</pose>
+      </include>
+    </model>
+
 
 
     <model name ='vehicle'>\
@@ -232,6 +393,6 @@
         </script>
       </material>
     </road>
-    <plugin name="gazonoVehicle" filename="build/libgazonoVehicle.so"/>
+    <plugin name="gazonoVehicle" filename="libgazonoVehicle.so"/>
   </world>
 </sdf>

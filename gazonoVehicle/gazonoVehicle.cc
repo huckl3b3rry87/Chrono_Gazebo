@@ -66,6 +66,7 @@ class GazonoVehicle : public WorldPlugin
     this->_world = _parent;
     //disable the physics engine
     _parent->EnablePhysicsEngine(false);
+    _world->GetPhysicsEngine()->SetRealTimeUpdateRate(400);
 
     //BEGIN LINE FOLLOW
     if (!ros::isInitialized())
@@ -159,11 +160,37 @@ class GazonoVehicle : public WorldPlugin
    {
      //control vehicle speed control
      //this will maintain an approximate speed of 7 m/s
-     if(vehicle->GetVehicleSpeedCOM() <= 3.0){
-       braking_input = 0.0;
-       throttle_input = 0.3;
+
+     //connect to the ray data to stop vehicle in case of obstruction
+     //this will only use a rectangle in the direction of the wheels to detect obstacles.
+     maxSpeed = 6.0;
+     raySensor->GetRanges(ranges);
+     center = steering_input*50 + 50;
+     minRange = 100000.0;
+     for(int i=0; i<ranges.size(); i++){
+       if(ranges[i]*sin(abs(i-center)*3.14159/180.0) <=2.5){
+         //std::cout<<"range was: "<<ranges[i]<<std::endl;
+         //set throttle and brake if object seen
+
+         //cut out of loop
+         if(ranges[i]<minRange)
+           minRange = ranges[i];
+       }
      }
-     else if(vehicle->GetVehicleSpeedCOM() >= 5.0){
+     if(minRange<10000.0){
+       //linear so 6m/s at 20m at 0m/s at 2.5m
+       maxSpeed = .343*minRange - .857;
+     }
+
+     if(vehicle->GetVehicleSpeedCOM() >= maxSpeed +1.0){
+       braking_input = 0.5;
+       throttle_input = 0.0;
+     }
+     else if(vehicle->GetVehicleSpeedCOM() <= maxSpeed /2.0){
+       braking_input = 0.0;
+       throttle_input = 0.2;
+     }
+     else if(vehicle->GetVehicleSpeedCOM() >= maxSpeed){
        braking_input = 0.3;
        throttle_input = 0.1;
      }
@@ -172,18 +199,6 @@ class GazonoVehicle : public WorldPlugin
        throttle_input = 0.2;
      }
 
-     //connect to the ray data to stop vehicle in case of obstruction
-     raySensor->GetRanges(ranges);
-     for(int i=0; i<ranges.size(); i++){
-       if(ranges[i] <=100){
-         //std::cout<<"range was: "<<ranges[i]<<std::endl;
-         //set throttle and brake if object seen
-         throttle_input = 0.0;
-         braking_input = 0.5;
-         //cut out of loop
-         i = ranges.size();
-       }
-     }
 
      for(int i =0; i<1; i++){
        //collect module information
@@ -335,6 +350,9 @@ private: ros::NodeHandle* rosnode_;
     double         braking_input = 0.1;
     int num_axles;
     int num_wheels;
+    double center;
+    double minRange;
+    double maxSpeed;
 
     //define the step size
     double step_size = 0.001;

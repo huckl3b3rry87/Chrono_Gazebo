@@ -23,6 +23,11 @@ BUILD:
   clone this repository
   create build directory inside gazonoVehicle - this will give correct path for vehicle data
   cmake ..; make
+  Add build directory to Gazebo plugin path:
+  from inside build directory:
+
+  $ export GAZEBO_PLUGIN_PATH=${GAZEBO_PLUGIN_PATH}:$PWD
+
 
 RUN:
   $./launch from inside gazonoVehicle directory
