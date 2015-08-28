@@ -26,6 +26,10 @@
     <include>
       <uri>model://sun</uri>
     </include>
+    <include>
+      <uri>model://sun</uri>
+    </include>
+
 
     <model name ='vehicle'>\
       <pose>0 0 0 0 0 0</pose>\
@@ -179,30 +183,48 @@
 
     <road name="Secondary">
       <width>7.5</width>
-      <point>5 0 0</point>
-      <point>10 0 0</point>
-      <point>20 14.7 0</point>
-      <point>30 23.8 0</point>
-      <point>40 23.8 0</point>
-      <point>50 14.7 0</point>
-      <point>60 0 0</point>
-      <point>70 -14.8 0</point>
-      <point>80 -23.8 0</point>
-      <point>90 -23.8 0</point>
-      <point>100 -14.8 0</point>
-      <point>110 0 0</point>
-      <point>110 10 0</point>
-      <point>100 30 0</point>
-      <point>90 40 0</point>
-      <point>80 45 0</point>
-      <point>70 50 0</point>
-      <point>0 50 0</point>
-      <point>-10 40 0</point>
-      <point>-20 35 0</point>
-      <point>-20 15 0</point>
-      <point>-10 10 0</point>
       <point>0 0 0</point>
-      <point>5 0 0</point>
+      <point>100 0 0</point>
+      <point>106 1 0</point>
+      <point>112 3 0</point>
+      <point>117 7 0</point>
+      <point>121 12 0</point>
+      <point>123 18 0</point>
+      <point>125 25 0</point>
+      <point>125 75 0</point>
+      <point>125 80 0</point>
+      <point>120 80 0</point>
+      <point>104 80 0</point>
+      <point>102 79.5 0</point>
+      <point>100 79 0</point>
+      <point>98.5 78 0</point>
+
+      <point>97 77 0</point>
+
+      <point>83.3 58.3 0</point>
+      <point>75 55 0</point>
+      <point>66.7 58.3 0</point>
+      <point>58.3 67.5 0</point>
+
+      <point>50 80 0</point>
+
+      <point>41.7 92.5 0</point>
+      <point>33.3 101.4 0</point>
+      <point>25 105 0</point>
+      <point>16.7 101.7 0</point>
+      <point>8.333 92.5 0</point>
+
+      <point>0 80 0</point>
+      <point>-39 26 0</point>
+      <point>-43 20 0</point>
+      <point>-44 15 0</point>
+      <point>-42.5 9 0</point>
+      <point>-39 4 0</point>
+      <point>-34 1 0</point>
+      <point>-29 0 0</point>
+      <point>0 0 0</point>
+
+
       <material>
         <script>
           <uri>file://../data/gazono.material</uri>
