@@ -148,9 +148,27 @@ class GazonoVehicle : public WorldPlugin
 
     tire_forces = ChTireForces(num_wheels);
     wheel_states = ChWheelStates(num_wheels);
+    //vehicle->GetSystem()->SetLcpSolverType(ChSystem::LCP_ITERATIVE_APGD);
     vehicle->GetSystem()->SetIterLCPmaxItersSpeed(300);
-    vehicle->GetSystem()->SetIterLCPmaxItersStab(20);
+    //vehicle->GetSystem()->SetIterLCPmaxItersStab(100);
     vehicle->GetSystem()->SetMaxPenetrationRecoverySpeed(0.5);
+
+    //add boxes and speed bumps to display vehicle dynamics
+    for(int i=0;i<8;i++){
+      ChSharedPtr<ChBodyEasyBox>box1(new ChBodyEasyBox(0.5, 3, 0.2, 5000, true, true));
+      box1->SetBodyFixed(true);
+      box1->SetPos(ChVector<>(2*i+20, 3.5*(i%2)-1.75, 0));
+      vehicle->GetSystem()->Add(box1);
+    }
+    for(int i=0;i<10;i++){
+      ChSharedPtr<ChBodyEasyCylinder>cylinder1(new ChBodyEasyCylinder(0.25, 3.0, 5000, true, true));
+      cylinder1->SetBodyFixed(true);
+      cylinder1->SetRot(Q_from_AngAxis(1.57, {0, 1, 0}));
+      cylinder1->SetPos(ChVector<>(i+50, 3.5*(i%2)-1.75, -0.12));
+
+      vehicle->GetSystem()->Add(cylinder1);
+    }
+
 
     this->updateConnection = event::Events::ConnectWorldUpdateBegin(
          boost::bind(&GazonoVehicle::OnUpdate, this));

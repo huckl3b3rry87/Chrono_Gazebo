@@ -22,10 +22,226 @@
       </link>
       <static>true</static>
     </model>
+    <scene>
+      <sky>
+        <material>Gazebo/CloudySky</material>
+        <clouds>
+          <speed>5.0</speed>
+          <direction>1 0 0 </direction>
+        </clouds>
+      </sky>
+      <grid>disable</grid>
+      <origin_visual>hide</origin_visual>
+    </scene>
 
     <include>
       <uri>model://sun</uri>
     </include>
+
+    <model name="my_ground_plane">
+    <pose>0 0 0 0 0 0</pose>
+    <static>true</static>
+      <link name="link">
+      <pose>0 0 -0.1 0 0 0</pose>
+        <visual name="visual">
+          <cast_shadows>false</cast_shadows>
+          <geometry>
+            <plane>
+              <normal>0 0 1</normal>
+              <size>1000 1000</size>
+            </plane>
+          </geometry>
+          <material>
+            <script>
+              <uri>model://../data/gazono.material</uri>
+              <name>Gazebo/Grass1</name>
+            </script>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="boxbumps">
+      <pose>0 0 0 0 0 0</pose>\
+      <link name ='chassis'>\
+        <pose>20 -1.75 0 0 0 0</pose>\
+        <visual name ='visual'>\
+          <geometry>
+            <box><size>0.5 3 0.2</size></box>
+          </geometry>
+        </visual>\
+      </link>
+      <link name ='chassis'>\
+        <pose>22 1.75 0 0 0 0</pose>\
+        <visual name ='visual'>\
+          <geometry>
+            <box><size>0.5 3 0.2</size></box>
+          </geometry>
+        </visual>\
+      </link>
+      <link name ='chassis'>\
+        <pose>24 -1.75 0 0 0 0</pose>\
+        <visual name ='visual'>\
+          <geometry>
+            <box><size>0.5 3 0.2</size></box>
+          </geometry>
+        </visual>\
+      </link>
+      <link name ='chassis'>\
+        <pose>26 1.75 0 0 0 0</pose>\
+        <visual name ='visual'>\
+          <geometry>
+            <box><size>0.5 3 0.2</size></box>
+          </geometry>
+        </visual>\
+      </link>
+      <link name ='chassis'>\
+        <pose>28 -1.75 0 0 0 0</pose>\
+        <visual name ='visual'>\
+          <geometry>
+            <box><size>0.5 3 0.2</size></box>
+          </geometry>
+        </visual>\
+      </link>
+      <link name ='chassis'>\
+        <pose>30 1.75 0 0 0 0</pose>\
+        <visual name ='visual'>\
+          <geometry>
+            <box><size>0.5 3 0.2</size></box>
+          </geometry>
+        </visual>\
+      </link>
+      <link name ='chassis'>\
+        <pose>32 -1.75 0 0 0 0</pose>\
+        <visual name ='visual'>\
+          <geometry>
+            <box><size>0.5 3 0.2</size></box>
+          </geometry>
+        </visual>\
+      </link>
+      <link name ='chassis'>\
+        <pose>34 1.75 0 0 0 0</pose>\
+        <visual name ='visual'>\
+          <geometry>
+            <box><size>0.5 3 0.2</size></box>
+          </geometry>
+        </visual>\
+      </link>
+    </model>
+
+    <model name="cylinderBumps">
+      <link name="link">
+        <pose>50 -1.75 -0.12 1.57 0 0</pose>
+        <visual name="visual">
+          <geometry>
+            <cylinder>
+              <radius>.25</radius>
+              <length>3.0</length>
+            </cylinder>
+          </geometry>
+        </visual>
+      </link>
+      <link name="link">
+        <pose>51 1.75 -0.12 1.57 0 0</pose>
+        <visual name="visual">
+          <geometry>
+            <cylinder>
+              <radius>.25</radius>
+              <length>3</length>
+            </cylinder>
+          </geometry>
+        </visual>
+      </link>
+      <link name="link">
+        <pose>52 -1.75 -0.12 1.57 0 0</pose>
+        <visual name="visual">
+          <geometry>
+            <cylinder>
+              <radius>.25</radius>
+              <length>3</length>
+            </cylinder>
+          </geometry>
+        </visual>
+      </link>
+      <link name="link">
+        <pose>53 1.75 -0.12 1.57 0 0</pose>
+        <visual name="visual">
+          <geometry>
+            <cylinder>
+              <radius>.25</radius>
+              <length>3</length>
+            </cylinder>
+          </geometry>
+        </visual>
+      </link>
+      <link name="link">
+        <pose>54 -1.75 -0.12 1.57 0 0</pose>
+        <visual name="visual">
+          <geometry>
+            <cylinder>
+              <radius>.25</radius>
+              <length>3</length>
+            </cylinder>
+          </geometry>
+        </visual>
+      </link>
+      <link name="link">
+        <pose>55 1.75 -0.12 1.57 0 0</pose>
+        <visual name="visual">
+          <geometry>
+            <cylinder>
+              <radius>.25</radius>
+              <length>3</length>
+            </cylinder>
+          </geometry>
+        </visual>
+      </link>
+      <link name="link">
+        <pose>56 -1.75 -0.12 1.57 0 0</pose>
+        <visual name="visual">
+          <geometry>
+            <cylinder>
+              <radius>.25</radius>
+              <length>3</length>
+            </cylinder>
+          </geometry>
+        </visual>
+      </link>
+      <link name="link">
+        <pose>57 1.75 -0.12 1.57 0 0</pose>
+        <visual name="visual">
+          <geometry>
+            <cylinder>
+              <radius>.25</radius>
+              <length>3</length>
+            </cylinder>
+          </geometry>
+        </visual>
+      </link>
+      <link name="link">
+        <pose>58 -1.75 -0.12 1.57 0 0</pose>
+        <visual name="visual">
+          <geometry>
+            <cylinder>
+              <radius>.25</radius>
+              <length>3</length>
+            </cylinder>
+          </geometry>
+        </visual>
+      </link>
+      <link name="link">
+        <pose>59 1.75 -0.12 1.57 0 0</pose>
+        <visual name="visual">
+          <geometry>
+            <cylinder>
+              <radius>.25</radius>
+              <length>3</length>
+            </cylinder>
+          </geometry>
+        </visual>
+      </link>
+
+    </model>
 
 
     <model name="office1">

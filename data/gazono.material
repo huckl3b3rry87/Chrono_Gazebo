@@ -17,3 +17,22 @@ material Gazebo/Line
     }
   }
 }
+material Gazebo/Grass1
+{
+  technique
+  {
+    pass
+    {
+      ambient 0.1 0.1 0.1 1.0
+      diffuse 0.8 0.8 0.8 1.0
+      specular 0.0 0.0 0.0 1.0 0.5
+
+      texture_unit
+      {
+        texture Grass3.jpg
+        filtering trilinear
+	scale 0.01 0.01
+      }
+    }
+  }
+}
