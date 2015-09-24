@@ -52,7 +52,7 @@
   {
     "Location Chassis":         [-0.104, 0.502, 0.256],
     "Location Arm":             [-0.097, 0.543, -0.047],
-    "Spring Coefficient":       369149.000,
+    "Spring Coefficient":       269149.000,
     "Free Length":              0.382
   },
 
@@ -60,7 +60,7 @@
   {
     "Location Chassis":         [-0.104, 0.498, 0.323],
     "Location Arm":             [-0.097, 0.544, -0.038],
-    "Damping Coefficient":      36725.2201
+    "Damping Coefficient":      26725.2201
   },
 
   "Axle":

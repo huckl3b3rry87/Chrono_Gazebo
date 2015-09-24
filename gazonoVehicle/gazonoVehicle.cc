@@ -28,11 +28,14 @@
 ///the chrono-engine includes
 #include "assets/ChTexture.h"
 #include "assets/ChColorAsset.h"
+#include "geometry/ChCTriangleMesh.h"
+#include "geometry/ChCTriangleMeshConnected.h"
 #include "core/ChFileutils.h"
 #include "core/ChStream.h"
 #include "core/ChRealtimeStep.h"
 #include "physics/ChSystem.h"
 #include "physics/ChBodyEasy.h"
+#include "physics/ChBody.h"
 #include "physics/ChLinkDistance.h"
 #include "physics/ChLinkMate.h"
 
@@ -54,6 +57,7 @@
 
 //gazonoVehicle includes
 #include "purePursuitDriver.cc"
+
 
 using namespace chrono;
 using namespace gazebo;
@@ -153,6 +157,41 @@ class GazonoVehicle : public WorldPlugin
     //vehicle->GetSystem()->SetIterLCPmaxItersStab(100);
     vehicle->GetSystem()->SetMaxPenetrationRecoverySpeed(0.5);
 
+    //Add the terrain mesh to Chrono
+    SetChronoDataPath("../data/");
+    ChSharedPtr<ChBody> gTerrain(new ChBody());
+    geometry::ChTriangleMeshConnected terrainMesh;//(new geometry::ChTriangleMeshConnected());
+    std::cout << "Path: " << GetChronoDataPath() << std::endl;
+    terrainMesh.LoadWavefrontMesh(GetChronoDataFile("gazonoTerrain.obj"));
+
+    gTerrain->GetCollisionModel()->ClearModel();
+    gTerrain->GetCollisionModel()->AddTriangleMesh(terrainMesh, true, false);
+    gTerrain->GetCollisionModel()->BuildModel();
+    gTerrain->SetCollide(true);
+
+    ChSharedPtr<ChTriangleMeshShape> vshape(new ChTriangleMeshShape());
+    vshape->GetMesh() = terrainMesh;
+    gTerrain->AddAsset(vshape);
+
+
+
+    //gTerrain->SetRot(Q_from_AngAxis(0, {0, 0,1})*Q_from_AngAxis(1.57, {1, 0, 0}));
+    gTerrain->SetPos({ 45, 50, -0.15 });
+    //std::cout << "Pos: " << gTerrain->GetPos().x << ", " << gTerrain->GetPos().y << ", " << gTerrain->GetPos().z<<std::endl;
+    gTerrain->SetBodyFixed(true);
+    vehicle->GetSystem()->Add(gTerrain);
+
+    // ChSharedPtr<ChBodyEasyBox>groundplane(new ChBodyEasyBox(1000.0, 1000.0, 0.1, 8000, true, true));
+    // groundplane->SetBodyFixed(true);
+    // groundplane->SetPos({0, 0, 0});
+    // vehicle->GetSystem()->Add(groundplane);
+
+    //correct for dip in terrain
+    ChSharedPtr<ChBodyEasyBox>gndBox(new ChBodyEasyBox(50, 60, .2, 8000, true, true));
+    gndBox->SetPos({-17, 55, -.105});
+    gndBox->SetBodyFixed(true);
+    vehicle->GetSystem()->Add(gndBox);
+
     //add boxes and speed bumps to display vehicle dynamics
     for(int i=0;i<8;i++){
       ChSharedPtr<ChBodyEasyBox>box1(new ChBodyEasyBox(0.5, 3, 0.2, 5000, true, true));
@@ -170,12 +209,20 @@ class GazonoVehicle : public WorldPlugin
     }
 
 
+
+
+
+
+
     this->updateConnection = event::Events::ConnectWorldUpdateBegin(
          boost::bind(&GazonoVehicle::OnUpdate, this));
 
   }
   public: void OnUpdate()
    {
+
+
+
      //control vehicle speed control
      //this will maintain an approximate speed of 7 m/s
 
@@ -247,7 +294,7 @@ class GazonoVehicle : public WorldPlugin
        //pursuitDriver->Update(vehicle);
        powertrain->Update(time, throttle_input, driveshaft_speed);
        vehicle->Update(time, steering_input, braking_input, powertrain_torque, tire_forces);
-       terrain->Update(time);
+       //terrain->Update(time);
        for (int i = 0; i < num_wheels; i++)
           tires[i]->Update(time, wheel_states[i]);
 
@@ -255,7 +302,7 @@ class GazonoVehicle : public WorldPlugin
        //driver->Advance(step_size);
        powertrain->Advance(step_size);
        vehicle->Advance(step_size);
-       terrain->Advance(step_size);
+       //terrain->Advance(step_size);
        for (int i = 0; i < num_wheels; i++)
           tires[i]->Advance(step_size);
        }
@@ -345,7 +392,7 @@ private: ros::NodeHandle* rosnode_;
     ChQuaternion<> initRot;
 
     //ground plane parameters
-    double terrainHeight = 0.0;
+    double terrainHeight = -100.1;
     double terrainLength = 1000.0;   // size in X direction
     double terrainWidth  = 1000.0;   // size in Y direction
 
@@ -356,6 +403,7 @@ private: ros::NodeHandle* rosnode_;
     std::vector<ChSharedPtr<RigidTire> > tires;
     //ChSharedPtr<ChDataDriver> driver;
     std::unique_ptr<PurePursuitDriver> pursuitDriver; //*****************
+
     std::vector<double> ranges;
     ChTireForces   tire_forces;
     ChWheelStates  wheel_states;
