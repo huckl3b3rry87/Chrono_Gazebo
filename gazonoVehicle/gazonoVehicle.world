@@ -380,6 +380,62 @@
       </include>
     </model>
 
+
+    <model name="barrier20">
+      <include>
+        <uri>model://jersey_barrier</uri>
+        <pose>129 30 0 0 0 -1.38</pose>
+      </include>
+    </model>
+    <model name="barrier21">
+      <include>
+        <uri>model://jersey_barrier</uri>
+        <pose>129 52 0 0 0 -1.35</pose>
+      </include>
+    </model>
+
+    <model name="barrier22">
+      <include>
+        <uri>model://jersey_barrier</uri>
+        <pose>121 52 0 0 0 1.36</pose>
+      </include>
+    </model>
+    <model name="barrier23">
+      <include>
+        <uri>model://jersey_barrier</uri>
+        <pose>121 30 0 0 0 1.4</pose>
+      </include>
+    </model>
+
+    <model name="barrier24">
+      <include>
+        <uri>model://jersey_barrier</uri>
+        <pose>129 41 0 0 0 1.55</pose>
+      </include>
+    </model>
+    <model name="barrier25">
+      <include>
+        <uri>model://jersey_barrier</uri>
+        <pose>121 41 0 0 0 1.53</pose>
+      </include>
+    </model>
+
+    <model name="barrier26">
+      <include>
+        <uri>model://jersey_barrier</uri>
+        <pose>129 64 0 0 0 1.53</pose>
+      </include>
+    </model>
+    <model name="barrier27">
+      <include>
+        <uri>model://jersey_barrier</uri>
+        <pose>121 64 0 0 0 1.54</pose>
+      </include>
+    </model>
+
+
+
+
     <model name="gas_station">
       <include>
         <uri>model://gas_station</uri>
@@ -438,7 +494,7 @@
         </sensor>
         <sensor name="camera" type="camera">
           <pose>2.1 0.0 0.5 0.0 0.0 0.0</pose>
-          <camera>
+          <camera name="driverCam">
             <horizontal_fov>1.75</horizontal_fov>
             <image>
               <format>R8G8B8</format>
@@ -591,6 +647,426 @@
         </script>
       </material>
     </road>
+
+    <model name="cinderblock0">
+      <include>
+        <uri>model://cinder_block</uri>
+        <pose>0 0 0 0 0 0</pose>
+      </include>
+    </model>
+    <model name="cinderblock1">
+      <include>
+        <uri>model://cinder_block</uri>
+        <pose>0 0 0 0 0 0</pose>
+      </include>
+    </model>
+    <model name="cinderblock2">
+      <include>
+        <uri>model://cinder_block</uri>
+        <pose>0 0 0 0 0 0</pose>
+      </include>
+    </model>
+    <model name="cinderblock3">
+      <include>
+        <uri>model://cinder_block</uri>
+        <pose>0 0 0 0 0 0</pose>
+      </include>
+    </model>
+    <model name="cinderblock4">
+      <include>
+        <uri>model://cinder_block</uri>
+        <pose>0 0 0 0 0 0</pose>
+      </include>
+    </model>
+    <model name="cinderblock5">
+      <include>
+        <uri>model://cinder_block</uri>
+        <pose>0 0 0 0 0 0</pose>
+      </include>
+    </model>
+    <model name="cinderblock6">
+      <include>
+        <uri>model://cinder_block</uri>
+        <pose>0 0 0 0 0 0</pose>
+      </include>
+    </model>
+    <model name="cinderblock7">
+      <include>
+        <uri>model://cinder_block</uri>
+        <pose>0 0 0 0 0 0</pose>
+      </include>
+    </model>
+    <model name="cinderblock8">
+      <include>
+        <uri>model://cinder_block</uri>
+        <pose>0 0 0 0 0 0</pose>
+      </include>
+    </model>
+    <model name="cinderblock9">
+      <include>
+        <uri>model://cinder_block</uri>
+        <pose>0 0 0 0 0 0</pose>
+      </include>
+    </model>
+    <model name="cinderblock10">
+      <include>
+        <uri>model://cinder_block</uri>
+        <pose>0 0 0 0 0 0</pose>
+      </include>
+    </model>
+    <model name="cinderblock11">
+      <include>
+        <uri>model://cinder_block</uri>
+        <pose>0 0 0 0 0 0</pose>
+      </include>
+    </model>
+    <model name="cinderblock12">
+      <include>
+        <uri>model://cinder_block</uri>
+        <pose>0 0 0 0 0 0</pose>
+      </include>
+    </model>
+    <model name="cinderblock13">
+      <include>
+        <uri>model://cinder_block</uri>
+        <pose>0 0 0 0 0 0</pose>
+      </include>
+    </model>
+    <model name="cinderblock14">
+      <include>
+        <uri>model://cinder_block</uri>
+        <pose>0 0 0 0 0 0</pose>
+      </include>
+    </model>
+    <model name="cinderblock15">
+      <include>
+        <uri>model://cinder_block</uri>
+        <pose>0 0 0 0 0 0</pose>
+      </include>
+    </model>
+    <model name="cinderblock16">
+      <include>
+        <uri>model://cinder_block</uri>
+        <pose>0 0 0 0 0 0</pose>
+      </include>
+    </model>
+    <model name="cinderblock17">
+      <include>
+        <uri>model://cinder_block</uri>
+        <pose>0 0 0 0 0 0</pose>
+      </include>
+    </model>
+    <model name="cinderblock18">
+      <include>
+        <uri>model://cinder_block</uri>
+        <pose>0 0 0 0 0 0</pose>
+      </include>
+    </model>
+    <model name="cinderblock19">
+      <include>
+        <uri>model://cinder_block</uri>
+        <pose>0 0 0 0 0 0</pose>
+      </include>
+    </model>
+    <model name="cinderblock20">
+      <include>
+        <uri>model://cinder_block</uri>
+        <pose>0 0 0 0 0 0</pose>
+      </include>
+    </model>
+    <model name="cinderblock21">
+      <include>
+        <uri>model://cinder_block</uri>
+        <pose>0 0 0 0 0 0</pose>
+      </include>
+    </model>
+    <model name="cinderblock22">
+      <include>
+        <uri>model://cinder_block</uri>
+        <pose>0 0 0 0 0 0</pose>
+      </include>
+    </model>
+    <model name="cinderblock23">
+      <include>
+        <uri>model://cinder_block</uri>
+        <pose>0 0 0 0 0 0</pose>
+      </include>
+    </model>
+    <model name="cinderblock24">
+      <include>
+        <uri>model://cinder_block</uri>
+        <pose>0 0 0 0 0 0</pose>
+      </include>
+    </model>
+    <model name="cinderblock25">
+      <include>
+        <uri>model://cinder_block</uri>
+        <pose>0 0 0 0 0 0</pose>
+      </include>
+    </model>
+    <model name="cinderblock26">
+      <include>
+        <uri>model://cinder_block</uri>
+        <pose>0 0 0 0 0 0</pose>
+      </include>
+    </model>
+    <model name="cinderblock27">
+      <include>
+        <uri>model://cinder_block</uri>
+        <pose>0 0 0 0 0 0</pose>
+      </include>
+    </model>
+    <model name="cinderblock28">
+      <include>
+        <uri>model://cinder_block</uri>
+        <pose>0 0 0 0 0 0</pose>
+      </include>
+    </model>
+    <model name="cinderblock29">
+      <include>
+        <uri>model://cinder_block</uri>
+        <pose>0 0 0 0 0 0</pose>
+      </include>
+    </model>
+    <model name="cinderblock30">
+      <include>
+        <uri>model://cinder_block</uri>
+        <pose>0 0 0 0 0 0</pose>
+      </include>
+    </model>
+    <model name="cinderblock31">
+      <include>
+        <uri>model://cinder_block</uri>
+        <pose>0 0 0 0 0 0</pose>
+      </include>
+    </model>
+    <model name="cinderblock32">
+      <include>
+        <uri>model://cinder_block</uri>
+        <pose>0 0 0 0 0 0</pose>
+      </include>
+    </model>
+    <model name="cinderblock33">
+      <include>
+        <uri>model://cinder_block</uri>
+        <pose>0 0 0 0 0 0</pose>
+      </include>
+    </model>
+    <model name="cinderblock34">
+      <include>
+        <uri>model://cinder_block</uri>
+        <pose>0 0 0 0 0 0</pose>
+      </include>
+    </model>
+    <model name="cinderblock35">
+      <include>
+        <uri>model://cinder_block</uri>
+        <pose>0 0 0 0 0 0</pose>
+      </include>
+    </model>
+    <model name="cinderblock36">
+      <include>
+        <uri>model://cinder_block</uri>
+        <pose>0 0 0 0 0 0</pose>
+      </include>
+    </model>
+    <model name="cinderblock37">
+      <include>
+        <uri>model://cinder_block</uri>
+        <pose>0 0 0 0 0 0</pose>
+      </include>
+    </model>
+    <model name="cinderblock38">
+      <include>
+        <uri>model://cinder_block</uri>
+        <pose>0 0 0 0 0 0</pose>
+      </include>
+    </model>
+    <model name="cinderblock39">
+      <include>
+        <uri>model://cinder_block</uri>
+        <pose>0 0 0 0 0 0</pose>
+      </include>
+    </model>
+    <model name="cinderblock40">
+      <include>
+        <uri>model://cinder_block</uri>
+        <pose>0 0 0 0 0 0</pose>
+      </include>
+    </model>
+    <model name="cinderblock41">
+      <include>
+        <uri>model://cinder_block</uri>
+        <pose>0 0 0 0 0 0</pose>
+      </include>
+    </model>
+    <model name="cinderblock42">
+      <include>
+        <uri>model://cinder_block</uri>
+        <pose>0 0 0 0 0 0</pose>
+      </include>
+    </model>
+    <model name="cinderblock43">
+      <include>
+        <uri>model://cinder_block</uri>
+        <pose>0 0 0 0 0 0</pose>
+      </include>
+    </model>
+    <model name="cinderblock44">
+      <include>
+        <uri>model://cinder_block</uri>
+        <pose>0 0 0 0 0 0</pose>
+      </include>
+    </model>
+    <model name="cinderblock45">
+      <include>
+        <uri>model://cinder_block</uri>
+        <pose>0 0 0 0 0 0</pose>
+      </include>
+    </model>
+    <model name="cinderblock46">
+      <include>
+        <uri>model://cinder_block</uri>
+        <pose>0 0 0 0 0 0</pose>
+      </include>
+    </model>
+    <model name="cinderblock47">
+      <include>
+        <uri>model://cinder_block</uri>
+        <pose>0 0 0 0 0 0</pose>
+      </include>
+    </model>
+    <model name="cinderblock48">
+      <include>
+        <uri>model://cinder_block</uri>
+        <pose>0 0 0 0 0 0</pose>
+      </include>
+    </model>
+    <model name="cinderblock49">
+      <include>
+        <uri>model://cinder_block</uri>
+        <pose>0 0 0 0 0 0</pose>
+      </include>
+    </model>
+
+    <model name="log0">
+      <link name="link">
+        <visual name="vis">
+          <geometry>
+            <box>
+              <size>5 .2 .2</size>
+            </box>
+          </geometry>
+        </visual>
+      </link>
+    </model>
+    <model name="log1">
+      <link name="link">
+        <visual name="vis">
+          <geometry>
+            <box>
+              <size>5 .2 .2</size>
+            </box>
+          </geometry>
+        </visual>
+      </link>
+    </model>
+    <model name="log2">
+      <link name="link">
+        <visual name="vis">
+          <geometry>
+            <box>
+              <size>5 .2 .2</size>
+            </box>
+          </geometry>
+        </visual>
+      </link>
+    </model>
+    <model name="log3">
+      <link name="link">
+        <visual name="vis">
+          <geometry>
+            <box>
+              <size>5 .2 .2</size>
+            </box>
+          </geometry>
+        </visual>
+      </link>
+    </model>
+    <model name="log4">
+      <link name="link">
+        <visual name="vis">
+          <geometry>
+            <box>
+              <size>5 .2 .2</size>
+            </box>
+          </geometry>
+        </visual>
+      </link>
+    </model>
+    <model name="log5">
+      <link name="link">
+        <visual name="vis">
+          <geometry>
+            <box>
+              <size>5 .2 .2</size>
+            </box>
+          </geometry>
+        </visual>
+      </link>
+    </model>
+    <model name="log6">
+      <link name="link">
+        <visual name="vis">
+          <geometry>
+            <box>
+              <size>5 .2 .2</size>
+            </box>
+          </geometry>
+        </visual>
+      </link>
+    </model>
+    <model name="log7">
+      <link name="link">
+        <visual name="vis">
+          <geometry>
+            <box>
+              <size>5 .2 .2</size>
+            </box>
+          </geometry>
+        </visual>
+      </link>
+    </model>
+    <model name="log8">
+      <link name="link">
+        <visual name="vis">
+          <geometry>
+            <box>
+              <size>5 .2 .2</size>
+            </box>
+          </geometry>
+        </visual>
+      </link>
+    </model>
+    <model name="log9">
+      <link name="link">
+        <visual name="vis">
+          <geometry>
+            <box>
+              <size>5 .2 .2</size>
+            </box>
+          </geometry>
+        </visual>
+      </link>
+    </model>
+
+
+
+
+
+
+
+
     <plugin name="gazonoVehicle" filename="libgazonoVehicle.so"/>
   </world>
 </sdf>

@@ -115,10 +115,20 @@ class GazonoVehicle : public WorldPlugin
     wheels.push_back(_world->GetModel("wheel3"));
     wheels.push_back(_world->GetModel("wheel4"));
 
+    for(int i; i<50; i++){
+        gzCinderBlocks.push_back(_world->GetModel("cinderblock" + std::to_string (i)));
+    }
+    for(int i; i<10; i++){
+        gzLogs.push_back(_world->GetModel("log" + std::to_string (i)));
+    }
+    //std::cout<<("cinderblock" + i)<<std::endl;
+
     //setup chrono vehicle
     //set initial conditions
-    initLoc = (0.0, 0.0, 1.0);
-    initRot = ChQuaternion<>(1.0, 0.0, 0.0, 0.0);
+
+    //initRot = ChQuaternion<>(1.0, 0.0, 0.0, 0.0);
+    initRot = Q_from_AngAxis(0,{0, 0, 1});
+    initLoc = (0, 0, 1.0);
 
     //create the chrono vehicle
     // boost::filesystem::path full_path( boost::filesystem::current_path() );
@@ -153,9 +163,9 @@ class GazonoVehicle : public WorldPlugin
     tire_forces = ChTireForces(num_wheels);
     wheel_states = ChWheelStates(num_wheels);
     //vehicle->GetSystem()->SetLcpSolverType(ChSystem::LCP_ITERATIVE_APGD);
-    vehicle->GetSystem()->SetIterLCPmaxItersSpeed(300);
+    vehicle->GetSystem()->SetIterLCPmaxItersSpeed(500);
     //vehicle->GetSystem()->SetIterLCPmaxItersStab(100);
-    vehicle->GetSystem()->SetMaxPenetrationRecoverySpeed(0.5);
+    vehicle->GetSystem()->SetMaxPenetrationRecoverySpeed(10.0);
 
     //Add the terrain mesh to Chrono
     SetChronoDataPath("../data/");
@@ -169,9 +179,9 @@ class GazonoVehicle : public WorldPlugin
     gTerrain->GetCollisionModel()->BuildModel();
     gTerrain->SetCollide(true);
 
-    ChSharedPtr<ChTriangleMeshShape> vshape(new ChTriangleMeshShape());
-    vshape->GetMesh() = terrainMesh;
-    gTerrain->AddAsset(vshape);
+    // ChSharedPtr<ChTriangleMeshShape> vshape(new ChTriangleMeshShape());
+    // vshape->GetMesh() = terrainMesh;
+    // gTerrain->AddAsset(vshape);
 
 
 
@@ -187,20 +197,20 @@ class GazonoVehicle : public WorldPlugin
     // vehicle->GetSystem()->Add(groundplane);
 
     //correct for dip in terrain
-    ChSharedPtr<ChBodyEasyBox>gndBox(new ChBodyEasyBox(50, 60, .2, 8000, true, true));
+    ChSharedPtr<ChBodyEasyBox>gndBox(new ChBodyEasyBox(50, 60, .2, 8000, true, false));
     gndBox->SetPos({-17, 55, -.105});
     gndBox->SetBodyFixed(true);
     vehicle->GetSystem()->Add(gndBox);
 
     //add boxes and speed bumps to display vehicle dynamics
     for(int i=0;i<8;i++){
-      ChSharedPtr<ChBodyEasyBox>box1(new ChBodyEasyBox(0.5, 3, 0.2, 5000, true, true));
+      ChSharedPtr<ChBodyEasyBox>box1(new ChBodyEasyBox(0.5, 3, 0.2, 5000, true, false));
       box1->SetBodyFixed(true);
       box1->SetPos(ChVector<>(2*i+20, 3.5*(i%2)-1.75, 0));
       vehicle->GetSystem()->Add(box1);
     }
     for(int i=0;i<10;i++){
-      ChSharedPtr<ChBodyEasyCylinder>cylinder1(new ChBodyEasyCylinder(0.25, 3.0, 5000, true, true));
+      ChSharedPtr<ChBodyEasyCylinder>cylinder1(new ChBodyEasyCylinder(0.25, 3.0, 5000, true, false));
       cylinder1->SetBodyFixed(true);
       cylinder1->SetRot(Q_from_AngAxis(1.57, {0, 1, 0}));
       cylinder1->SetPos(ChVector<>(i+50, 3.5*(i%2)-1.75, -0.12));
@@ -208,11 +218,25 @@ class GazonoVehicle : public WorldPlugin
       vehicle->GetSystem()->Add(cylinder1);
     }
 
+    //Add 10 blocks (cinderblocks) into chrono
+    for(int i=0; i<50; i++){
+      ChSharedPtr<ChBodyEasyBox>cinderblock(new ChBodyEasyBox(.37, .17, .2, 2000, true, false));
+      cinderblock->SetBodyFixed(false);
+      cinderblock->SetRot(Q_from_AngAxis(0, {0, 0, 0}));
+      cinderblock->SetPos(ChVector<>(123 + (i%5), 35, .2*i));
+      vehicle->GetSystem()->Add(cinderblock);
+      chCinderBlocks.push_back(cinderblock);
+    }
+    //
+    for(int i=0; i<10; i++){
+      ChSharedPtr<ChBodyEasyBox>log(new ChBodyEasyBox(5, .2, .2, 3000, true, false));
+      log->SetBodyFixed(false);
+      //log->SetRot(Q_from_AngAxis(1.57, {0, 1, 0}));
+      log->SetPos(ChVector<>(123 + 3*(i%2), 56+(i%4), .2*i));
+      vehicle->GetSystem ()->Add(log);
+      chLogs.push_back(log);
 
-
-
-
-
+    }
 
     this->updateConnection = event::Events::ConnectWorldUpdateBegin(
          boost::bind(&GazonoVehicle::OnUpdate, this));
@@ -305,7 +329,7 @@ class GazonoVehicle : public WorldPlugin
        //terrain->Advance(step_size);
        for (int i = 0; i < num_wheels; i++)
           tires[i]->Advance(step_size);
-       }
+     }
 
        //update the gazebo vehicle and wheel pose
        _model1->SetWorldPose(math::Pose(
@@ -334,6 +358,44 @@ class GazonoVehicle : public WorldPlugin
                   vehicle->GetWheelRot(j).e3
               )), "link");
         }
+        //std::cout<<"updating the cinderblocks\n";
+        for(int j=0; j<chCinderBlocks.size();j++){
+          //std::cout<<"Test point\n";
+          //std::cout<<"block: "<<gzCinderBlocks[j]<<std::endl;
+          //add half the hight to put block at right z level
+          gzCinderBlocks[j]->SetWorldPose(math::Pose(
+              math::Vector3(
+                  chCinderBlocks[j]->GetPos().x,
+                  chCinderBlocks[j]->GetPos().y,
+                  chCinderBlocks[j]->GetPos().z
+              ),
+              math::Quaternion(
+                  chCinderBlocks[j]->GetRot().e0,
+                  chCinderBlocks[j]->GetRot().e1,
+                  chCinderBlocks[j]->GetRot().e2,
+                  chCinderBlocks[j]->GetRot().e3
+              )), "link");
+              //std::cout<<"updated another cinderblocks\n";
+        }
+        for(int j=0; j<chLogs.size();j++){
+          //std::cout<<"Test point\n";
+          //std::cout<<"block: "<<gzCinderBlocks[j]<<std::endl;
+          //add half the hight to put block at right z level
+          gzLogs[j]->SetWorldPose(math::Pose(
+              math::Vector3(
+                  chLogs[j]->GetPos().x,
+                  chLogs[j]->GetPos().y,
+                  chLogs[j]->GetPos().z
+              ),
+              math::Quaternion(
+                  chLogs[j]->GetRot().e0,
+                  chLogs[j]->GetRot().e1,
+                  chLogs[j]->GetRot().e2,
+                  chLogs[j]->GetRot().e3
+              )), "link");
+              //std::cout<<"updated another cinderblocks\n";
+        }
+        //std::cout<<"finished updating the cinderblocks\n";
    }
 
    void UpdateDriverInput(const std_msgs::Float64::ConstPtr& _msg)
@@ -427,6 +489,10 @@ private: ros::NodeHandle* rosnode_;
     //pointers to reference the models shared by chrono and gazebo
     boost::shared_ptr<sensors::RaySensor> raySensor;
     std::vector<ChSharedPtr<ChBody>> chronoModels;
+    std::vector<ChSharedPtr<ChBody>> chCinderBlocks;
+    std::vector<physics::ModelPtr> gzCinderBlocks;
+    std::vector<ChSharedPtr<ChBody>> chLogs;
+    std::vector<physics::ModelPtr> gzLogs;
     std::vector<physics::ModelPtr> wheels;
     physics::WorldPtr _world;
     physics::ModelPtr _model1;
