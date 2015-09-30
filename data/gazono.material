@@ -36,3 +36,22 @@ material Gazebo/Grass1
     }
   }
 }
+material Gazebo/Wood1
+{
+  technique
+  {
+    pass
+    {
+      ambient 0.5 0.5 0.5 1.0
+      diffuse 0.8 0.8 0.8 1.0
+      specular 0.5 0.5 0.5 1.0 0.5
+
+      texture_unit
+      {
+        texture Wood1.jpg
+        filtering trilinear
+	scale 1.0 1.0
+      }
+    }
+  }
+}

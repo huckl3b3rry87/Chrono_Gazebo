@@ -152,7 +152,7 @@ class GazonoVehicle : public WorldPlugin
 
     for (int i = 0; i < num_wheels; i++) {
         //create the tires from the tire file
-        tires[i] = ChSharedPtr<RigidTire>(new RigidTire(vehicle::GetDataFile(rigidtire_file), *terrain));
+        tires[i] = ChSharedPtr<RigidTire>(new RigidTire(vehicle::GetDataFile(rigidtire_file)));
         tires[i]->Initialize(vehicle->GetWheelBody(i));
     }
     //create the driver if not using line following with camera
@@ -320,7 +320,7 @@ class GazonoVehicle : public WorldPlugin
        vehicle->Update(time, steering_input, braking_input, powertrain_torque, tire_forces);
        //terrain->Update(time);
        for (int i = 0; i < num_wheels; i++)
-          tires[i]->Update(time, wheel_states[i]);
+          tires[i]->Update(time, wheel_states[i], *terrain);
 
        // Advance simulation for one timestep for all modules
        //driver->Advance(step_size);
@@ -365,9 +365,9 @@ class GazonoVehicle : public WorldPlugin
           //add half the hight to put block at right z level
           gzCinderBlocks[j]->SetWorldPose(math::Pose(
               math::Vector3(
-                  chCinderBlocks[j]->GetPos().x,
-                  chCinderBlocks[j]->GetPos().y,
-                  chCinderBlocks[j]->GetPos().z
+                  chCinderBlocks[j]->GetPos().x - chCinderBlocks[j]->GetRot().Rotate({0, 0, .1}).x,
+                  chCinderBlocks[j]->GetPos().y - chCinderBlocks[j]->GetRot().Rotate({0, 0, .1}).y,
+                  chCinderBlocks[j]->GetPos().z - chCinderBlocks[j]->GetRot().Rotate({0, 0, .1}).z
               ),
               math::Quaternion(
                   chCinderBlocks[j]->GetRot().e0,

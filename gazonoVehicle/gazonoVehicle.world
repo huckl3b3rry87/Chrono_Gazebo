@@ -492,6 +492,7 @@
           <update_rate>30</update_rate>
           <visualize>true</visualize>
         </sensor>
+        <!--
         <sensor name="camera" type="camera">
           <pose>2.1 0.0 0.5 0.0 0.0 0.0</pose>
           <camera name="driverCam">
@@ -516,7 +517,7 @@
             <updateRate>60.0</updateRate>
             <imageTopicName>image_raw</imageTopicName>
             <pointCloudTopicName>points</pointCloudTopicName>
-            <cameraInfoTopicName>camera_info</cameraInfoTopicName>
+            <cameraInfoTopicName>driver_camera_info</cameraInfoTopicName>
             <frameName>world</frameName>
             <pointCloudCutoff>0.5</pointCloudCutoff>
             <distortion_k1>0.00000001</distortion_k1>
@@ -529,6 +530,83 @@
           <update_rate>60</update_rate>
           <visualize>true</visualize>
         </sensor>
+-->
+        <sensor name="topcamera" type="camera">
+          <pose>1.0 0.0 2.0 0.0 0.0 0.0</pose>
+          <camera name="topCam">
+            <horizontal_fov>1.57</horizontal_fov>
+            <image>
+              <format>R8G8B8</format>
+              <width>800</width>
+              <height>600</height>
+            </image>
+            <clip>
+              <near>0.1</near>
+              <far>250</far>
+            </clip>
+            <noise>
+              <type>gaussian</type>
+              <mean>0.0</mean>
+              <stddev>0.000</stddev>
+            </noise>
+          </camera>
+          <plugin name="plugin_3" filename="libgazebo_ros_camera.so">
+            <alwaysOn>1</alwaysOn>
+            <updateRate>60.0</updateRate>
+            <imageTopicName>topCam/image_raw</imageTopicName>
+            <pointCloudTopicName>points</pointCloudTopicName>
+            <cameraInfoTopicName>top/camera_info</cameraInfoTopicName>
+            <frameName>world</frameName>
+            <pointCloudCutoff>0.5</pointCloudCutoff>
+            <distortion_k1>0.00000001</distortion_k1>
+            <distortion_k2>0.00000001</distortion_k2>
+            <distortion_k3>0.00000001</distortion_k3>
+            <distortion_t1>0.00000001</distortion_t1>
+            <distortion_t2>0.00000001</distortion_t2>
+          </plugin>
+          <always_on>1</always_on>
+          <update_rate>60</update_rate>
+          <visualize>true</visualize>
+        </sensor>
+
+<!--
+        <sensor name="sidecamera" type="camera">
+          <pose>1.0 -3.0 1.0 0.0 0.0 1.57</pose>
+          <camera name="sideCam">
+            <horizontal_fov>1.57</horizontal_fov>
+            <image>
+              <format>R8G8B8</format>
+              <width>800</width>
+              <height>600</height>
+            </image>
+            <clip>
+              <near>0.1</near>
+              <far>250</far>
+            </clip>
+            <noise>
+              <type>gaussian</type>
+              <mean>0.0</mean>
+              <stddev>0.000</stddev>
+            </noise>
+          </camera>
+          <plugin name="plugin_4" filename="libgazebo_ros_camera.so">
+            <alwaysOn>1</alwaysOn>
+            <updateRate>60.0</updateRate>
+            <imageTopicName>sideCam/image_raw</imageTopicName>
+            <pointCloudTopicName>points</pointCloudTopicName>
+            <cameraInfoTopicName>side_camera_info</cameraInfoTopicName>
+            <frameName>world</frameName>
+            <pointCloudCutoff>0.5</pointCloudCutoff>
+            <distortion_k1>0.00000001</distortion_k1>
+            <distortion_k2>0.00000001</distortion_k2>
+            <distortion_k3>0.00000001</distortion_k3>
+            <distortion_t1>0.00000001</distortion_t1>
+            <distortion_t2>0.00000001</distortion_t2>
+          </plugin>
+          <always_on>1</always_on>
+          <update_rate>60</update_rate>
+          <visualize>true</visualize>
+        </sensor>-->
       </link>\
     </model>\
 
@@ -949,6 +1027,8 @@
       </include>
     </model>
 
+
+
     <model name="log0">
       <link name="link">
         <visual name="vis">
@@ -957,6 +1037,12 @@
               <size>5 .2 .2</size>
             </box>
           </geometry>
+          <material>
+            <script>
+              <uri>file://../data/gazono.material</uri>
+              <name>Gazebo/Wood1</name>
+            </script>
+          </material>
         </visual>
       </link>
     </model>
@@ -968,6 +1054,12 @@
               <size>5 .2 .2</size>
             </box>
           </geometry>
+          <material>
+            <script>
+              <uri>file://../data/gazono.material</uri>
+              <name>Gazebo/Wood1</name>
+            </script>
+          </material>
         </visual>
       </link>
     </model>
@@ -979,6 +1071,12 @@
               <size>5 .2 .2</size>
             </box>
           </geometry>
+          <material>
+            <script>
+              <uri>file://../data/gazono.material</uri>
+              <name>Gazebo/Wood1</name>
+            </script>
+          </material>
         </visual>
       </link>
     </model>
@@ -990,6 +1088,12 @@
               <size>5 .2 .2</size>
             </box>
           </geometry>
+          <material>
+            <script>
+              <uri>file://../data/gazono.material</uri>
+              <name>Gazebo/Wood1</name>
+            </script>
+          </material>
         </visual>
       </link>
     </model>
@@ -1001,6 +1105,12 @@
               <size>5 .2 .2</size>
             </box>
           </geometry>
+          <material>
+            <script>
+              <uri>file://../data/gazono.material</uri>
+              <name>Gazebo/Wood1</name>
+            </script>
+          </material>
         </visual>
       </link>
     </model>
@@ -1012,6 +1122,12 @@
               <size>5 .2 .2</size>
             </box>
           </geometry>
+          <material>
+            <script>
+              <uri>file://../data/gazono.material</uri>
+              <name>Gazebo/Wood1</name>
+            </script>
+          </material>
         </visual>
       </link>
     </model>
@@ -1023,6 +1139,12 @@
               <size>5 .2 .2</size>
             </box>
           </geometry>
+          <material>
+            <script>
+              <uri>file://../data/gazono.material</uri>
+              <name>Gazebo/Wood1</name>
+            </script>
+          </material>
         </visual>
       </link>
     </model>
@@ -1034,6 +1156,12 @@
               <size>5 .2 .2</size>
             </box>
           </geometry>
+          <material>
+            <script>
+              <uri>file://../data/gazono.material</uri>
+              <name>Gazebo/Wood1</name>
+            </script>
+          </material>
         </visual>
       </link>
     </model>
@@ -1045,6 +1173,12 @@
               <size>5 .2 .2</size>
             </box>
           </geometry>
+          <material>
+            <script>
+              <uri>file://../data/gazono.material</uri>
+              <name>Gazebo/Wood1</name>
+            </script>
+          </material>
         </visual>
       </link>
     </model>
@@ -1056,14 +1190,15 @@
               <size>5 .2 .2</size>
             </box>
           </geometry>
+          <material>
+            <script>
+              <uri>file://../data/gazono.material</uri>
+              <name>Gazebo/Wood1</name>
+            </script>
+          </material>
         </visual>
       </link>
     </model>
-
-
-
-
-
 
 
 
