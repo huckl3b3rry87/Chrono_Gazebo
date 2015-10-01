@@ -17,7 +17,7 @@ INSTALL:
         source should be the top directory
         build directory can be wherever
         enable module_vehicle 
-      make; make install
+      make; sudo make install
 
 BUILD:
   clone this repository
@@ -26,14 +26,13 @@ BUILD:
   Add build directory to Gazebo plugin path:
   from inside build directory:
 
-  $ export GAZEBO_PLUGIN_PATH=${GAZEBO_PLUGIN_PATH}:$PWD
-
 
 RUN:
   $./launch from inside gazonoVehicle directory
   
-  Can modify launch script to run desired configuration
+  Can/should modify launch script to run desired configuration
   
+  The world file saves camera images by default to relative directories Captures/TopCam/2015_10_01 and Captures      /SideCam/2015_10_01. The world file can be changed to save to different directory of not save at all.
 
 NOTES:
 
@@ -41,10 +40,6 @@ CURRENTLY TESTED ON UBUNTU TRUSTY 14.04
 Build mode for Chrono and Gazebo should be RELEASE for speed
 If run with gzserver instead of gazebo, will run faster but only camera for visual
 
-To run the vehicle without ROS: (will need code tweaking to work but easy)
-  run:
-  $gazebo gazonoVehicle.world
-  from inside the gazonoVehicle directory
 
 Strange issues:
   Every now and then, gazebo will crash upon startup. Rerunning should solve issue
