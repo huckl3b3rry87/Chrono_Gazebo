@@ -597,7 +597,7 @@
         <visual name ='visual'>\
           <geometry>
             <mesh>
-              <uri>file://wheel_R.stl</uri>
+              <uri>file://wheel_R.dae</uri>
               <scale>1.0 1.0 1.0</scale>
             </mesh>
             <!--<box><size>0.1 0.1 0.1</size></box>-->
@@ -613,7 +613,7 @@
         <visual name ='visual'>\
           <geometry>
             <mesh>
-              <uri>file://wheel_R.stl</uri>
+              <uri>file://wheel_R.dae</uri>
               <scale>1.0 1.0 1.0</scale>
             </mesh>
             <!--<box><size>0.1 0.1 0.1</size></box>-->
@@ -629,7 +629,7 @@
         <visual name ='visual'>\
           <geometry>
             <mesh>
-              <uri>file://wheel_R.stl</uri>
+              <uri>file://wheel_R.dae</uri>
               <scale>1.0 1.0 1.0</scale>
             </mesh>
             <!--<box><size>0.1 0.1 0.1</size></box>-->
@@ -645,7 +645,7 @@
         <visual name ='visual'>\
           <geometry>
             <mesh>
-              <uri>file://wheel_R.stl</uri>
+              <uri>file://wheel_R.dae</uri>
               <scale>1.0 1.0 1.0</scale>
             </mesh>
             <!--<box><size>0.1 0.1 0.1</size></box>-->
