@@ -1,0 +1,273 @@
+<?xml version="1.0"?>
+<sdf version="1.5">
+  <world name="default">
+    <scene>
+      <sky>
+        <material>Gazebo/CloudySky</material>
+        <clouds>
+          <speed>5.0</speed>
+          <direction>1 0 0 </direction>
+        </clouds>
+      </sky>
+    </scene>
+
+    <include>
+      <uri>model://sun</uri>
+    </include>
+
+    <model name="my_ground_plane">
+    <pose>0 0 0 0 0 0</pose>
+    <static>true</static>
+      <link name="link">
+      <pose>0 0 0 0 0 0</pose>
+        <visual name="visual">
+          <cast_shadows>true</cast_shadows>
+          <geometry>
+            <plane>
+              <normal>0 0 1</normal>
+              <size>500 500</size>
+            </plane>
+          </geometry>
+          <material>
+          <script>
+            <uri>model://../data/gazono.material</uri>
+            <name>Gazebo/Grass1</name>
+          </script>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <model name ='vehicle'>\
+      <pose>0 0 0 0 0 0</pose>\
+      <link name ='chassis'>\
+        <pose>0 0 0 0 0 0</pose>\
+        <cast_shadows>true</cast_shadows>
+        <visual name ='visual'>\
+          <geometry>
+            <mesh>
+              <uri>file://hmmwv_chassis.dae</uri>
+              <scale>1.0 1.0 1.0</scale>
+            </mesh>
+            <!--<box><size>0.1 0.1 0.1</size></box>-->
+          </geometry>
+        </visual>\
+        <sensor name="laser" type="ray">
+          <pose>2.2 0 .3 0 0 0</pose>
+          <ray>
+              <scan>
+              <horizontal>
+                <samples>100</samples>
+                <resolution>1</resolution>
+                <min_angle>-.875</min_angle>
+                <max_angle>.875</max_angle>
+              </horizontal>
+            </scan>
+            <range>
+              <min>0.08</min>
+              <max>20</max>
+              <resolution>0.01</resolution>
+            </range>
+            <noise>
+              <type>gaussian</type>
+              <mean>0.0</mean>
+              <stddev>0.01</stddev>
+            </noise>
+          </ray>
+          <plugin name="plugin_1" filename="libgazebo_ros_laser.so">
+            <gaussianNoise>0.005</gaussianNoise>
+            <alwaysOn>true</alwaysOn>
+            <updateRate>30</updateRate>
+            <topicName>base_scan</topicName>
+            <frameName>base_link</frameName>
+          </plugin>
+          <always_on>1</always_on>
+          <update_rate>30</update_rate>
+          <visualize>true</visualize>
+        </sensor>
+
+        <sensor name="camera" type="camera">
+          <pose>2.1 0.0 0.5 0.0 0.0 0.0</pose>
+          <camera name="driverCam">
+            <horizontal_fov>1.75</horizontal_fov>
+            <image>
+              <format>R8G8B8</format>
+              <width>1024</width>
+              <height>1024</height>
+            </image>
+            <clip>
+              <near>0.1</near>
+              <far>250</far>
+            </clip>
+            <noise>
+              <type>gaussian</type>
+              <mean>0.0</mean>
+              <stddev>0.002</stddev>
+            </noise>
+          </camera>
+          <plugin name="plugin_2" filename="libgazebo_ros_camera.so">
+            <alwaysOn>1</alwaysOn>
+            <updateRate>30</updateRate>
+            <imageTopicName>image_raw</imageTopicName>
+            <pointCloudTopicName>points</pointCloudTopicName>
+            <cameraInfoTopicName>camera_info</cameraInfoTopicName>
+            <frameName>world1</frameName>
+            <pointCloudCutoff>0.5</pointCloudCutoff>
+            <distortion_k1>0.00000001</distortion_k1>
+            <distortion_k2>0.00000001</distortion_k2>
+            <distortion_k3>0.00000001</distortion_k3>
+            <distortion_t1>0.00000001</distortion_t1>
+            <distortion_t2>0.00000001</distortion_t2>
+          </plugin>
+          <always_on>1</always_on>
+          <update_rate>30</update_rate>
+          <visualize>true</visualize>
+        </sensor>
+
+        <!--<sensor name="topcamera" type="camera">
+          <pose>-4 -4 2.5 0 .349 .785</pose>
+          <camera name="topCam">
+            <horizontal_fov>1.57</horizontal_fov>
+            <image>
+              <format>B8G8R8</format>
+              <width>800</width>
+              <height>600</height>
+            </image>
+            <clip>
+              <near>0.1</near>
+              <far>250</far>
+            </clip>
+            <noise>
+              <type>gaussian</type>
+              <mean>0.0</mean>
+              <stddev>0.000</stddev>
+            </noise>
+            <save enabled=true>
+              <path>Captures/TopCam/2015_10_01</path>
+            </save>
+          </camera>
+          <always_on>1</always_on>
+          <update_rate>60</update_rate>
+          <visualize>true</visualize>
+        </sensor>
+
+
+        <sensor name="sidecamera" type="camera">
+          <pose>4.0 -3.5 1.0 0 0.175 2.356</pose>
+          <camera name="sideCam">
+            <horizontal_fov>1.57</horizontal_fov>
+            <image>
+              <format>B8G8R8</format>
+              <width>800</width>
+              <height>600</height>
+            </image>
+            <clip>
+              <near>0.1</near>
+              <far>250</far>
+            </clip>
+            <noise>
+              <type>gaussian</type>
+              <mean>0.0</mean>
+              <stddev>0.000</stddev>
+            </noise>
+            <save enabled=true>
+              <path>Captures/SideCam/2015_10_01</path>
+            </save>
+
+          </camera>
+
+          <always_on>1</always_on>
+          <update_rate>60</update_rate>
+          <visualize>true</visualize>
+        </sensor>-->
+      </link>\
+    </model>\
+
+    <model name ='wheel1'>\
+      <pose>0 0 0 0 0 0</pose>\
+      <link name ='link'>\
+        <pose>0 0 0 0 0 0</pose>\
+        <visual name ='visual'>\
+          <geometry>
+            <mesh>
+              <uri>file://wheel_R.dae</uri>
+              <scale>1.0 1.0 1.0</scale>
+            </mesh>
+            <!--<box><size>0.1 0.1 0.1</size></box>-->
+          </geometry>
+        </visual>\
+      </link>\
+    </model>\
+
+    <model name ='wheel2'>\
+      <pose>0 0 0 0 0 0</pose>\
+      <link name ='link'>\
+        <pose>0 0 0 0 0 0</pose>\
+        <visual name ='visual'>\
+          <geometry>
+            <mesh>
+              <uri>file://wheel_R.dae</uri>
+              <scale>1.0 1.0 1.0</scale>
+            </mesh>
+            <!--<box><size>0.1 0.1 0.1</size></box>-->
+          </geometry>
+        </visual>\
+      </link>\
+    </model>\
+
+    <model name ='wheel3'>\
+      <pose>0 0 0 0 0 0</pose>\
+      <link name ='link'>\
+        <pose>0 0 0 0 0 0</pose>\
+        <visual name ='visual'>\
+          <geometry>
+            <mesh>
+              <uri>file://wheel_R.dae</uri>
+              <scale>1.0 1.0 1.0</scale>
+            </mesh>
+            <!--<box><size>0.1 0.1 0.1</size></box>-->
+          </geometry>
+        </visual>\
+      </link>\
+    </model>\
+
+    <model name ='wheel4'>\
+      <pose>0 0 0 0 0 0</pose>\
+      <link name ='link'>\
+        <pose>0 0 0 0 0 0</pose>\
+        <visual name ='visual'>\
+          <geometry>
+            <mesh>
+              <uri>file://wheel_R.dae</uri>
+              <scale>1.0 1.0 1.0</scale>
+            </mesh>
+            <!--<box><size>0.1 0.1 0.1</size></box>-->
+          </geometry>
+        </visual>\
+      </link>\
+    </model>\
+
+    <road name="Secondary1">
+      <width>7.5</width>
+      <point>0 0 0.05</point>
+      <point>20.71 0 0.05</point>
+      <point>50 29.29 0.05</point>
+      <point>50 70.71 0.05</point>
+      <point>20.71 100 0.05</point>
+      <point>-20.71 100 0.05</point>
+      <point>-50 70.71 0.05</point>
+      <point>-50 29.29 0.05</point>
+      <point>-20.71 0 0.05</point>
+      <point>0 0 0.05</point>
+
+      <material>
+        <script>
+          <uri>file://../data/gazono.material</uri>
+          <name>Gazebo/Line</name>
+        </script>
+      </material>
+    </road>
+
+    <plugin name="chrono_gazebo" filename="libchrono_gazebo.so"/>
+  </world>
+</sdf>
