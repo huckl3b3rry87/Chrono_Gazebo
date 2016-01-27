@@ -19,7 +19,7 @@
     <pose>0 0 0 0 0 0</pose>
     <static>true</static>
       <link name="link">
-      <pose>45 50 -0.15 0 0 0</pose>
+      <pose>0 0 0 0 0 0</pose>
         <visual name="visual">
           <cast_shadows>true</cast_shadows>
           <geometry>
@@ -45,7 +45,7 @@
     <model name="boxbumps">
       <pose>0 0 0 0 0 0</pose>\
       <link name ='chassis'>\
-        <pose>20 -1.75 0 0 0 0</pose>\
+        <pose>-25 -51.75 0.15 0 0 0</pose>\
         <visual name ='visual'>\
           <geometry>
             <box><size>0.5 3 0.2</size></box>
@@ -53,7 +53,7 @@
         </visual>\
       </link>
       <link name ='chassis'>\
-        <pose>22 1.75 0 0 0 0</pose>\
+        <pose>-23 -48.25 0.15 0 0 0</pose>\
         <visual name ='visual'>\
           <geometry>
             <box><size>0.5 3 0.2</size></box>
@@ -61,7 +61,7 @@
         </visual>\
       </link>
       <link name ='chassis'>\
-        <pose>24 -1.75 0 0 0 0</pose>\
+        <pose>-21 -51.75 0.15 0 0 0</pose>\
         <visual name ='visual'>\
           <geometry>
             <box><size>0.5 3 0.2</size></box>
@@ -69,7 +69,7 @@
         </visual>\
       </link>
       <link name ='chassis'>\
-        <pose>26 1.75 0 0 0 0</pose>\
+        <pose>-19 -48.25 0.15 0 0 0</pose>\
         <visual name ='visual'>\
           <geometry>
             <box><size>0.5 3 0.2</size></box>
@@ -77,7 +77,7 @@
         </visual>\
       </link>
       <link name ='chassis'>\
-        <pose>28 -1.75 0 0 0 0</pose>\
+        <pose>-17 -51.75 0.15 0 0 0</pose>\
         <visual name ='visual'>\
           <geometry>
             <box><size>0.5 3 0.2</size></box>
@@ -85,7 +85,7 @@
         </visual>\
       </link>
       <link name ='chassis'>\
-        <pose>30 1.75 0 0 0 0</pose>\
+        <pose>-15 -48.25 0.15 0 0 0</pose>\
         <visual name ='visual'>\
           <geometry>
             <box><size>0.5 3 0.2</size></box>
@@ -93,7 +93,7 @@
         </visual>\
       </link>
       <link name ='chassis'>\
-        <pose>32 -1.75 0 0 0 0</pose>\
+        <pose>-13 -51.75 0.15 0 0 0</pose>\
         <visual name ='visual'>\
           <geometry>
             <box><size>0.5 3 0.2</size></box>
@@ -101,7 +101,7 @@
         </visual>\
       </link>
       <link name ='chassis'>\
-        <pose>34 1.75 0 0 0 0</pose>\
+        <pose>-11 -48.25 0.15 0 0 0</pose>\
         <visual name ='visual'>\
           <geometry>
             <box><size>0.5 3 0.2</size></box>
@@ -112,7 +112,7 @@
 
     <model name="cylinderBumps">
       <link name="link">
-        <pose>50 -1.75 -0.12 1.57 0 0</pose>
+        <pose>5 -51.75 0.03 1.57 0 0</pose>
         <visual name="visual">
           <geometry>
             <cylinder>
@@ -123,7 +123,7 @@
         </visual>
       </link>
       <link name="link">
-        <pose>51 1.75 -0.12 1.57 0 0</pose>
+        <pose>6 -48.25 0.03 1.57 0 0</pose>
         <visual name="visual">
           <geometry>
             <cylinder>
@@ -134,7 +134,7 @@
         </visual>
       </link>
       <link name="link">
-        <pose>52 -1.75 -0.12 1.57 0 0</pose>
+        <pose>7 -51.75 0.03 1.57 0 0</pose>
         <visual name="visual">
           <geometry>
             <cylinder>
@@ -145,7 +145,7 @@
         </visual>
       </link>
       <link name="link">
-        <pose>53 1.75 -0.12 1.57 0 0</pose>
+        <pose>8 -48.25 0.03 1.57 0 0</pose>
         <visual name="visual">
           <geometry>
             <cylinder>
@@ -156,7 +156,7 @@
         </visual>
       </link>
       <link name="link">
-        <pose>54 -1.75 -0.12 1.57 0 0</pose>
+        <pose>9 -51.75 0.03 1.57 0 0</pose>
         <visual name="visual">
           <geometry>
             <cylinder>
@@ -167,7 +167,7 @@
         </visual>
       </link>
       <link name="link">
-        <pose>55 1.75 -0.12 1.57 0 0</pose>
+        <pose>10 -48.25 0.03 1.57 0 0</pose>
         <visual name="visual">
           <geometry>
             <cylinder>
@@ -178,7 +178,7 @@
         </visual>
       </link>
       <link name="link">
-        <pose>56 -1.75 -0.12 1.57 0 0</pose>
+        <pose>11 -51.75 0.03 1.57 0 0</pose>
         <visual name="visual">
           <geometry>
             <cylinder>
@@ -189,7 +189,7 @@
         </visual>
       </link>
       <link name="link">
-        <pose>57 1.75 -0.12 1.57 0 0</pose>
+        <pose>12 -48.25 0.03 1.57 0 0</pose>
         <visual name="visual">
           <geometry>
             <cylinder>
@@ -200,7 +200,7 @@
         </visual>
       </link>
       <link name="link">
-        <pose>58 -1.75 -0.12 1.57 0 0</pose>
+        <pose>13 -51.75 0.03 1.57 0 0</pose>
         <visual name="visual">
           <geometry>
             <cylinder>
@@ -211,7 +211,7 @@
         </visual>
       </link>
       <link name="link">
-        <pose>59 1.75 -0.12 1.57 0 0</pose>
+        <pose>14 -48.25 0.03 1.57 0 0</pose>
         <visual name="visual">
           <geometry>
             <cylinder>
@@ -228,42 +228,42 @@
     <model name="office1">
       <include>
         <uri>model://office_building</uri>
-        <pose>10 15 0 0 0 0</pose>
+        <pose>-35 -35 0 0 0 0</pose>
       </include>
     </model>
 
     <model name="office2">
       <include>
         <uri>model://office_building</uri>
-        <pose>30 15 0 0 0 0</pose>
+        <pose>-15 -35 0 0 0 0</pose>
       </include>
     </model>
 
     <model name="office3">
       <include>
         <uri>model://office_building</uri>
-        <pose>50 15 0 0 0 0</pose>
+        <pose>5 -35 0 0 0 0</pose>
       </include>
     </model>
 
     <model name="office4">
       <include>
         <uri>model://office_building</uri>
-        <pose>10 -15 0 0 0 0</pose>
+        <pose>-35 -65 0 0 0 0</pose>
       </include>
     </model>
 
     <model name="office5">
       <include>
         <uri>model://office_building</uri>
-        <pose>30 -15 0 0 0 0</pose>
+        <pose>-15 -65 0 0 0 0</pose>
       </include>
     </model>
 
     <model name="office6">
       <include>
         <uri>model://office_building</uri>
-        <pose>50 -15 0 0 0 0</pose>
+        <pose>5 -65 0 0 0 0</pose>
       </include>
     </model>
 
@@ -271,13 +271,13 @@
     <model name="barrier1">
       <include>
         <uri>model://jersey_barrier</uri>
-        <pose>81.2 62 0 0 0 .5</pose>
+        <pose>36.2 12 0.15 0 0 .5</pose>
       </include>
     </model>
     <model name="barrier2">
       <include>
         <uri>model://jersey_barrier</uri>
-        <pose>85.2 54 0 0 0 .5</pose>
+        <pose>40.2 4 0.15 0 0 .5</pose>
       </include>
     </model>
 
@@ -285,98 +285,98 @@
     <model name="barrier18">
       <include>
         <uri>model://jersey_barrier</uri>
-        <pose>80.5 51.2 0 0 0 .3</pose>
+        <pose>35.5 1.2 0.15 0 0 .3</pose>
       </include>
     </model>
 
     <model name="barrier3">
       <include>
         <uri>model://jersey_barrier</uri>
-        <pose>76.6 60.3 0 0 0 0</pose>
+        <pose>31.6 10.3 0.15 0 0 0</pose>
       </include>
     </model>
     <model name="barrier4">
       <include>
         <uri>model://jersey_barrier</uri>
-        <pose>75.1 50 0 0 0 0</pose>
+        <pose>30.1 0 0.15 0 0 0</pose>
       </include>
     </model>
 
     <model name="barrier15">
       <include>
         <uri>model://jersey_barrier</uri>
-        <pose>72.2 60.9 0 0 0 -.3</pose>
+        <pose>27.2 10.9 0.15 0 0 -.3</pose>
       </include>
     </model>
     <model name="barrier16">
       <include>
         <uri>model://jersey_barrier</uri>
-        <pose>69.7 51.2 0 0 0 -.3</pose>
+        <pose>24.7 1.2 0.15 0 0 -.3</pose>
       </include>
     </model>
 
     <model name="barrier5">
       <include>
         <uri>model://jersey_barrier</uri>
-        <pose>68.3 63.1 0 0 0 -.5</pose>
+        <pose>23.3 13.1 0.15 0 0 -.5</pose>
       </include>
     </model>
     <model name="barrier6">
       <include>
         <uri>model://jersey_barrier</uri>
-        <pose>64.2 54 0 0 0 -.5</pose>
+        <pose>19.2 4 0.15 0 0 -.5</pose>
       </include>
     </model>
 
     <model name="barrier13">
       <include>
         <uri>model://jersey_barrier</uri>
-        <pose>64.8 66.2 0 0 0 -.78</pose>
+        <pose>19.8 16.2 0.15 0 0 -.78</pose>
       </include>
     </model>
     <model name="barrier14">
       <include>
         <uri>model://jersey_barrier</uri>
-        <pose>59.2 58.2 0 0 0 -.78</pose>
+        <pose>14.2 8.2 0.15 0 0 -.78</pose>
       </include>
     </model>
 
     <model name="barrier7">
       <include>
         <uri>model://jersey_barrier</uri>
-        <pose>61.3 70.6 0 0 0 -.79</pose>
+        <pose>16.3 20.6 0.15 0 0 -.79</pose>
       </include>
     </model>
     <model name="barrier8">
       <include>
         <uri>model://jersey_barrier</uri>
-        <pose>55.2 63.1 0 0 0 -.79</pose>
+        <pose>10.2 13.1 0.15 0 0 -.79</pose>
       </include>
     </model>
 
     <model name="barrier11">
       <include>
         <uri>model://jersey_barrier</uri>
-        <pose>58 75.4 0 0 0 -.87</pose>
+        <pose>13 25.4 0.15 0 0 -.87</pose>
       </include>
     </model>
     <model name="barrier12">
       <include>
         <uri>model://jersey_barrier</uri>
-        <pose>51.5 68.3 0 0 0 -.96</pose>
+        <pose>6.5 18.3 0.15 0 0 -.96</pose>
       </include>
     </model>
 
     <model name="barrier9">
       <include>
         <uri>model://jersey_barrier</uri>
-        <pose>55.1 80.1 0 0 0 -.96</pose>
+        <pose>10.1 30.1 0.15 0 0 -.96</pose>
       </include>
     </model>
     <model name="barrier10">
       <include>
         <uri>model://jersey_barrier</uri>
-        <pose>47.7 73.4 0 0 0 -.96</pose>
+        <pose>2.7 23.4 0.15 0 0 -.96</pose>
       </include>
     </model>
 
@@ -384,52 +384,52 @@
     <model name="barrier20">
       <include>
         <uri>model://jersey_barrier</uri>
-        <pose>128.5 30 0 0 0 -1.38</pose>
+        <pose>83.5 -20 0.15 0 0 -1.38</pose>
       </include>
     </model>
     <model name="barrier21">
       <include>
         <uri>model://jersey_barrier</uri>
-        <pose>128.5 52 0 0 0 -1.35</pose>
+        <pose>83.5 2 0.15 0 0 -1.35</pose>
       </include>
     </model>
 
     <model name="barrier22">
       <include>
         <uri>model://jersey_barrier</uri>
-        <pose>121.5 52 0 0 0 1.36</pose>
+        <pose>76.5 2 0.15 0 0 1.36</pose>
       </include>
     </model>
     <model name="barrier23">
       <include>
         <uri>model://jersey_barrier</uri>
-        <pose>121.5 30 0 0 0 1.4</pose>
+        <pose>76.5 -20 0.15 0 0 1.4</pose>
       </include>
     </model>
 
     <model name="barrier24">
       <include>
         <uri>model://jersey_barrier</uri>
-        <pose>128.5 41 0 0 0 1.55</pose>
+        <pose>83.5 -9 0.15 0 0 1.55</pose>
       </include>
     </model>
     <model name="barrier25">
       <include>
         <uri>model://jersey_barrier</uri>
-        <pose>121.5 41 0 0 0 1.53</pose>
+        <pose>76.5 -9 0.15 0 0 1.53</pose>
       </include>
     </model>
 
     <model name="barrier26">
       <include>
         <uri>model://jersey_barrier</uri>
-        <pose>128.5 64 0 0 0 1.53</pose>
+        <pose>83.5 14 0.15 0 0 1.53</pose>
       </include>
     </model>
     <model name="barrier27">
       <include>
         <uri>model://jersey_barrier</uri>
-        <pose>121.5 64 0 0 0 1.54</pose>
+        <pose>76.5 14 0.15 0 0 1.54</pose>
       </include>
     </model>
 
@@ -439,7 +439,7 @@
     <model name="gas_station">
       <include>
         <uri>model://gas_station</uri>
-        <pose>123 105 0 0 0 0</pose>
+        <pose>78 55 0.15 0 0 0</pose>
       </include>
     </model>
 
@@ -656,47 +656,47 @@
 
     <road name="Secondary1">
       <width>7.5</width>
-      <point>0 0 0</point>
-      <point>100 0 0</point>
-      <point>106 1 0</point>
-      <point>112 3 0</point>
-      <point>117 7 0</point>
-      <point>121 12 0</point>
-      <point>123 18 0</point>
-      <point>125 25 0</point>
-      <point>125 32 0</point>
-      <point>125 35.5 -4</point>
-      <point>125 39 0</point>
-      <point>125 54 0</point>
-      <point>125 57.5 -4</point>
-      <point>125 61 0</point>
-      <point>125 75 0</point>
-      <point>125 80 0</point>
-      <point>120 80 0</point>
-      <point>104 80 0</point>
-      <point>102 79.5 0</point>
-      <point>100 79 0</point>
-      <point>98.5 78 0</point>
-      <point>97 77 0</point>
-      <point>83.3 58.3 0</point>
-      <point>75 55 0</point>
-      <point>66.7 58.3 0</point>
-      <point>58.3 67.5 0</point>
-      <point>50 80 0</point>
-      <point>41.7 92.5 0</point>
-      <point>33.3 101.4 0</point>
-      <point>25 105 0</point>
-      <point>16.7 101.7 0</point>
-      <point>8.333 92.5 0</point>
-      <point>0 80 0</point>
-      <point>-39 26 0</point>
-      <point>-43 20 0</point>
-      <point>-44 15 0</point>
-      <point>-42.5 9 0</point>
-      <point>-39 4 0</point>
-      <point>-34 1 0</point>
-      <point>-29 0 0</point>
-      <point>0 0 0</point>
+      <point>-45 -50 0.15</point>
+      <point>55 -50 0.15</point>
+      <point>61 -49 0.15</point>
+      <point>67 -47 0.15</point>
+      <point>72 -43 0.15</point>
+      <point>76 -38 0.15</point>
+      <point>78 -32 0.15</point>
+      <point>80 -25 0.15</point>
+      <point>80 -18 0.15</point>
+      <point>80 -14.5 -4</point>
+      <point>80 -11 0.15</point>
+      <point>80 4 0.15</point>
+      <point>80 7.5 -4</point>
+      <point>80 11 0.15</point>
+      <point>80 25 0.15</point>
+      <point>80 30 0.15</point>
+      <point>75 30 0.15</point>
+      <point>59 30 0.15</point>
+      <point>57 29.5 0.15</point>
+      <point>55 29 0.15</point>
+      <point>53.5 28 0.15</point>
+      <point>52 27 0.15</point>
+      <point>38.3 8.3 0.15</point>
+      <point>30 5 0.15</point>
+      <point>21.7 8.3 0.15</point>
+      <point>13.3 17.5 0.15</point>
+      <point>5 30 0.15</point>
+      <point>-3.3 42.5 0.15</point>
+      <point>-11.7 51.4 0.15</point>
+      <point>-20 55 0.15</point>
+      <point>-28.3 51.7 0.15</point>
+      <point>-36.667 42.5 0.15</point>
+      <point>-45 30 0.15</point>
+      <point>-84 -24 0.15</point>
+      <point>-88 -30 0.15</point>
+      <point>-89 -35 0.15</point>
+      <point>-87.5 -41 0.15</point>
+      <point>-84 -46 0.15</point>
+      <point>-79 -49 0.15</point>
+      <point>-74 -50 0.15</point>
+      <point>-45 -50 0.15</point>
 
       <material>
         <script>

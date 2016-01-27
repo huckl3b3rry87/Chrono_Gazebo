@@ -19,10 +19,10 @@
 //chrono vehicle includes
 #include "chrono_vehicle/ChApiVehicle.h"
 #include "chrono_vehicle/ChVehicleModelData.h"
-#include "chrono_vehicle/vehicle/Vehicle.h"
+#include "chrono_vehicle/wheeled_vehicle/vehicle/WheeledVehicle.h"
 #include "chrono_vehicle/powertrain/SimplePowertrain.h"
 #include "chrono_vehicle/driver/ChDataDriver.h"
-#include "chrono_vehicle/tire/RigidTire.h"
+#include "chrono_vehicle/wheeled_vehicle/tire/RigidTire.h"
 #include "chrono_vehicle/terrain/RigidTerrain.h"
 
 ///the chrono-engine includes
@@ -54,9 +54,6 @@
 #include <ros/ros.h>
 #include "boost/thread/mutex.hpp"
 #include <std_msgs/Float64.h>
-
-//gazonoVehicle includes
-#include "purePursuitDriver.cc"
 
 
 using namespace chrono;
@@ -115,6 +112,8 @@ class GazonoVehicle : public WorldPlugin
     wheels.push_back(_world->GetModel("wheel3"));
     wheels.push_back(_world->GetModel("wheel4"));
 
+    //set chrono and gazebo to use the same cinderblocks and logs
+
     for(int i; i<50; i++){
         gzCinderBlocks.push_back(_world->GetModel("cinderblock" + std::to_string (i)));
     }
@@ -125,105 +124,104 @@ class GazonoVehicle : public WorldPlugin
 
     //setup chrono vehicle
     //set initial conditions
-
-    //initRot = ChQuaternion<>(1.0, 0.0, 0.0, 0.0);
-    initRot = Q_from_AngAxis(0,{0, 0, 1});
-    initLoc = (0, 0, 1.0);
+    ChVector<> initLoc(-45, -50, 1.0);
+    ChQuaternion<> initRot(1, 0, 0, 0);
 
     //create the chrono vehicle
-    vehicle = ChSharedPtr<Vehicle>(new Vehicle(vehicle::GetDataFile(vehicle_file)));
-    vehicle->Initialize(ChCoordsys<>(initLoc, initRot));
+    veh = ChSharedPtr<vehicle::WheeledVehicle>(new vehicle::WheeledVehicle(vehicle::GetDataFile(vehicle_file)));
+    veh->Initialize(ChCoordsys<>(initLoc, initRot));
 
-    terrain = ChSharedPtr<RigidTerrain> (new RigidTerrain(vehicle->GetSystem(), terrainHeight, terrainLength, terrainWidth, 0.8));
+    terrain = ChSharedPtr<vehicle::RigidTerrain>(new vehicle::RigidTerrain(veh->GetSystem(), vehicle::GetDataFile(rigidterrain_file)));
+    std::cout<<"added terrain mesh"<<std::endl;
 
-    powertrain = ChSharedPtr<SimplePowertrain>(new SimplePowertrain(vehicle::GetDataFile(simplepowertrain_file)));
+    powertrain = ChSharedPtr<vehicle::SimplePowertrain>(new vehicle::SimplePowertrain(vehicle::GetDataFile(simplepowertrain_file)));
 
     powertrain->Initialize();
 
-    num_axles = vehicle->GetNumberAxles();
+    num_axles = veh->GetNumberAxles();
     num_wheels = 2 * num_axles;
-    tires = std::vector<ChSharedPtr<RigidTire>>(num_wheels);
+    tires = std::vector<ChSharedPtr<vehicle::RigidTire>>(num_wheels);
 
     for (int i = 0; i < num_wheels; i++) {
         //create the tires from the tire file
-        tires[i] = ChSharedPtr<RigidTire>(new RigidTire(vehicle::GetDataFile(rigidtire_file)));
-        tires[i]->Initialize(vehicle->GetWheelBody(i));
+        tires[i] = ChSharedPtr<vehicle::RigidTire>(new vehicle::RigidTire(vehicle::GetDataFile(rigidtire_file)));
+        tires[i]->Initialize(veh->GetWheelBody(i));
     }
-    //create the driver if not using line following with camera
-    //driver = ChSharedPtr<ChDataDriver>(new ChDataDriver(vehicle::GetDataFile(driver_file)));
-    //pursuitDriver = std::unique_ptr<PurePursuitDriver>(new PurePursuitDriver(10.0));
-    //lineDriver = std::unique_ptr<LineFollow>(new LineFollow(10.0));
 
-    tire_forces = ChTireForces(num_wheels);
-    wheel_states = ChWheelStates(num_wheels);
+    tire_forces = vehicle::TireForces(num_wheels);
+    wheel_states = vehicle::WheelStates(num_wheels);
     //vehicle->GetSystem()->SetLcpSolverType(ChSystem::LCP_ITERATIVE_APGD);
-    vehicle->GetSystem()->SetIterLCPmaxItersSpeed(500);
+    veh->GetSystem()->SetIterLCPmaxItersSpeed(500);
     //vehicle->GetSystem()->SetIterLCPmaxItersStab(100);
-    vehicle->GetSystem()->SetMaxPenetrationRecoverySpeed(10.0);
+    veh->GetSystem()->SetMaxPenetrationRecoverySpeed(10.0);
 
     //Add the terrain mesh to Chrono
     SetChronoDataPath("../data/");
-    ChSharedPtr<ChBody> gTerrain(new ChBody());
-    geometry::ChTriangleMeshConnected terrainMesh;//(new geometry::ChTriangleMeshConnected());
-    //std::cout << "Path: " << GetChronoDataPath() << std::endl;
-    terrainMesh.LoadWavefrontMesh(GetChronoDataFile("gazonoTerrain.obj"));
 
-    gTerrain->GetCollisionModel()->ClearModel();
-    gTerrain->GetCollisionModel()->AddTriangleMesh(terrainMesh, true, false);
-    gTerrain->GetCollisionModel()->BuildModel();
-    gTerrain->SetCollide(true);
-    gTerrain->SetPos({ 45, 50, -0.15 });
-    gTerrain->SetBodyFixed(true);
-    vehicle->GetSystem()->Add(gTerrain);
+    //std::cout << "Path: " << GetChronoDataPath() << std::endl;
+
+    //**********No longer needed for terrain mesh but this****************
+    //****************is how to load mesh into chrono*********************
+    // ChSharedPtr<ChBody> gTerrain(new ChBody());
+    // geometry::ChTriangleMeshConnected terrainMesh;//(new geometry::ChTriangleMeshConnected());
+    // terrainMesh.LoadWavefrontMesh(GetChronoDataFile("gazonoTerrain.obj"));
+    //
+    // gTerrain->GetCollisionModel()->ClearModel();
+    // gTerrain->GetCollisionModel()->AddTriangleMesh(terrainMesh, true, false);
+    // gTerrain->GetCollisionModel()->BuildModel();
+    // gTerrain->SetCollide(true);
+    // gTerrain->SetPos({ 45, 50, -0.15 });
+    // gTerrain->SetBodyFixed(true);
+    // veh->GetSystem()->Add(gTerrain);
 
     //correct for dip in terrain
     ChSharedPtr<ChBodyEasyBox>gndBox(new ChBodyEasyBox(50, 60, .2, 8000, true, false));
-    gndBox->SetPos({-17, 55, -.105});
+    gndBox->SetPos({-62, 5, 0.045});
     gndBox->SetBodyFixed(true);
-    vehicle->GetSystem()->Add(gndBox);
+    veh->GetSystem()->Add(gndBox);
 
     //add boxes and speed bumps to display vehicle dynamics
     for(int i=0;i<8;i++){
       ChSharedPtr<ChBodyEasyBox>box1(new ChBodyEasyBox(0.5, 3, 0.2, 5000, true, false));
       box1->SetBodyFixed(true);
-      box1->SetPos(ChVector<>(2*i+20, 3.5*(i%2)-1.75, 0));
-      vehicle->GetSystem()->Add(box1);
+      box1->SetPos(ChVector<>(2*i-25, 3.5*(i%2)-51.75, 0.15));
+      veh->GetSystem()->Add(box1);
     }
     for(int i=0;i<10;i++){
       ChSharedPtr<ChBodyEasyCylinder>cylinder1(new ChBodyEasyCylinder(0.25, 3.0, 5000, true, false));
       cylinder1->SetBodyFixed(true);
       cylinder1->SetRot(Q_from_AngAxis(1.57, {0, 1, 0}));
-      cylinder1->SetPos(ChVector<>(i+50, 3.5*(i%2)-1.75, -0.12));
+      cylinder1->SetPos(ChVector<>(i+5, 3.5*(i%2)-51.75, 0.03));
 
-      vehicle->GetSystem()->Add(cylinder1);
+      veh->GetSystem()->Add(cylinder1);
     }
 
-    //Add 10 blocks (cinderblocks) into chrono
+    //Add blocks (cinderblocks) into chrono
     for(int i=0; i<50; i++){
       ChSharedPtr<ChBodyEasyBox>cinderblock(new ChBodyEasyBox(.37, .17, .2, 1000, true, false));
       cinderblock->SetBodyFixed(false);
       cinderblock->SetRot(Q_from_AngAxis(0, {0, 0, 0}));
-      cinderblock->SetPos(ChVector<>(123 + (i%5), 35, .2*i));
-      vehicle->GetSystem()->Add(cinderblock);
+      cinderblock->SetPos(ChVector<>(78 + (i%5), -15, .2*i));
+      veh->GetSystem()->Add(cinderblock);
       chCinderBlocks.push_back(cinderblock);
     }
-    //
+    //Add logs (square) into chrono
     for(int i=0; i<10; i++){
       ChSharedPtr<ChBodyEasyBox>log(new ChBodyEasyBox(5, .2, .2, 1000, true, false));
       log->SetBodyFixed(false);
       //log->SetRot(Q_from_AngAxis(1.57, {0, 1, 0}));
-      log->SetPos(ChVector<>(123 + 3*(i%2), 56+.25*i, .2*i));
-      vehicle->GetSystem ()->Add(log);
+      log->SetPos(ChVector<>(78 + 3*(i%2), 6+.25*i, .2*i));
+      veh->GetSystem ()->Add(log);
       chLogs.push_back(log);
-
     }
 
     this->updateConnection = event::Events::ConnectWorldUpdateBegin(
          boost::bind(&GazonoVehicle::OnUpdate, this));
+    std::cout<<"Terminated Load Function..."<<std::endl;
   }
   public: void OnUpdate()
    {
-     //control vehicle speed control
+     //control vehicle speed
      //this will maintain an approximate speed of 7 m/s
 
      //connect to the ray data to stop vehicle in case of obstruction
@@ -243,15 +241,15 @@ class GazonoVehicle : public WorldPlugin
        maxSpeed = .343*minRange - .857;
      }
 
-     if(vehicle->GetVehicleSpeedCOM() >= maxSpeed +1.0){
+     if(veh->GetVehicleSpeedCOM() >= maxSpeed +1.0){
        braking_input = 0.5;
        throttle_input = 0.0;
      }
-     else if(vehicle->GetVehicleSpeedCOM() <= maxSpeed /2.0){
+     else if(veh->GetVehicleSpeedCOM() <= maxSpeed /2.0){
        braking_input = 0.0;
        throttle_input = 0.2;
      }
-     else if(vehicle->GetVehicleSpeedCOM() >= maxSpeed){
+     else if(veh->GetVehicleSpeedCOM() >= maxSpeed){
        braking_input = 0.3;
        throttle_input = 0.1;
      }
@@ -264,70 +262,57 @@ class GazonoVehicle : public WorldPlugin
      for(int i =0; i<1; i++){
        //collect module information
 
-       //THIS IS WHERE COLLECT DRIVER INFO IF NOT USING LINE FOLLOW WITH CAM
-       //throttle_input = driver->GetThrottle();
-       //steering_input = driver->GetSteering();
-       //braking_input = driver->GetBraking();
-
-       //throttle_input = pursuitDriver->GetThrottle();
-       //steering_input = pursuitDriver->GetSteering();
-       //braking_input = pursuitDriver->GetBraking();
-
-       //throttle_input = lineDriver->GetThrottle();
-       //steering_input = lineDriver->GetSteering();
-       //braking_input = lineDriver->GetBraking();
-
        powertrain_torque = powertrain->GetOutputTorque();
-       driveshaft_speed = vehicle->GetDriveshaftSpeed();
+       driveshaft_speed = veh->GetDriveshaftSpeed();
        for (int i = 0; i < num_wheels; i++) {
           tire_forces[i] = tires[i]->GetTireForce();
-          wheel_states[i] = vehicle->GetWheelState(i);
+          wheel_states[i] = veh->GetWheelState(i);
        }
 
        //Update modules (process inputs from other modules)
-       time = vehicle->GetSystem()->GetChTime();
+       time = veh->GetSystem()->GetChTime();
        //driver->Update(time);
        //pursuitDriver->Update(vehicle);
        powertrain->Update(time, throttle_input, driveshaft_speed);
-       vehicle->Update(time, steering_input, braking_input, powertrain_torque, tire_forces);
-       //terrain->Update(time);
+       veh->Update(time, steering_input, braking_input, powertrain_torque, tire_forces);
+       terrain->Update(time);
        for (int i = 0; i < num_wheels; i++)
           tires[i]->Update(time, wheel_states[i], *terrain);
 
        // Advance simulation for one timestep for all modules
        //driver->Advance(step_size);
        powertrain->Advance(step_size);
-       vehicle->Advance(step_size);
-       //terrain->Advance(step_size);
+       veh->Advance(step_size);
+       terrain->Advance(step_size);
        for (int i = 0; i < num_wheels; i++)
           tires[i]->Advance(step_size);
      }
 
-       //update the gazebo vehicle and wheel pose
+       //Communication and updates between Chrono and Gazebo
        _model1->SetWorldPose(math::Pose(
            math::Vector3(
-               vehicle->GetChassisPos().x,
-               vehicle->GetChassisPos().y,
-               vehicle->GetChassisPos().z
+               veh->GetChassisPos().x,
+               veh->GetChassisPos().y,
+               veh->GetChassisPos().z
            ),
            math::Quaternion(
-               vehicle->GetChassisRot().e0,
-               vehicle->GetChassisRot().e1,
-               vehicle->GetChassisRot().e2,
-               vehicle->GetChassisRot().e3
+               veh->GetChassisRot().e0,
+               veh->GetChassisRot().e1,
+               veh->GetChassisRot().e2,
+               veh->GetChassisRot().e3
            )), "link");
         for(int j=0; j<wheels.size();j++){
           wheels[j]->SetWorldPose(math::Pose(
               math::Vector3(
-                  vehicle->GetWheelPos(j).x,
-                  vehicle->GetWheelPos(j).y,
-                  vehicle->GetWheelPos(j).z
+                  veh->GetWheelPos(j).x,
+                  veh->GetWheelPos(j).y,
+                  veh->GetWheelPos(j).z
               ),
               math::Quaternion(
-                  vehicle->GetWheelRot(j).e0,
-                  vehicle->GetWheelRot(j).e1,
-                  vehicle->GetWheelRot(j).e2,
-                  vehicle->GetWheelRot(j).e3
+                  veh->GetWheelRot(j).e0,
+                  veh->GetWheelRot(j).e1,
+                  veh->GetWheelRot(j).e2,
+                  veh->GetWheelRot(j).e3
               )), "link");
         }
         //std::cout<<"updating the cinderblocks\n";
@@ -391,48 +376,34 @@ private: ros::NodeHandle* rosnode_;
     ros::CallbackQueue queue_;
     boost::thread callback_queue_thread_;
 
-    //Chrono optional vehicle setups
+    //Chrono vehicle setups
     ////******THESE ARE BEING PULLED FROM THE DATA DIRECTORY AT
     ////****** Chrono_Gazebo/data
     // JSON file for vehicle model
-    //std::string vehicle_file("hmmwv/vehicle/HMMWV_Vehicle.json");
-    //std::string vehicle_file("hmmwv/vehicle/HMMWV_Vehicle_simple_lugged.json");
     std::string vehicle_file = "hmmwv/vehicle/HMMWV_Vehicle_4WD.json";
-    //std::string vehicle_file = "generic/vehicle/Vehicle_DoubleWishbones_ARB.json";
-    //std::string vehicle_file("generic/vehicle/Vehicle_DoubleWishbones_ARB.json");
-    //std::string vehicle_file("generic/vehicle/Vehicle_MultiLinks.json");
-    //std::string vehicle_file("generic/vehicle/Vehicle_SolidAxles.json");
-    //std::string vehicle_file("generic/vehicle/Vehicle_ThreeAxles.json");
-    //std::string vehicle_file("generic/vehicle_multisteer/Vehicle_DualFront_Independent.json");
-    //std::string vehicle_file("generic/vehicle_multisteer/Vehicle_DualFront_Shared.json");
 
     // JSON files for tire models (rigid) and powertrain (simple)
     std::string rigidtire_file = "generic/tire/RigidTire.json";
+
+    //JSON file for terrain models
+    std::string rigidterrain_file = "terrain/RigidMesh.json";
+
     std::string simplepowertrain_file = "generic/powertrain/SimplePowertrain.json";
 
     // Driver input file (if not using Irrlicht)
     std::string driver_file = "generic/driver/Sample_Maneuver.txt";
 
-    // Initial vehicle location and orientation
-    ChVector<> initLoc;
-    ChQuaternion<> initRot;
-
-    //ground plane parameters
-    double terrainHeight = -100.1;
-    double terrainLength = 1000.0;   // size in X direction
-    double terrainWidth  = 1000.0;   // size in Y direction
-
     //chrono vehicle components
-    ChSharedPtr<Vehicle> vehicle;
-    ChSharedPtr<RigidTerrain> terrain;
-    ChSharedPtr<SimplePowertrain> powertrain;
-    std::vector<ChSharedPtr<RigidTire> > tires;
+    ChSharedPtr<vehicle::WheeledVehicle> veh;
+    ChSharedPtr<vehicle::RigidTerrain> terrain;
+    ChSharedPtr<vehicle::SimplePowertrain> powertrain;
+    std::vector<ChSharedPtr<vehicle::RigidTire> > tires;
     //ChSharedPtr<ChDataDriver> driver;
-    std::unique_ptr<PurePursuitDriver> pursuitDriver; //*****************
+    //std::unique_ptr<PurePursuitDriver> pursuitDriver; //*****************
 
     std::vector<double> ranges;
-    ChTireForces   tire_forces;
-    ChWheelStates  wheel_states;
+    vehicle::TireForces   tire_forces;
+    vehicle::WheelStates  wheel_states;
 
     //chrono vehicle parameters, values should not matter unless no driver
     double         driveshaft_speed;
