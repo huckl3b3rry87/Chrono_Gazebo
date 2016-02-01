@@ -78,178 +78,218 @@ class chrono_gazebo : public WorldPlugin
     }
 
     this->rosnode_ = new ros::NodeHandle("chrono_gazebo");
-
     // Custom Callback Queue
     ros::SubscribeOptions so = ros::SubscribeOptions::create<std_msgs::Float64>(
       "/track_point",1,
       boost::bind( &chrono_gazebo::UpdateDriverInput,this,_1),
       ros::VoidPtr(), &this->queue_);
     this->sub_ = this->rosnode_->subscribe(so);
-
     // Custom Callback Queue
     this->callback_queue_thread_ = boost::thread( boost::bind( &chrono_gazebo::QueueThread,this ) );
     //END LINE FOLLOW LOAD
-
     //CONNECT TO LASER
     this->raySensor =
     boost::dynamic_pointer_cast<sensors::RaySensor>
       (sensors::SensorManager::Instance()->GetSensor(
-        this->_world->GetName() + "::vehicle::chassis::laser"));
+        this->_world->GetName() + "::vehicle0::chassis::laser"));
         // this->world->GetName() + "::" + this->model->GetScopedName()
-        // + "::pelvis::"
+        // + "::pelvis::"S
         // "imu_sensor"));
     if (!this->raySensor)
     std::cout << "laser not found!\n\n";
     //END CONNECT TO LASER
-
     //create model pointers
-    if(_world->GetModel("vehicle") != NULL){
-        _model1 = _world->GetModel("vehicle");
+    for(int i = 0; i<num_vehicles; i++){
+      std::vector<physics::ModelPtr> wheels;
+      physics::ModelPtr _model1;
+      if(_world->GetModel("vehicle" + std::to_string(i)) != NULL){
+          _model1 = _world->GetModel("vehicle" + std::to_string(i));
+          gazeboVehicles.push_back(_model1);
+      }
+      else{std::cout<<"COULD NOT FIND GAZEBO MODEL: vehicle"<<i<<std::endl;}
+      //create vector of wheels for easy reference
+      wheels.push_back(_world->GetModel("wheel"+ std::to_string(i)+ "_1"));
+      wheels.push_back(_world->GetModel("wheel"+ std::to_string(i)+ "_2"));
+      wheels.push_back(_world->GetModel("wheel"+ std::to_string(i)+ "_3"));
+      wheels.push_back(_world->GetModel("wheel"+ std::to_string(i)+ "_4"));
+      gazeboWheels.push_back(wheels);
     }
+
+
+
+    // for(int i=0;i<num_vehicles; i++){
+    //   if(_world->GetModel("vehicle" + std::to_string (i)) != NULL){
+    //     std::cout<<"Adding vehicles\n";
+    //     gazeboVehicles.push_back(_world->GetModel("vehicle" + std::to_string (i)));
+    //     gazeboWheels[i].push_back(_world->GetModel("wheel"+std::to_string(i) + "_1"));
+    //     gazeboWheels[i].push_back(_world->GetModel("wheel"+std::to_string(i) + "_2"));
+    //     gazeboWheels[i].push_back(_world->GetModel("wheel"+std::to_string(i) + "_3"));
+    //     gazeboWheels[i].push_back(_world->GetModel("wheel"+std::to_string(i) + "_4"));
+    //
+    //   }
+    //  else{std::cout<<"COULD NOT FIND GAZEBO MODEL: vehicle"<<i<<std::endl;}
+    // }
     //create vector of wheels for easy reference
-    wheels.push_back(_world->GetModel("wheel1"));
-    wheels.push_back(_world->GetModel("wheel2"));
-    wheels.push_back(_world->GetModel("wheel3"));
-    wheels.push_back(_world->GetModel("wheel4"));
-
-
     //setup chrono vehicle
     //set initial conditions
-    ChVector<> initLoc(0, 0, 1.0);
-    ChQuaternion<> initRot(1, 0, 0, 0);
-
-    //create the chrono vehicle
-    veh = ChSharedPtr<vehicle::WheeledVehicle>(new vehicle::WheeledVehicle(vehicle::GetDataFile(vehicle_file)));
-    veh->Initialize(ChCoordsys<>(initLoc, initRot));
-
-    terrain = ChSharedPtr<vehicle::RigidTerrain>(new vehicle::RigidTerrain(veh->GetSystem(), vehicle::GetDataFile(rigidterrain_file)));
-    //std::cout<<"added terrain mesh"<<std::endl;
-
-    powertrain = ChSharedPtr<vehicle::SimplePowertrain>(new vehicle::SimplePowertrain(vehicle::GetDataFile(simplepowertrain_file)));
-
-    powertrain->Initialize();
-
-    num_axles = veh->GetNumberAxles();
-    num_wheels = 2 * num_axles;
-    tires = std::vector<ChSharedPtr<vehicle::RigidTire>>(num_wheels);
-
-    for (int i = 0; i < num_wheels; i++) {
-        //create the tires from the tire file
-        tires[i] = ChSharedPtr<vehicle::RigidTire>(new vehicle::RigidTire(vehicle::GetDataFile(rigidtire_file)));
-        tires[i]->Initialize(veh->GetWheelBody(i));
+std::cout<<"Reached Line 120\n";
+    for(int i=0; i<num_vehicles; i++){
+      std::cout<<"Value of i="<<i<<std::endl;
+      chronoVehiclesInitLoc.push_back(ChVector<> (-10*i, 0, 1.0));
+      chronoVehiclesInitRot.push_back(ChQuaternion<> (1, 0, 0, 0));
     }
+    // ChVector<> initLoc(0, 0, 1.0);
+    // ChQuaternion<> initRot(1, 0, 0, 0);
+std::cout<<"Reached Line 128\n";
+    //create the chrono vehicle
+    for(int i=0; i<num_vehicles; i++){
+      std::cout<<"Value of i, second loop = "<<i<<std::endl;
+      std::cout<<"num_vehicles = "<<num_vehicles<<std::endl;
 
-    tire_forces = vehicle::TireForces(num_wheels);
-    wheel_states = vehicle::WheelStates(num_wheels);
-    //vehicle->GetSystem()->SetLcpSolverType(ChSystem::LCP_ITERATIVE_APGD);
-    veh->GetSystem()->SetIterLCPmaxItersSpeed(iters);
-    //vehicle->GetSystem()->SetIterLCPmaxItersStab(100);
-    veh->GetSystem()->SetMaxPenetrationRecoverySpeed(10.0);
+      veh = ChSharedPtr<vehicle::WheeledVehicle>(new vehicle::WheeledVehicle(vehicle::GetDataFile(vehicle_file)));
+      veh->Initialize(ChCoordsys<>(chronoVehiclesInitLoc[i], chronoVehiclesInitRot[i]));
+
+      terrain = ChSharedPtr<vehicle::RigidTerrain>(new vehicle::RigidTerrain(veh->GetSystem(), vehicle::GetDataFile(rigidterrain_file)));
+
+      powertrain = ChSharedPtr<vehicle::SimplePowertrain>(new vehicle::SimplePowertrain(vehicle::GetDataFile(simplepowertrain_file)));
+      powertrain->Initialize();
+
+      num_axles = veh->GetNumberAxles();
+      num_wheels = 2 * num_axles;
+      tires = std::vector<ChSharedPtr<vehicle::RigidTire>>(num_wheels);
+
+      for (int i = 0; i < num_wheels; i++) {
+          //create the tires from the tire file
+          tires[i] = ChSharedPtr<vehicle::RigidTire>(new vehicle::RigidTire(vehicle::GetDataFile(rigidtire_file)));
+          tires[i]->Initialize(veh->GetWheelBody(i));
+      }
+
+      tire_forces = vehicle::TireForces(num_wheels);
+      wheel_states = vehicle::WheelStates(num_wheels);
+      //vehicle->GetSystem()->SetLcpSolverType(ChSystem::LCP_ITERATIVE_APGD);
+      veh->GetSystem()->SetIterLCPmaxItersSpeed(iters);
+      //vehicle->GetSystem()->SetIterLCPmaxItersStab(100);
+      veh->GetSystem()->SetMaxPenetrationRecoverySpeed(10.0);
+
+      //update the chrono system vectors
+      chronoVehicles.push_back(veh);
+      chronoPowertrains.push_back(powertrain);
+      chronoTires.push_back(tires);
+      chronoTireForces.push_back(tire_forces);
+      chronoWheelStates.push_back(wheel_states);
+    }
 
     //Add the terrain mesh to Chrono
     SetChronoDataPath("../data/");
 
-    //std::cout << "Path: " << GetChronoDataPath() << std::endl;
     this->updateConnection = event::Events::ConnectWorldUpdateBegin(
          boost::bind(&chrono_gazebo::OnUpdate, this));
-    //std::cout<<"Terminated Load Function..."<<std::endl;
+
   }
   public: void OnUpdate()
    {
-     //control vehicle speed
-     //this will maintain an approximate speed of 7 m/s
-
-     //connect to the ray data to stop vehicle in case of obstruction
-     //this will only use a rectangle in the direction of the wheels to detect obstacles.
-     maxSpeed = 6.0;
      raySensor->GetRanges(ranges);
-     center = steering_input*50 + 50;
-     minRange = 100000.0;
-     for(int i=0; i<ranges.size(); i++){
-       if(ranges[i]*sin(abs(i-center)*3.14159/180.0) <=2.5){
-         if(ranges[i]<minRange)
-           minRange = ranges[i];
+     for(int i=0; i<num_vehicles; i++){
+       //control vehicle speed
+       //this will maintain an approximate speed of max_speed m/s
+
+       //connect to the ray data to stop vehicle in case of obstruction
+       //this will only use a rectangle in the direction of the wheels to detect obstacles.
+
+       center = steering_input*50 + 50;
+       minRange = 100000.0;
+       for(int j=0; j<ranges.size(); j++){
+         if(ranges[j]*sin(abs(j-center)*3.14159/180.0) <=2.5){
+           if(ranges[j]<minRange)
+             minRange = ranges[j];
+         }
        }
-     }
-     if(minRange<10000.0){
-       //linear so 6m/s at 20m at 0m/s at 2.5m
-       maxSpeed = .343*minRange - .857;
-     }
-
-     if(veh->GetVehicleSpeedCOM() >= maxSpeed +1.0){
-       braking_input = 0.5;
-       throttle_input = 0.0;
-     }
-     else if(veh->GetVehicleSpeedCOM() <= maxSpeed /2.0){
-       braking_input = 0.0;
-       throttle_input = 0.2;
-     }
-     else if(veh->GetVehicleSpeedCOM() >= maxSpeed){
-       braking_input = 0.3;
-       throttle_input = 0.1;
-     }
-     else{
-       braking_input = 0.15;
-       throttle_input = 0.2;
-     }
-
-
-     for(int i =0; i<1; i++){
-       //collect module information
-
-       powertrain_torque = powertrain->GetOutputTorque();
-       driveshaft_speed = veh->GetDriveshaftSpeed();
-       for (int i = 0; i < num_wheels; i++) {
-          tire_forces[i] = tires[i]->GetTireForce();
-          wheel_states[i] = veh->GetWheelState(i);
+       maxSpeed = maxSpeedInput;
+       if(minRange<10000.0){
+         //linear so 6m/s at 20m at 0m/s at 2.5m
+         maxSpeed = .343*minRange - .857;
        }
 
-       //Update modules (process inputs from other modules)
-       time = veh->GetSystem()->GetChTime();
-       //driver->Update(time);
-       //pursuitDriver->Update(vehicle);
-       powertrain->Update(time, throttle_input, driveshaft_speed);
-       veh->Update(time, steering_input, braking_input, powertrain_torque, tire_forces);
-       terrain->Update(time);
-       for (int i = 0; i < num_wheels; i++)
-          tires[i]->Update(time, wheel_states[i], *terrain);
+       if(chronoVehicles[i]->GetVehicleSpeedCOM() >= maxSpeed +1.0){
+         braking_input = 0.5;
+         throttle_input = 0.0;
+       }
+       else if(chronoVehicles[i]->GetVehicleSpeedCOM() <= maxSpeed /2.0){
+         braking_input = 0.0;
+         throttle_input = 0.2;
+       }
+       else if(chronoVehicles[i]->GetVehicleSpeedCOM() >= maxSpeed){
+         braking_input = 0.3;
+         throttle_input = 0.1;
+       }
+       else{
+         braking_input = 0.15;
+         throttle_input = 0.2;
+       }
+       std::cout<<"Min Range: " << minRange<<std::endl;
+       std::cout<<"Max Speed: " << maxSpeed<<std::endl;
+       std::cout<<"Throttle Input: " << throttle_input<<std::endl;
+       std::cout<<"Braking Input: " << braking_input<<std::endl;
+       std::cout<<"Steering Input: " << steering_input<<std::endl;
+       std::cout<<std::endl;
 
-       // Advance simulation for one timestep for all modules
-       //driver->Advance(step_size);
-       powertrain->Advance(step_size);
-       veh->Advance(step_size);
-       terrain->Advance(step_size);
-       for (int i = 0; i < num_wheels; i++)
-          tires[i]->Advance(step_size);
-     }
+        //collect module information
 
-       //Communication and updates between Chrono and Gazebo
-       _model1->SetWorldPose(math::Pose(
-           math::Vector3(
-               veh->GetChassisPos().x,
-               veh->GetChassisPos().y,
-               veh->GetChassisPos().z
-           ),
-           math::Quaternion(
-               veh->GetChassisRot().e0,
-               veh->GetChassisRot().e1,
-               veh->GetChassisRot().e2,
-               veh->GetChassisRot().e3
-           )), "link");
-        for(int j=0; j<wheels.size();j++){
-          wheels[j]->SetWorldPose(math::Pose(
-              math::Vector3(
-                  veh->GetWheelPos(j).x,
-                  veh->GetWheelPos(j).y,
-                  veh->GetWheelPos(j).z
-              ),
-              math::Quaternion(
-                  veh->GetWheelRot(j).e0,
-                  veh->GetWheelRot(j).e1,
-                  veh->GetWheelRot(j).e2,
-                  veh->GetWheelRot(j).e3
-              )), "link");
+        powertrain_torque = chronoPowertrains[i]->GetOutputTorque();
+        driveshaft_speed = chronoVehicles[i]->GetDriveshaftSpeed();
+        for (int j = 0; j < num_wheels; j++) {
+          chronoTireForces[i][j] = chronoTires[i][j]->GetTireForce();
+          chronoWheelStates[i][j] = chronoVehicles[i]->GetWheelState(j);
         }
+
+        //Update modules (process inputs from other modules)
+        time = chronoVehicles[i]->GetSystem()->GetChTime();
+        //driver->Update(time);
+        //pursuitDriver->Update(chronoVehicles[i]icle);
+        chronoPowertrains[i]->Update(time, throttle_input, driveshaft_speed);
+        chronoVehicles[i]->Update(time, steering_input, braking_input, powertrain_torque, chronoTireForces[i]);
+        terrain->Update(time);
+        for (int j = 0; j < num_wheels; j++)
+          chronoTires[i][j]->Update(time, chronoWheelStates[i][j], *terrain);
+
+        // Advance simulation for one timestep for all modules
+        //driver->Advance(step_size);
+        chronoPowertrains[i]->Advance(step_size);
+        chronoVehicles[i]->Advance(step_size);
+        terrain->Advance(step_size);
+        for (int j = 0; j < num_wheels; j++){
+          chronoTires[i][j]->Advance(step_size);
+        }
+
+        //Communication and updates between Chrono and Gazebo
+        gazeboVehicles[i]->SetWorldPose(math::Pose(
+            math::Vector3(
+                chronoVehicles[i]->GetChassisPos().x,
+                chronoVehicles[i]->GetChassisPos().y,
+                chronoVehicles[i]->GetChassisPos().z
+            ),
+            math::Quaternion(
+                chronoVehicles[i]->GetChassisRot().e0,
+                chronoVehicles[i]->GetChassisRot().e1,
+                chronoVehicles[i]->GetChassisRot().e2,
+                chronoVehicles[i]->GetChassisRot().e3
+            )), "link");
+          for(int j=0; j<gazeboWheels[i].size();j++){
+            gazeboWheels[i][j]->SetWorldPose(math::Pose(
+                math::Vector3(
+                    chronoVehicles[i]->GetWheelPos(j).x,
+                    chronoVehicles[i]->GetWheelPos(j).y,
+                    chronoVehicles[i]->GetWheelPos(j).z
+                ),
+                math::Quaternion(
+                    chronoVehicles[i]->GetWheelRot(j).e0,
+                    chronoVehicles[i]->GetWheelRot(j).e1,
+                    chronoVehicles[i]->GetWheelRot(j).e2,
+                    chronoVehicles[i]->GetWheelRot(j).e3
+                )), "link");
+          }
+     }
+
         //std::cout<<"updating the cinderblocks\n";
    }
 
@@ -323,11 +363,22 @@ private: ros::NodeHandle* rosnode_;
     double center;
     double minRange;
     double maxSpeed;
+    double maxSpeedInput = 8.333;
 
     //define the step size
     double step_size = 0.001;
     double iters = 100;
     double time = 0.0;
+
+    //vector of vehicle and associated models
+    int num_vehicles = 2;
+    std::vector<ChSharedPtr<vehicle::WheeledVehicle>> chronoVehicles;
+    std::vector<ChSharedPtr<vehicle::SimplePowertrain>> chronoPowertrains;
+    std::vector<std::vector<ChSharedPtr<vehicle::RigidTire>>> chronoTires;
+    std::vector<vehicle::TireForces> chronoTireForces;
+    std::vector<vehicle::WheelStates> chronoWheelStates;
+    std::vector<ChVector<>> chronoVehiclesInitLoc;
+    std::vector<ChQuaternion<>> chronoVehiclesInitRot;
 
     //pointers to reference the models shared by chrono and gazebo
     boost::shared_ptr<sensors::RaySensor> raySensor;
@@ -336,9 +387,13 @@ private: ros::NodeHandle* rosnode_;
     std::vector<physics::ModelPtr> gzCinderBlocks;
     std::vector<ChSharedPtr<ChBody>> chLogs;
     std::vector<physics::ModelPtr> gzLogs;
-    std::vector<physics::ModelPtr> wheels;
+
+    //vector for gazebo's vehicles
+    std::vector<std::vector<physics::ModelPtr>> gazeboWheels;
+    std::vector<physics::ModelPtr> gazeboVehicles;
+
     physics::WorldPtr _world;
-    physics::ModelPtr _model1;
+
     event::ConnectionPtr updateConnection;
 };
 
