@@ -79,24 +79,52 @@ class chrono_gazebo : public WorldPlugin
 
     this->rosnode_ = new ros::NodeHandle("chrono_gazebo");
     // Custom Callback Queue
-    ros::SubscribeOptions so = ros::SubscribeOptions::create<std_msgs::Float64>(
-      "/track_point",1,
-      boost::bind( &chrono_gazebo::UpdateDriverInput,this,_1),
+    ros::SubscribeOptions so0 = ros::SubscribeOptions::create<std_msgs::Float64>(
+      "/track_point0",1,
+      boost::bind( &chrono_gazebo::UpdateDriverInput0,this,_1),
       ros::VoidPtr(), &this->queue_);
-    this->sub_ = this->rosnode_->subscribe(so);
+    this->sub0_ = this->rosnode_->subscribe(so0);
+
+    ros::SubscribeOptions so1 = ros::SubscribeOptions::create<std_msgs::Float64>(
+      "/track_point1",1,
+      boost::bind( &chrono_gazebo::UpdateDriverInput1,this,_1),
+      ros::VoidPtr(), &this->queue_);
+    this->sub1_ = this->rosnode_->subscribe(so1);
+
+
+
+
     // Custom Callback Queue
-    this->callback_queue_thread_ = boost::thread( boost::bind( &chrono_gazebo::QueueThread,this ) );
+    this->callback_queue_thread_ = boost::thread( boost::bind( &chrono_gazebo::QueueThread,this));
     //END LINE FOLLOW LOAD
     //CONNECT TO LASER
-    this->raySensor =
+    this->raySensor0 =
     boost::dynamic_pointer_cast<sensors::RaySensor>
       (sensors::SensorManager::Instance()->GetSensor(
-        this->_world->GetName() + "::vehicle0::chassis::laser"));
+        this->_world->GetName() + "::vehicle0::chassis0::laser"));
         // this->world->GetName() + "::" + this->model->GetScopedName()
         // + "::pelvis::"S
         // "imu_sensor"));
-    if (!this->raySensor)
-    std::cout << "laser not found!\n\n";
+    if (!this->raySensor0)
+    std::cout << "laser 0 not found!\n\n";
+    this->raySensor1 =
+    boost::dynamic_pointer_cast<sensors::RaySensor>
+      (sensors::SensorManager::Instance()->GetSensor(
+        this->_world->GetName() + "::vehicle1::chassis1::laser"));
+        // this->world->GetName() + "::" + this->model->GetScopedName()
+        // + "::pelvis::"S
+        // "imu_sensor"));
+    if (!this->raySensor1)
+    std::cout << "laser 1 not found!\n\n";
+    if(raySensor0 == NULL || raySensor1 == NULL){
+      std::cout<<"\n\n\nA LASER WAS NOT FOUND!!!\n\n\n";
+    }
+    else{
+      raySensors.push_back(raySensor0);
+      raySensors.push_back(raySensor1);
+    }
+
+
     //END CONNECT TO LASER
     //create model pointers
     for(int i = 0; i<num_vehicles; i++){
@@ -132,22 +160,32 @@ class chrono_gazebo : public WorldPlugin
     //create vector of wheels for easy reference
     //setup chrono vehicle
     //set initial conditions
-std::cout<<"Reached Line 120\n";
+// std::cout<<"Reached Line 120\n";
     for(int i=0; i<num_vehicles; i++){
-      std::cout<<"Value of i="<<i<<std::endl;
+      // std::cout<<"Value of i="<<i<<std::endl;
       chronoVehiclesInitLoc.push_back(ChVector<> (-10*i, 0, 1.0));
       chronoVehiclesInitRot.push_back(ChQuaternion<> (1, 0, 0, 0));
     }
     // ChVector<> initLoc(0, 0, 1.0);
     // ChQuaternion<> initRot(1, 0, 0, 0);
-std::cout<<"Reached Line 128\n";
+// std::cout<<"Reached Line 128\n";
     //create the chrono vehicle
     for(int i=0; i<num_vehicles; i++){
-      std::cout<<"Value of i, second loop = "<<i<<std::endl;
-      std::cout<<"num_vehicles = "<<num_vehicles<<std::endl;
+      // std::cout<<"Value of i, second loop = "<<i<<std::endl;
+      // std::cout<<"num_vehicles = "<<num_vehicles<<std::endl;
 
       veh = ChSharedPtr<vehicle::WheeledVehicle>(new vehicle::WheeledVehicle(vehicle::GetDataFile(vehicle_file)));
       veh->Initialize(ChCoordsys<>(chronoVehiclesInitLoc[i], chronoVehiclesInitRot[i]));
+
+      //in development for use with chrono path following
+      // ChBezierCurve* path = ChBezierCurve::read(vehicle::GetDataFile(path_file));
+      //
+      //
+      //
+      // ChPathFollowerDriver driver_follower(my_hmmwv.GetVehicle(), vehicle::GetDataFile(steering_controller_file),
+      //         vehicle::GetDataFile(speed_controller_file), path, "my_path", target_speed);
+      //
+      //
 
       terrain = ChSharedPtr<vehicle::RigidTerrain>(new vehicle::RigidTerrain(veh->GetSystem(), vehicle::GetDataFile(rigidterrain_file)));
 
@@ -188,15 +226,20 @@ std::cout<<"Reached Line 128\n";
   }
   public: void OnUpdate()
    {
-     raySensor->GetRanges(ranges);
+
      for(int i=0; i<num_vehicles; i++){
+
+       //saySensor->GetRanges(ranges);
+       raySensors[i]->GetRanges(ranges);
+
+
        //control vehicle speed
        //this will maintain an approximate speed of max_speed m/s
 
        //connect to the ray data to stop vehicle in case of obstruction
        //this will only use a rectangle in the direction of the wheels to detect obstacles.
 
-       center = steering_input*50 + 50;
+       center = steering_input[i]*50 + 50;
        minRange = 100000.0;
        for(int j=0; j<ranges.size(); j++){
          if(ranges[j]*sin(abs(j-center)*3.14159/180.0) <=2.5){
@@ -226,12 +269,12 @@ std::cout<<"Reached Line 128\n";
          braking_input = 0.15;
          throttle_input = 0.2;
        }
-       std::cout<<"Min Range: " << minRange<<std::endl;
-       std::cout<<"Max Speed: " << maxSpeed<<std::endl;
-       std::cout<<"Throttle Input: " << throttle_input<<std::endl;
-       std::cout<<"Braking Input: " << braking_input<<std::endl;
-       std::cout<<"Steering Input: " << steering_input<<std::endl;
-       std::cout<<std::endl;
+       // std::cout<<"Min Range: " << minRange<<std::endl;
+       // std::cout<<"Max Speed: " << maxSpeed<<std::endl;
+       // std::cout<<"Throttle Input: " << throttle_input<<std::endl;
+       // std::cout<<"Braking Input: " << braking_input<<std::endl;
+       // std::cout<<"Steering Input: " << steering_input<<std::endl;
+       // std::cout<<std::endl;
 
         //collect module information
 
@@ -247,7 +290,7 @@ std::cout<<"Reached Line 128\n";
         //driver->Update(time);
         //pursuitDriver->Update(chronoVehicles[i]icle);
         chronoPowertrains[i]->Update(time, throttle_input, driveshaft_speed);
-        chronoVehicles[i]->Update(time, steering_input, braking_input, powertrain_torque, chronoTireForces[i]);
+        chronoVehicles[i]->Update(time, steering_input[i], braking_input, powertrain_torque, chronoTireForces[i]);
         terrain->Update(time);
         for (int j = 0; j < num_wheels; j++)
           chronoTires[i][j]->Update(time, chronoWheelStates[i][j], *terrain);
@@ -293,10 +336,16 @@ std::cout<<"Reached Line 128\n";
         //std::cout<<"updating the cinderblocks\n";
    }
 
-   void UpdateDriverInput(const std_msgs::Float64::ConstPtr& _msg)
+   void UpdateDriverInput0(const std_msgs::Float64::ConstPtr& _msg)
     {
-      this->steering_input = _msg->data;
+      std::cout<<"Updating steering input 0\n\n";
+      this->steering_input[0] = _msg->data;
     }
+    void UpdateDriverInput1(const std_msgs::Float64::ConstPtr& _msg)
+     {
+       std::cout<<"Updating steering input 1\n\n";
+       this->steering_input[1] = _msg->data;
+     }
 
     // custom callback queue thread
     void QueueThread()
@@ -318,7 +367,8 @@ std::cout<<"Reached Line 128\n";
     }
 
 private: ros::NodeHandle* rosnode_;
-    ros::Subscriber sub_;
+    ros::Subscriber sub0_;
+    ros::Subscriber sub1_;
     ros::CallbackQueue queue_;
     boost::thread callback_queue_thread_;
 
@@ -340,6 +390,13 @@ private: ros::NodeHandle* rosnode_;
     // Driver input file (if not using Irrlicht)
     std::string driver_file = "generic/driver/Sample_Maneuver.txt";
 
+
+    //chrono driver files
+    // std::string steering_controller_file = "generic/driver/SteeringController.json";
+    // std::string speed_controller_file = "generic/driver/SpeedController.json";
+    // std::string path_file = "paths/curve.txt";
+    // std::string path_file = "paths/ISO_double_lane_change.txt";
+
     //chrono vehicle components
     ChSharedPtr<vehicle::WheeledVehicle> veh;
     ChSharedPtr<vehicle::RigidTerrain> terrain;
@@ -356,7 +413,7 @@ private: ros::NodeHandle* rosnode_;
     double         driveshaft_speed;
     double         powertrain_torque;
     double         throttle_input = 0.2;
-    double         steering_input = 0.0;
+    std::vector<double> steering_input = {0.0, 0.0};
     double         braking_input = 0.1;
     int num_axles;
     int num_wheels;
@@ -367,7 +424,7 @@ private: ros::NodeHandle* rosnode_;
 
     //define the step size
     double step_size = 0.001;
-    double iters = 100;
+    double iters = 10;
     double time = 0.0;
 
     //vector of vehicle and associated models
@@ -381,7 +438,9 @@ private: ros::NodeHandle* rosnode_;
     std::vector<ChQuaternion<>> chronoVehiclesInitRot;
 
     //pointers to reference the models shared by chrono and gazebo
-    boost::shared_ptr<sensors::RaySensor> raySensor;
+    boost::shared_ptr<sensors::RaySensor> raySensor0;
+    boost::shared_ptr<sensors::RaySensor> raySensor1;
+    std::vector<boost::shared_ptr<sensors::RaySensor>> raySensors;
     std::vector<ChSharedPtr<ChBody>> chronoModels;
     std::vector<ChSharedPtr<ChBody>> chCinderBlocks;
     std::vector<physics::ModelPtr> gzCinderBlocks;

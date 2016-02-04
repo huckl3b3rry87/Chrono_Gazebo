@@ -3,7 +3,6 @@
   <world name="default">
     <scene>
       <sky>
-        <material>Gazebo/CloudySky</material>
         <clouds>
           <speed>5.0</speed>
           <direction>1 0 0 </direction>
@@ -21,7 +20,7 @@
       <link name="link">
       <pose>0 0 0 0 0 0</pose>
         <visual name="visual">
-          <cast_shadows>true</cast_shadows>
+        <cast_shadows>true</cast_shadows>
           <geometry>
             <plane>
               <normal>0 0 1</normal>
@@ -40,10 +39,11 @@
 
     <model name ="vehicle0">\
       <pose>0 0 0 0 0 0</pose>\
-      <link name ='chassis'>\
+      <link name ='chassis0'>\
+        <frameName>'chassis00'</frameName>
         <pose>0 0 0 0 0 0</pose>\
-        <cast_shadows>true</cast_shadows>
         <visual name ='visual'>\
+        <cast_shadows>true</cast_shadows>
           <geometry>
             <mesh>
               <uri>file://hmmwv_chassis.dae</uri>
@@ -81,7 +81,8 @@
               <stddev>0.01</stddev>
             </noise>
           </ray>
-          <plugin name="plugin_1" filename="libgazebo_ros_laser.so">
+          <plugin name="plugin_01" filename="libgazebo_ros_laser.so">
+            <robotNamespace></robotNamespace>
             <gaussianNoise>0.005</gaussianNoise>
             <alwaysOn>true</alwaysOn>
             <updateRate>30</updateRate>
@@ -93,9 +94,9 @@
           <visualize>true</visualize>
         </sensor>
 
-        <sensor name="camera" type="camera">
+        <sensor name="driverCam0" type="camera">
           <pose>2.1 0.0 0.5 0.0 0.0 0.0</pose>
-          <camera name="driverCam">
+          <camera name="driverCam0">
             <horizontal_fov>1.75</horizontal_fov>
             <image>
               <format>R8G8B8</format>
@@ -112,13 +113,16 @@
               <stddev>0.002</stddev>
             </noise>
           </camera>
-          <plugin name="plugin_2" filename="libgazebo_ros_camera.so">
+
+          <plugin name="plugin_02" filename="libgazebo_ros_camera.so">
+            <robotNamespace></robotNamespace>
             <alwaysOn>1</alwaysOn>
             <updateRate>30</updateRate>
+            <cameraName>driverCam0</cameraName>
             <imageTopicName>image_raw</imageTopicName>
             <pointCloudTopicName>points</pointCloudTopicName>
             <cameraInfoTopicName>camera_info</cameraInfoTopicName>
-            <frameName>world1</frameName>
+            <frameName>chassis00</frameName>
             <pointCloudCutoff>0.5</pointCloudCutoff>
             <distortion_k1>0.00000001</distortion_k1>
             <distortion_k2>0.00000001</distortion_k2>
@@ -129,64 +133,8 @@
           <always_on>1</always_on>
           <update_rate>30</update_rate>
           <visualize>true</visualize>
+
         </sensor>
-
-        <!--<sensor name="topcamera" type="camera">
-          <pose>-4 -4 2.5 0 .349 .785</pose>
-          <camera name="topCam">
-            <horizontal_fov>1.57</horizontal_fov>
-            <image>
-              <format>B8G8R8</format>
-              <width>800</width>
-              <height>600</height>
-            </image>
-            <clip>
-              <near>0.1</near>
-              <far>250</far>
-            </clip>
-            <noise>
-              <type>gaussian</type>
-              <mean>0.0</mean>
-              <stddev>0.000</stddev>
-            </noise>
-            <save enabled=true>
-              <path>Captures/TopCam/2015_10_01</path>
-            </save>
-          </camera>
-          <always_on>1</always_on>
-          <update_rate>60</update_rate>
-          <visualize>true</visualize>
-        </sensor>
-
-
-        <sensor name="sidecamera" type="camera">
-          <pose>4.0 -3.5 1.0 0 0.175 2.356</pose>
-          <camera name="sideCam">
-            <horizontal_fov>1.57</horizontal_fov>
-            <image>
-              <format>B8G8R8</format>
-              <width>800</width>
-              <height>600</height>
-            </image>
-            <clip>
-              <near>0.1</near>
-              <far>250</far>
-            </clip>
-            <noise>
-              <type>gaussian</type>
-              <mean>0.0</mean>
-              <stddev>0.000</stddev>
-            </noise>
-            <save enabled=true>
-              <path>Captures/SideCam/2015_10_01</path>
-            </save>
-
-          </camera>
-
-          <always_on>1</always_on>
-          <update_rate>60</update_rate>
-          <visualize>true</visualize>
-        </sensor>-->
       </link>\
     </model>\
 
@@ -256,10 +204,11 @@
 
     <model name ="vehicle1">\
       <pose>0 0 0 0 0 0</pose>\
-      <link name ='chassis'>\
+      <link name ='chassis1'>\
+        <frame>name = 'chassis11'</frame>
         <pose>0 0 0 0 0 0</pose>\
-        <cast_shadows>true</cast_shadows>
         <visual name ='visual'>\
+        <cast_shadows>true</cast_shadows>
           <geometry>
             <mesh>
               <uri>file://hmmwv_chassis.dae</uri>
@@ -274,6 +223,82 @@
             <box><size>4.55 2.31 2.0</size></box>
           </geometry>
         </collision>\
+        <sensor name="laser" type="ray">
+          <pose>2.2 0 .3 0 0 0</pose>
+          <ray>
+              <scan>
+              <horizontal>
+                <samples>100</samples>
+                <resolution>1</resolution>
+                <min_angle>-.875</min_angle>
+                <max_angle>.875</max_angle>
+              </horizontal>
+            </scan>
+            <range>
+              <min>0.08</min>
+              <max>20</max>
+              <resolution>0.01</resolution>
+            </range>
+            <noise>
+              <type>gaussian</type>
+              <mean>0.0</mean>
+              <stddev>0.01</stddev>
+            </noise>
+          </ray>
+          <plugin name="plugin_11" filename="libgazebo_ros_laser.so">
+            <robotNamespace></robotNamespace>
+            <gaussianNoise>0.005</gaussianNoise>
+            <alwaysOn>true</alwaysOn>
+            <updateRate>30</updateRate>
+            <topicName>base_scan</topicName>
+            <frameName>base_link</frameName>
+          </plugin>
+          <always_on>1</always_on>
+          <update_rate>30</update_rate>
+          <visualize>true</visualize>
+        </sensor>
+
+        <sensor name="driverCam1" type="camera">
+          <pose>2.1 0.0 0.5 0.0 0.0 0.0</pose>
+          <camera name="driverCam1">
+            <horizontal_fov>1.75</horizontal_fov>
+            <image>
+              <format>R8G8B8</format>
+              <width>1024</width>
+              <height>1024</height>
+            </image>
+            <clip>
+              <near>0.1</near>
+              <far>250</far>
+            </clip>
+            <noise>
+              <type>gaussian</type>
+              <mean>0.0</mean>
+              <stddev>0.002</stddev>
+            </noise>
+          </camera>
+
+          <plugin name="plugin_12" filename="libgazebo_ros_camera.so">
+            <robotNamespace></robotNamespace>
+            <alwaysOn>1</alwaysOn>
+            <updateRate>30</updateRate>
+            <cameraName>driverCam1</cameraName>
+            <imageTopicName>image_raw</imageTopicName>
+            <pointCloudTopicName>points</pointCloudTopicName>
+            <cameraInfoTopicName>camera_info</cameraInfoTopicName>
+            <frameName>chassis1</frameName>
+            <pointCloudCutoff>0.5</pointCloudCutoff>
+            <distortion_k1>0.00000001</distortion_k1>
+            <distortion_k2>0.00000001</distortion_k2>
+            <distortion_k3>0.00000001</distortion_k3>
+            <distortion_t1>0.00000001</distortion_t1>
+            <distortion_t2>0.00000001</distortion_t2>
+          </plugin>
+          <always_on>1</always_on>
+          <update_rate>30</update_rate>
+          <visualize>true</visualize>
+
+        </sensor>
       </link>\
     </model>\
 
