@@ -113,7 +113,7 @@
               <stddev>0.002</stddev>
             </noise>
           </camera>
-
+<!--
           <plugin name="plugin_02" filename="libgazebo_ros_camera.so">
             <robotNamespace></robotNamespace>
             <alwaysOn>1</alwaysOn>
@@ -133,7 +133,7 @@
           <always_on>1</always_on>
           <update_rate>30</update_rate>
           <visualize>true</visualize>
-
+-->
         </sensor>
       </link>\
     </model>\
@@ -277,7 +277,7 @@
               <stddev>0.002</stddev>
             </noise>
           </camera>
-
+<!--
           <plugin name="plugin_12" filename="libgazebo_ros_camera.so">
             <robotNamespace></robotNamespace>
             <alwaysOn>1</alwaysOn>
@@ -297,7 +297,7 @@
           <always_on>1</always_on>
           <update_rate>30</update_rate>
           <visualize>true</visualize>
-
+-->
         </sensor>
       </link>\
     </model>\

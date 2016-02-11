@@ -24,6 +24,7 @@
 #include "chrono_vehicle/driver/ChDataDriver.h"
 #include "chrono_vehicle/wheeled_vehicle/tire/RigidTire.h"
 #include "chrono_vehicle/terrain/RigidTerrain.h"
+#include "chrono_vehicle/driver/ChPathFollowerDriver.h"
 
 ///the chrono-engine includes
 #include "assets/ChTexture.h"
@@ -91,9 +92,6 @@ class chrono_gazebo : public WorldPlugin
       ros::VoidPtr(), &this->queue_);
     this->sub1_ = this->rosnode_->subscribe(so1);
 
-
-
-
     // Custom Callback Queue
     this->callback_queue_thread_ = boost::thread( boost::bind( &chrono_gazebo::QueueThread,this));
     //END LINE FOLLOW LOAD
@@ -143,21 +141,6 @@ class chrono_gazebo : public WorldPlugin
       gazeboWheels.push_back(wheels);
     }
 
-
-
-    // for(int i=0;i<num_vehicles; i++){
-    //   if(_world->GetModel("vehicle" + std::to_string (i)) != NULL){
-    //     std::cout<<"Adding vehicles\n";
-    //     gazeboVehicles.push_back(_world->GetModel("vehicle" + std::to_string (i)));
-    //     gazeboWheels[i].push_back(_world->GetModel("wheel"+std::to_string(i) + "_1"));
-    //     gazeboWheels[i].push_back(_world->GetModel("wheel"+std::to_string(i) + "_2"));
-    //     gazeboWheels[i].push_back(_world->GetModel("wheel"+std::to_string(i) + "_3"));
-    //     gazeboWheels[i].push_back(_world->GetModel("wheel"+std::to_string(i) + "_4"));
-    //
-    //   }
-    //  else{std::cout<<"COULD NOT FIND GAZEBO MODEL: vehicle"<<i<<std::endl;}
-    // }
-    //create vector of wheels for easy reference
     //setup chrono vehicle
     //set initial conditions
 // std::cout<<"Reached Line 120\n";
@@ -177,15 +160,15 @@ class chrono_gazebo : public WorldPlugin
       veh = ChSharedPtr<vehicle::WheeledVehicle>(new vehicle::WheeledVehicle(vehicle::GetDataFile(vehicle_file)));
       veh->Initialize(ChCoordsys<>(chronoVehiclesInitLoc[i], chronoVehiclesInitRot[i]));
 
-      //in development for use with chrono path following
-      // ChBezierCurve* path = ChBezierCurve::read(vehicle::GetDataFile(path_file));
-      //
-      //
-      //
-      // ChPathFollowerDriver driver_follower(my_hmmwv.GetVehicle(), vehicle::GetDataFile(steering_controller_file),
-      //         vehicle::GetDataFile(speed_controller_file), path, "my_path", target_speed);
-      //
-      //
+      //have chrono drive the vehicle around a circle
+      ChBezierCurve* path = ChBezierCurve::read(vehicle::GetDataFile(path_file));
+
+      driver_follower = ChSharedPtr<vehicle::ChPathFollowerDriver>(
+              new vehicle::ChPathFollowerDriver(*veh,
+              vehicle::GetDataFile(steering_controller_file),
+              vehicle::GetDataFile(speed_controller_file), path, std::string("my_path"), 0.0));
+
+      drivers.push_back(driver_follower);
 
       terrain = ChSharedPtr<vehicle::RigidTerrain>(new vehicle::RigidTerrain(veh->GetSystem(), vehicle::GetDataFile(rigidterrain_file)));
 
@@ -253,22 +236,28 @@ class chrono_gazebo : public WorldPlugin
          maxSpeed = .343*minRange - .857;
        }
 
-       if(chronoVehicles[i]->GetVehicleSpeedCOM() >= maxSpeed +1.0){
-         braking_input = 0.5;
-         throttle_input = 0.0;
-       }
-       else if(chronoVehicles[i]->GetVehicleSpeedCOM() <= maxSpeed /2.0){
-         braking_input = 0.0;
-         throttle_input = 0.2;
-       }
-       else if(chronoVehicles[i]->GetVehicleSpeedCOM() >= maxSpeed){
-         braking_input = 0.3;
-         throttle_input = 0.1;
-       }
-       else{
-         braking_input = 0.15;
-         throttle_input = 0.2;
-       }
+        drivers[i]->SetDesiredSpeed(maxSpeed);
+        braking_input = drivers[i]->GetBraking();
+        steering_input[i] = drivers[i]->GetSteering();
+        throttle_input = drivers[i]->GetThrottle();
+
+
+      //  if(chronoVehicles[i]->GetVehicleSpeedCOM() >= maxSpeed +1.0){
+      //    braking_input = 0.5;
+      //    throttle_input = 0.0;
+      //  }
+      //  else if(chronoVehicles[i]->GetVehicleSpeedCOM() <= maxSpeed /2.0){
+      //    braking_input = 0.0;
+      //    throttle_input = 0.2;
+      //  }
+      //  else if(chronoVehicles[i]->GetVehicleSpeedCOM() >= maxSpeed){
+      //    braking_input = 0.3;
+      //    throttle_input = 0.1;
+      //  }
+      //  else{
+      //    braking_input = 0.15;
+      //    throttle_input = 0.2;
+      //  }
        // std::cout<<"Min Range: " << minRange<<std::endl;
        // std::cout<<"Max Speed: " << maxSpeed<<std::endl;
        // std::cout<<"Throttle Input: " << throttle_input<<std::endl;
@@ -287,7 +276,7 @@ class chrono_gazebo : public WorldPlugin
 
         //Update modules (process inputs from other modules)
         time = chronoVehicles[i]->GetSystem()->GetChTime();
-        //driver->Update(time);
+        drivers[i]->Update(time);
         //pursuitDriver->Update(chronoVehicles[i]icle);
         chronoPowertrains[i]->Update(time, throttle_input, driveshaft_speed);
         chronoVehicles[i]->Update(time, steering_input[i], braking_input, powertrain_torque, chronoTireForces[i]);
@@ -296,7 +285,7 @@ class chrono_gazebo : public WorldPlugin
           chronoTires[i][j]->Update(time, chronoWheelStates[i][j], *terrain);
 
         // Advance simulation for one timestep for all modules
-        //driver->Advance(step_size);
+        drivers[i]->Advance(step_size);
         chronoPowertrains[i]->Advance(step_size);
         chronoVehicles[i]->Advance(step_size);
         terrain->Advance(step_size);
@@ -390,20 +379,21 @@ private: ros::NodeHandle* rosnode_;
     // Driver input file (if not using Irrlicht)
     std::string driver_file = "generic/driver/Sample_Maneuver.txt";
 
-
-    //chrono driver files
-    // std::string steering_controller_file = "generic/driver/SteeringController.json";
-    // std::string speed_controller_file = "generic/driver/SpeedController.json";
-    // std::string path_file = "paths/curve.txt";
+    //driver files
+    // std::string driver_file = "generic/driver/Sample_Maneuver.txt";
+    std::string steering_controller_file = "generic/driver/SteeringController.json";
+    std::string speed_controller_file = "generic/driver/SpeedController.json";
+    std::string path_file = "paths/curve.txt";
     // std::string path_file = "paths/ISO_double_lane_change.txt";
+
 
     //chrono vehicle components
     ChSharedPtr<vehicle::WheeledVehicle> veh;
     ChSharedPtr<vehicle::RigidTerrain> terrain;
     ChSharedPtr<vehicle::SimplePowertrain> powertrain;
     std::vector<ChSharedPtr<vehicle::RigidTire> > tires;
-    //ChSharedPtr<ChDataDriver> driver;
-    //std::unique_ptr<PurePursuitDriver> pursuitDriver; //*****************
+    ChSharedPtr<vehicle::ChPathFollowerDriver> driver_follower;
+    std::vector<ChSharedPtr<vehicle::ChPathFollowerDriver>> drivers;
 
     std::vector<double> ranges;
     vehicle::TireForces   tire_forces;
