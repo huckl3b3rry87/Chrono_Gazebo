@@ -146,7 +146,7 @@ class chrono_gazebo : public WorldPlugin
 // std::cout<<"Reached Line 120\n";
     for(int i=0; i<num_vehicles; i++){
       // std::cout<<"Value of i="<<i<<std::endl;
-      chronoVehiclesInitLoc.push_back(ChVector<> (-10*i, 0, 1.0));
+      chronoVehiclesInitLoc.push_back(ChVector<> (-10*i, -36, 1.0));
       chronoVehiclesInitRot.push_back(ChQuaternion<> (1, 0, 0, 0));
     }
     // ChVector<> initLoc(0, 0, 1.0);
@@ -327,12 +327,12 @@ class chrono_gazebo : public WorldPlugin
 
    void UpdateDriverInput0(const std_msgs::Float64::ConstPtr& _msg)
     {
-      std::cout<<"Updating steering input 0\n\n";
+      // std::cout<<"Updating steering input 0\n\n";
       this->steering_input[0] = _msg->data;
     }
     void UpdateDriverInput1(const std_msgs::Float64::ConstPtr& _msg)
      {
-       std::cout<<"Updating steering input 1\n\n";
+       // std::cout<<"Updating steering input 1\n\n";
        this->steering_input[1] = _msg->data;
      }
 
@@ -383,7 +383,7 @@ private: ros::NodeHandle* rosnode_;
     // std::string driver_file = "generic/driver/Sample_Maneuver.txt";
     std::string steering_controller_file = "generic/driver/SteeringController.json";
     std::string speed_controller_file = "generic/driver/SpeedController.json";
-    std::string path_file = "paths/curve.txt";
+    std::string path_file = "paths/testpath.txt";
     // std::string path_file = "paths/ISO_double_lane_change.txt";
 
 
