@@ -6,11 +6,16 @@ FIND_PACKAGE(Chrono COMPONENTS Vehicle CONFIG)
 
 #message(STATUS "CHRONOVEHICLE_INCLUDES ${CHRONO_INCLUDE_DIRS}")
 INCLUDE_DIRECTORIES(SYSTEM ${CHRONO_INCLUDE_DIRS} ${GAZEBO_INCLUDE_DIRS})
+SET(SRC_DIR "${PROJECT_SOURCE_DIR}/src")
+INCLUDE_DIRECTORIES(${SRC_DIR})
 
 link_directories(${GAZEBO_LIBRARY_DIRS})
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${GAZEBO_CXX_FLAGS}")
 
-add_library(chrono_gazebo SHARED chrono_gazebo.cc )
+add_library(chrono_gazebo SHARED 
+	${SRC_DIR}/GcVehicle.cc
+	${SRC_DIR}/GcVehicleBuilder.cc
+	chrono_gazebo.cc )
 
 TARGET_LINK_LIBRARIES(chrono_gazebo ${CHRONO_LIBRARIES} ${GAZEBO_LIBRARIES}) 
 

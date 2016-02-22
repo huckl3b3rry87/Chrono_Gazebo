@@ -205,7 +205,7 @@
     <model name ="vehicle1">\
       <pose>0 0 0 0 0 0</pose>\
       <link name ='chassis1'>\
-        <frame>name = 'chassis11'</frame>
+        <frameName>'chassis11'</frameName>
         <pose>0 0 0 0 0 0</pose>\
         <visual name ='visual'>\
         <cast_shadows>true</cast_shadows>

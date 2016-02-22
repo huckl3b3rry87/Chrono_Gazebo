@@ -18,6 +18,9 @@
 //
 // =============================================================================
 
+#ifndef SRC_GCVEHICLE_HH_
+#define SRC_GCVEHICLE_HH_
+
 //includes
 
 #include <chrono_vehicle/driver/ChPathFollowerDriver.h>
@@ -25,17 +28,14 @@
 #include <chrono_vehicle/terrain/RigidTerrain.h>
 #include <chrono_vehicle/wheeled_vehicle/tire/RigidTire.h>
 #include <chrono_vehicle/wheeled_vehicle/vehicle/WheeledVehicle.h>
-#include <core/ChCoordsys.h>
 #include <core/ChQuaternion.h>
-#include <core/ChSmartpointers.h>
-#include <core/ChVector.h>
+#include <gazebo/math/Pose.hh>
+#include <gazebo/physics/Model.hh>
 #include <gazebo/physics/PhysicsTypes.hh>
 #include <gazebo/sensors/RaySensor.hh>
-#include <ros/subscriber.h>
 #include <std_msgs/Float64.h>
 #include <string>
 #include <vector>
-
 
 //namespace(s)
 using namespace chrono;
@@ -49,7 +49,7 @@ public:
 			const ChSharedPtr<vehicle::SimplePowertrain> powertrain,
 			const std::vector<ChSharedPtr<vehicle::RigidTire> > &tires,
 			ChSharedPtr<vehicle::ChPathFollowerDriver> driver,
-			const double maxSpeed, const sensors::RaySensor &raySensor,
+			const double maxSpeed, const sensors::RaySensorPtr raySensor,
 			const physics::ModelPtr gazeboVehicle,
 			const std::vector<physics::ModelPtr> &gazeboWheels,
 			const double stepSize);
@@ -66,7 +66,7 @@ public:
 
 	int getId();
 private:
-	math::Pose &getPose(const ChVector<> vec, const ChQuaternion<> quat);
+	math::Pose getPose(const ChVector<> vec, const ChQuaternion<> quat);
 
 private:
 	ChSharedPtr<vehicle::RigidTerrain> terrain;
@@ -77,7 +77,7 @@ private:
 
 	int numWheels;
 
-	sensors::RaySensor raySensor;
+	sensors::RaySensorPtr raySensor;
 	physics::ModelPtr gazeboVehicle;
 	std::vector<physics::ModelPtr> gazeboWheels;
 
@@ -90,51 +90,4 @@ private:
 	double stepSize;
 };
 
-class GcVehicleBuilder {
-
-public:
-	GcVehicleBuilder(physics::WorldPtr world, ChSystem *chsys,
-			ChSharedPtr<vehicle::RigidTerrain> terrain, const double stepSize);
-
-	GcVehicle &buildGcVehicle();
-
-	ros::Subscriber &getLastRosSubscriber();
-
-	void setVehicleFile(const std::string &vehicleFile);
-
-	void setPowertrainFile(const std::string &powertrainFile);
-
-	void setTireFile(const std::string &tireFile);
-
-	void setSteerCtrlFile(const std::string &steerFile);
-
-	void setSpeedCtrlFile(const std::string &speedFile);
-
-	void setInitCoordsys(const ChCoordsys<> &coordsys);
-
-	void setMaxSpeed(const double maxSpeed);
-
-	void setPath(const ChBezierCurve *path);
-
-	void setNodeHandler(const ros::NodeHandle *handle);
-
-	void setCallbackQueue(const ros::CallbackQueue *queue);
-
-private:
-	physics::WorldPtr world;
-	ChSystem *chsys;
-	ChSharedPtr<vehicle::RigidTerrain> terrain;
-	std::string vehicleFile;
-	std::string powertrainFile;
-	std::string tireFile;
-	std::string steerFile;
-	std::string speedFile;
-	ros::NodeHandle *handle = NULL;
-	ros::CallbackQueue *queue = NULL;
-	int vehId = 0;
-	ChCoordsys<> coordsys;
-	double maxSpeed = 0;
-	ChBezierCurve *path = NULL;
-	double stepSize = 0.01;
-	ros::Subscriber lastSub;
-};
+#endif /* SRC_GCVEHICLE_HH_ */

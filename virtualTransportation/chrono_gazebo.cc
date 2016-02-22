@@ -16,7 +16,8 @@
 //these vehicles to reference
 //
 // =============================================================================
-#include <gcVehicle.hh>
+#include <GcVehicle.hh>
+#include <GcVehicleBuilder.hh>
 #include <vector>
 
 //chrono vehicle includes
@@ -65,7 +66,7 @@ public:
 				new vehicle::RigidTerrain(chsys,
 						vehicle::GetDataFile(rigidterrain_file)));
 
-		builder = GcVehicleBuilder(_world, chsys, terrain, step_size);
+		auto builder = GcVehicleBuilder(_world, chsys, terrain, step_size);
 		builder.setVehicleFile(vehicle_file);
 		builder.setPowertrainFile(simplepowertrain_file);
 		builder.setTireFile(rigidtire_file);
@@ -119,7 +120,7 @@ public:
 
 		for (int i = 0; i < num_vehicles; i++) {
 
-			gcVehicles[i].advance();
+			gcVehicles[i]->advance();
 		}
 
 		//std::cout<<"updating the cinderblocks\n";
@@ -144,8 +145,7 @@ public:
 	}
 
 private:
-	GcVehicleBuilder builder;
-	std::vector<GcVehicle> gcVehicles;
+	std::vector<boost::shared_ptr<GcVehicle> > gcVehicles;
 	ChSystem *chsys;
 
 	ros::NodeHandle* rosnode_;
