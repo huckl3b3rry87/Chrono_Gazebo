@@ -59,9 +59,13 @@ public:
 
 		this->rosnode_ = new ros::NodeHandle("chrono_gazebo");
 
-		chsys = new ChSystem;
+		auto chsys = new ChSystem();
+		chsys->Set_G_acc(ChVector<>(0, 0, -9.81));
+		chsys->SetLcpSolverType(ChSystem::LCP_ITERATIVE_SOR);
 		chsys->SetIterLCPmaxItersSpeed(iters);
+		chsys->SetIterLCPmaxItersStab(150);
 		chsys->SetMaxPenetrationRecoverySpeed(10.0);
+
 		terrain = ChSharedPtr<vehicle::RigidTerrain>(
 				new vehicle::RigidTerrain(chsys,
 						vehicle::GetDataFile(rigidterrain_file)));
@@ -90,7 +94,7 @@ public:
 //create model pointers
 		for (int i = 0; i < num_vehicles; i++) {
 			builder.setInitCoordsys(
-					ChCoordsys<>(ChVector<>(-10 * i, -36, 1.0),
+					ChCoordsys<>(ChVector<>(0, 5 * i, 1.0),
 							ChQuaternion<>(1, 0, 0, 0)));
 			gcVehicles.push_back(builder.buildGcVehicle());
 		}
@@ -115,14 +119,13 @@ public:
 public:
 	void OnUpdate() {
 
-		terrain->Update(chsys->GetChTime());
-		terrain->Advance(step_size);
+		//terrain->Update(chsys->GetChTime());
 
 		for (int i = 0; i < num_vehicles; i++) {
-
-			gcVehicles[i]->advance();
+			gcVehicles[i]->advance_();
 		}
 
+		//terrain->Advance(step_size);
 		//std::cout<<"updating the cinderblocks\n";
 	}
 
@@ -141,12 +144,14 @@ public:
 		this->rosnode_->shutdown();
 		this->callback_queue_thread_.join();
 		delete this->rosnode_;
-		delete this->chsys;
 	}
 
 private:
+
+	//vector of vehicle and associated models
+	int num_vehicles = 2;
+
 	std::vector<boost::shared_ptr<GcVehicle> > gcVehicles;
-	ChSystem *chsys;
 
 	ros::NodeHandle* rosnode_;
 	ros::CallbackQueue queue_;
@@ -188,9 +193,6 @@ private:
 	//define the step size
 	double step_size = 0.001;
 	double iters = 10;
-
-	//vector of vehicle and associated models
-	int num_vehicles = 2;
 
 	//pointers to reference the models shared by chrono and gazebo
 //	std::vector<ChSharedPtr<ChBody>> chCinderBlocks;

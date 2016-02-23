@@ -59,7 +59,7 @@ public:
 	//advance
 	void updateDriver(const std_msgs::Float64::ConstPtr& _msg);
 
-	void advance();
+	void advance_();
 
 	//other functions
 	std::string &getName();

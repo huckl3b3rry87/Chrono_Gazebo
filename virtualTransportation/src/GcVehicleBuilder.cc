@@ -63,7 +63,7 @@ boost::shared_ptr<GcVehicle> GcVehicleBuilder::buildGcVehicle() {
 			new vehicle::SimplePowertrain(powertrainFile));
 	powertrain->Initialize();
 
-	auto tires = std::vector<ChSharedPtr<vehicle::RigidTire>>(numWheels);
+	auto tires = std::vector<ChSharedPtr<vehicle::RigidTire> >(numWheels);
 
 	for (int i = 0; i < numWheels; i++) {
 		//create the tires from the tire file
@@ -79,11 +79,12 @@ boost::shared_ptr<GcVehicle> GcVehicleBuilder::buildGcVehicle() {
 	if ((gazeboVehicle = world->GetModel("vehicle" + id)) == NULL) {
 		std::cerr << "COULD NOT FIND GAZEBO MODEL: vehicle" + id + '\n';
 	}
-	for (int i = 1; i < numWheels; i++) {
+	for (int i = 0; i < numWheels; i++) {
 		physics::ModelPtr wheelPtr;
 		const std::string wheelName = "wheel" + id + "_" + std::to_string(i);
 		if ((wheelPtr = world->GetModel(wheelName)) != NULL) {
-			gazeboWheels.push_back(wheelPtr);
+			gazeboWheels[i] = wheelPtr;
+			std::cout << wheelPtr->GetName() << std::endl;
 		} else {
 			std::cerr << "COULD NOT FIND GAZEBO MODEL: " + wheelName + '\n';
 		}

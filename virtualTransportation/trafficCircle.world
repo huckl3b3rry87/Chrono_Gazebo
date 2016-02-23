@@ -138,6 +138,22 @@
       </link>\
     </model>\
 
+    <model name ='wheel0_0'>\
+      <pose>0 0 0 0 0 0</pose>\
+      <link name ='link'>\
+        <pose>0 0 0 0 0 0</pose>\
+        <visual name ='visual'>\
+          <geometry>
+            <mesh>
+              <uri>file://wheel_R.dae</uri>
+              <scale>1.0 1.0 1.0</scale>
+            </mesh>
+            <!--<box><size>0.1 0.1 0.1</size></box>-->
+          </geometry>
+        </visual>\
+      </link>\
+    </model>\
+
     <model name ='wheel0_1'>\
       <pose>0 0 0 0 0 0</pose>\
       <link name ='link'>\
@@ -171,22 +187,6 @@
     </model>\
 
     <model name ='wheel0_3'>\
-      <pose>0 0 0 0 0 0</pose>\
-      <link name ='link'>\
-        <pose>0 0 0 0 0 0</pose>\
-        <visual name ='visual'>\
-          <geometry>
-            <mesh>
-              <uri>file://wheel_R.dae</uri>
-              <scale>1.0 1.0 1.0</scale>
-            </mesh>
-            <!--<box><size>0.1 0.1 0.1</size></box>-->
-          </geometry>
-        </visual>\
-      </link>\
-    </model>\
-
-    <model name ='wheel0_4'>\
       <pose>0 0 0 0 0 0</pose>\
       <link name ='link'>\
         <pose>0 0 0 0 0 0</pose>\
@@ -302,6 +302,22 @@
       </link>\
     </model>\
 
+    <model name ='wheel1_0'>\
+      <pose>0 0 0 0 0 0</pose>\
+      <link name ='link'>\
+        <pose>0 0 0 0 0 0</pose>\
+        <visual name ='visual'>\
+          <geometry>
+            <mesh>
+              <uri>file://wheel_R.dae</uri>
+              <scale>1.0 1.0 1.0</scale>
+            </mesh>
+            <!--<box><size>0.1 0.1 0.1</size></box>-->
+          </geometry>
+        </visual>\
+      </link>\
+    </model>\
+
     <model name ='wheel1_1'>\
       <pose>0 0 0 0 0 0</pose>\
       <link name ='link'>\
@@ -335,22 +351,6 @@
     </model>\
 
     <model name ='wheel1_3'>\
-      <pose>0 0 0 0 0 0</pose>\
-      <link name ='link'>\
-        <pose>0 0 0 0 0 0</pose>\
-        <visual name ='visual'>\
-          <geometry>
-            <mesh>
-              <uri>file://wheel_R.dae</uri>
-              <scale>1.0 1.0 1.0</scale>
-            </mesh>
-            <!--<box><size>0.1 0.1 0.1</size></box>-->
-          </geometry>
-        </visual>\
-      </link>\
-    </model>\
-
-    <model name ='wheel1_4'>\
       <pose>0 0 0 0 0 0</pose>\
       <link name ='link'>\
         <pose>0 0 0 0 0 0</pose>\
