@@ -9,7 +9,7 @@
 // http://projectchrono.org/license-chrono.txt.
 //
 // =============================================================================
-// Authors: Asher Elmquist
+// Authors: Asher Elmquist, Leon Yang
 // =============================================================================
 //
 //gcVehicle defines a vehicle based on chrono_vehicle and gazebo relying on the
@@ -21,15 +21,11 @@
 
 #include "GcVehicle.hh"
 
-#include <gazebo/math/Vector3.hh>
 #include <cmath>
 #include <cstdlib>
 
-#include <iostream>
-
-//includes
-
-//namespace(s)
+using namespace chrono;
+using namespace gazebo;
 
 //constructor
 GcVehicle::GcVehicle(const int id,
@@ -57,14 +53,14 @@ void GcVehicle::updateDriver(const std_msgs::Float64::ConstPtr& _msg) {
 	steeringInput = _msg->data;
 }
 
-//private listener functions
+//private functions
 math::Pose GcVehicle::getPose(const ChVector<> vec, const ChQuaternion<> quat) {
 	return math::Pose(math::Vector3(vec.x, vec.y, vec.z),
 			math::Quaternion(quat.e0, quat.e1, quat.e2, quat.e3));
 }
 
 //advance
-void GcVehicle::advance_() {
+void GcVehicle::advance() {
 	std::vector<double> ranges;
 	raySensor->GetRanges(ranges);
 	double center = steeringInput * 50 + 50;
@@ -100,13 +96,11 @@ void GcVehicle::advance_() {
 	powertrain->Update(time, throttleInput, driveshaftSpeed);
 	vehicle->Update(time, steeringInput, brakingInput, powertrainTorque,
 			tireForces);
-	terrain->Update(time);
 	for (int i = 0; i < numWheels; i++)
 		tires[i]->Update(time, wheelStates[i], *terrain);
 
 	// Advance simulation for one timestep for all modules
 	driver->Advance(stepSize);
-	terrain->Advance(stepSize);
 	powertrain->Advance(stepSize);
 	vehicle->Advance(stepSize);
 	for (int i = 0; i < numWheels; i++) {
@@ -117,10 +111,16 @@ void GcVehicle::advance_() {
 	gazeboVehicle->SetWorldPose(
 			getPose(vehicle->GetChassisPos(), vehicle->GetChassisRot()),
 			"link");
-
+	auto rot = vehicle->GetChassisRot();
+	std::cout << id << ": " << rot.e0 << " " << rot.e1 << " " << rot.e2 << " " << rot.e3 << std::endl;
 	for (int i = 0; i < numWheels; i++) {
 		gazeboWheels[i]->SetWorldPose(
 				getPose(vehicle->GetWheelPos(i), vehicle->GetWheelRot(i)),
 				"link");
 	}
 }
+
+int GcVehicle::getId() {
+	return this->id;
+}
+

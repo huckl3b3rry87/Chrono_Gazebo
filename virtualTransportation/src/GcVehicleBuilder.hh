@@ -9,7 +9,7 @@
 // http://projectchrono.org/license-chrono.txt.
 //
 // =============================================================================
-// Authors: Asher Elmquist
+// Authors: Asher Elmquist, Leon Yang
 // =============================================================================
 //
 //gcVehicle defines a vehicle based on chrono_vehicle and gazebo relying on the
@@ -17,7 +17,6 @@
 //and visuals within gazebo
 //
 // =============================================================================
-
 
 #ifndef SRC_GCVEHICLEBUILDER_HH_
 #define SRC_GCVEHICLEBUILDER_HH_
@@ -27,29 +26,28 @@
 #include <core/ChCoordsys.h>
 #include <core/ChSmartpointers.h>
 #include <gazebo/physics/PhysicsTypes.hh>
+#include <GcVehicle.hh>
 #include <ros/subscriber.h>
 #include <string>
-
-#include "GcVehicle.hh"
 
 namespace chrono {
 class ChBezierCurve;
 } /* namespace chrono */
 
-class GcVehicle;
-
-using namespace chrono;
-using namespace gazebo;
-
 class GcVehicleBuilder {
 
 public:
-	GcVehicleBuilder(physics::WorldPtr world, ChSystem *chsys,
-			ChSharedPtr<vehicle::RigidTerrain> terrain, const double stepSize);
+	// constructor
+	GcVehicleBuilder(gazebo::physics::WorldPtr world, chrono::ChSystem *chsys,
+			chrono::ChSharedPtr<chrono::vehicle::RigidTerrain> terrain,
+			const double stepSize);
 
+	// build a vehicle with all the components
 	boost::shared_ptr<GcVehicle> buildGcVehicle();
 
 	ros::Subscriber &getLastRosSubscriber();
+
+	// parameter setters
 
 	void setVehicleFile(const std::string &vehicleFile);
 
@@ -61,32 +59,37 @@ public:
 
 	void setSpeedCtrlFile(const std::string &speedFile);
 
-	void setInitCoordsys(const ChCoordsys<> &coordsys);
+	void setInitCoordsys(const chrono::ChCoordsys<> &coordsys);
 
 	void setMaxSpeed(const double maxSpeed);
 
-	void setPath(ChBezierCurve *path);
+	void setPath(chrono::ChBezierCurve *path);
 
 	void setNodeHandler(ros::NodeHandle *handle);
 
 	void setCallbackQueue(ros::CallbackQueue *queue);
 
 private:
-	physics::WorldPtr world;
-	ChSystem *chsys;
-	ChSharedPtr<vehicle::RigidTerrain> terrain;
+	gazebo::physics::WorldPtr world;
+
+	chrono::ChSystem *chsys;
+	chrono::ChSharedPtr<chrono::vehicle::RigidTerrain> terrain;
+	double stepSize = 0.01;
+
 	std::string vehicleFile;
 	std::string powertrainFile;
 	std::string tireFile;
 	std::string steerFile;
 	std::string speedFile;
+
 	ros::NodeHandle *handle = NULL;
 	ros::CallbackQueue *queue = NULL;
+
+	// vehicle specific parameters
 	int vehId = 0;
-	ChCoordsys<> coordsys;
+	chrono::ChCoordsys<> coordsys;
 	double maxSpeed = 0;
-	ChBezierCurve *path = NULL;
-	double stepSize = 0.01;
+	chrono::ChBezierCurve *path = NULL;
 	ros::Subscriber lastSub;
 };
 

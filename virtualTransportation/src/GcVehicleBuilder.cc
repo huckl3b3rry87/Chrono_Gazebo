@@ -9,7 +9,7 @@
 // http://projectchrono.org/license-chrono.txt.
 //
 // =============================================================================
-// Authors: Asher Elmquist
+// Authors: Asher Elmquist, Leon Yang
 // =============================================================================
 //
 //gcVehicle defines a vehicle based on chrono_vehicle and gazebo relying on the
@@ -18,28 +18,28 @@
 //
 // =============================================================================
 
-#include "GcVehicleBuilder.hh"
-
 #include <boost/bind/bind.hpp>
-#include <boost/bind/placeholders.hpp>
 #include <chrono_vehicle/ChVehicleModelData.h>
 #include <chrono_vehicle/driver/ChPathFollowerDriver.h>
 #include <chrono_vehicle/powertrain/SimplePowertrain.h>
 #include <chrono_vehicle/wheeled_vehicle/tire/RigidTire.h>
 #include <chrono_vehicle/wheeled_vehicle/vehicle/WheeledVehicle.h>
-#include <core/ChSmartpointers.h>
-#include <gazebo/physics/PhysicsTypes.hh>
+#include <gazebo/common/SingletonT.hh>
+#include <gazebo/sensors/RaySensor.hh>
 #include <gazebo/sensors/SensorManager.hh>
 #include <gazebo/sensors/SensorTypes.hh>
 #include <gazebo/physics/World.hh>
+#include <GcVehicleBuilder.hh>
 #include <ros/callback_queue.h>
+#include <ros/forwards.h>
 #include <ros/node_handle.h>
 #include <ros/subscribe_options.h>
 #include <std_msgs/Float64.h>
 #include <iostream>
 #include <vector>
 
-#include "GcVehicle.hh"
+using namespace chrono;
+using namespace gazebo;
 
 GcVehicleBuilder::GcVehicleBuilder(physics::WorldPtr world, ChSystem *chsys,
 		ChSharedPtr<vehicle::RigidTerrain> terrain, const double stepSize) :
@@ -50,21 +50,21 @@ boost::shared_ptr<GcVehicle> GcVehicleBuilder::buildGcVehicle() {
 
 	const std::string id = std::to_string(vehId);
 
+	// -- Chrono part --
+
+	// create and initialize a Chrono vehicle model
 	auto veh = ChSharedPtr<vehicle::WheeledVehicle>(
 			new vehicle::WheeledVehicle(chsys, vehicleFile));
 	veh->Initialize(coordsys);
-	const int numWheels = 2 * veh->GetNumberAxles();
 
-	auto driver = ChSharedPtr<vehicle::ChPathFollowerDriver>(
-			new vehicle::ChPathFollowerDriver(*veh, steerFile, speedFile, path,
-					std::string("my_path"), 0.0));
-
+	// create and initialize a powertrain
 	auto powertrain = ChSharedPtr<vehicle::SimplePowertrain>(
 			new vehicle::SimplePowertrain(powertrainFile));
 	powertrain->Initialize();
 
+	// create and initialize the tires
+	const int numWheels = 2 * veh->GetNumberAxles();
 	auto tires = std::vector<ChSharedPtr<vehicle::RigidTire> >(numWheels);
-
 	for (int i = 0; i < numWheels; i++) {
 		//create the tires from the tire file
 		tires[i] = ChSharedPtr<vehicle::RigidTire>(
@@ -72,23 +72,34 @@ boost::shared_ptr<GcVehicle> GcVehicleBuilder::buildGcVehicle() {
 		tires[i]->Initialize(veh->GetWheelBody(i));
 	}
 
+	// create path follower
+	auto driver = ChSharedPtr<vehicle::ChPathFollowerDriver>(
+			new vehicle::ChPathFollowerDriver(*veh, steerFile, speedFile, path,
+					std::string("my_path"), 0.0));
+
+	// -- Gazebo part --
+
 	physics::ModelPtr gazeboVehicle;
 	std::vector<physics::ModelPtr> gazeboWheels(numWheels);
 	sensors::RaySensorPtr raySensor;
 
+	// retrieve vehicle model from Gazebo
 	if ((gazeboVehicle = world->GetModel("vehicle" + id)) == NULL) {
 		std::cerr << "COULD NOT FIND GAZEBO MODEL: vehicle" + id + '\n';
 	}
+
+	// retrieve wheel models from Gazebo
 	for (int i = 0; i < numWheels; i++) {
 		physics::ModelPtr wheelPtr;
 		const std::string wheelName = "wheel" + id + "_" + std::to_string(i);
 		if ((wheelPtr = world->GetModel(wheelName)) != NULL) {
 			gazeboWheels[i] = wheelPtr;
-			std::cout << wheelPtr->GetName() << std::endl;
 		} else {
 			std::cerr << "COULD NOT FIND GAZEBO MODEL: " + wheelName + '\n';
 		}
 	}
+
+	// retrieve sensor model from Gazebo
 	const std::string sensorName = world->GetName() + "::vehicle" + id
 			+ "::chassis" + id + "::laser";
 	if ((raySensor = boost::dynamic_pointer_cast<sensors::RaySensor>(
@@ -96,17 +107,20 @@ boost::shared_ptr<GcVehicle> GcVehicleBuilder::buildGcVehicle() {
 		std::cerr << "COULD NOT FIND LASER SENSOR " + id + '\n';
 	}
 
+	// create a GcVehicle
 	auto gcVeh = boost::shared_ptr<GcVehicle>(
 			new GcVehicle(vehId, terrain, veh, powertrain, tires, driver,
 					maxSpeed, raySensor, gazeboVehicle, gazeboWheels,
 					stepSize));
 
+	// subscribe the GcVehicle to ros
 	auto opt = ros::SubscribeOptions::create<std_msgs::Float64>(
 			"/track_point" + std::to_string(vehId), 1,
 			boost::bind(&GcVehicle::updateDriver, gcVeh, _1), ros::VoidPtr(),
 			queue);
 	lastSub = handle->subscribe(opt);
 
+	// increase the vehicle id
 	vehId++;
 
 	return gcVeh;

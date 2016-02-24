@@ -9,16 +9,21 @@
 // http://projectchrono.org/license-chrono.txt.
 //
 // =============================================================================
-// Authors: Asher Elmquist
+// Authors: Asher Elmquist, Leon Yang
 // =============================================================================
 //
 //This sets up the simulation by creating gcVehicles and loading a world for
 //these vehicles to reference
 //
 // =============================================================================
+
+// local includes
 #include <GcVehicle.hh>
 #include <GcVehicleBuilder.hh>
+
+// standard library
 #include <vector>
+#include <cmath>
 
 //chrono vehicle includes
 #include "chrono_vehicle/ChVehicleModelData.h"
@@ -37,14 +42,12 @@
 #include <ros/ros.h>
 #include "boost/thread/mutex.hpp"
 
-
 using namespace chrono;
 using namespace gazebo;
 
 class chrono_gazebo: public WorldPlugin {
 public:
 	void Load(physics::WorldPtr _parent, sdf::ElementPtr /*_sdf*/) {
-		//create a world pointer
 		this->_world = _parent;
 		//disable the physics engine
 		_world->EnablePhysicsEngine(false);
@@ -52,24 +55,28 @@ public:
 
 		//BEGIN LINE FOLLOW
 		if (!ros::isInitialized()) {
-			ROS_FATAL_STREAM(
-					"A ROS node for Gazebo has not been initialized, unable to load plugin. " << "Load the Gazebo system plugin 'libgazebo_ros_api_plugin.so' in the gazebo_ros package)");
+			std::string msg =
+					"A ROS node for Gazebo has not been initialized, unable to load plugin. "
+							"Load the Gazebo system plugin 'libgazebo_ros_api_plugin.so' in the gazebo_ros package";
+			ROS_FATAL_STREAM(msg);
 			return;
 		}
-
 		this->rosnode_ = new ros::NodeHandle("chrono_gazebo");
 
-		auto chsys = new ChSystem();
+		// initialize Chrono system
+		chsys = new ChSystem();
 		chsys->Set_G_acc(ChVector<>(0, 0, -9.81));
 		chsys->SetLcpSolverType(ChSystem::LCP_ITERATIVE_SOR);
 		chsys->SetIterLCPmaxItersSpeed(iters);
 		chsys->SetIterLCPmaxItersStab(150);
 		chsys->SetMaxPenetrationRecoverySpeed(10.0);
 
+		// load and initialize terrain
 		terrain = ChSharedPtr<vehicle::RigidTerrain>(
 				new vehicle::RigidTerrain(chsys,
 						vehicle::GetDataFile(rigidterrain_file)));
 
+		// create and initialize GcVehicleBuilder
 		auto builder = GcVehicleBuilder(_world, chsys, terrain, step_size);
 		builder.setVehicleFile(vehicle_file);
 		builder.setPowertrainFile(simplepowertrain_file);
@@ -79,37 +86,28 @@ public:
 		builder.setNodeHandler(rosnode_);
 		builder.setCallbackQueue(&queue_);
 		//have chrono drive the vehicle around a circle
-		ChBezierCurve* path = ChBezierCurve::read(
-				vehicle::GetDataFile(path_file));
+		ChBezierCurve* path = ChBezierCurve::read(vehicle::GetDataFile(path_file));
 		builder.setPath(path);
 		builder.setMaxSpeed(maxSpeedInput);
 
-// Custom Callback Queue
+		// Custom Callback Queue
 		this->callback_queue_thread_ = boost::thread(
 				boost::bind(&chrono_gazebo::QueueThread, this));
-		//END LINE FOLLOW LOAD
-		//CONNECT TO LASER
 
-//END CONNECT TO LASER
-//create model pointers
+		// store the created vehicles
+		gcVehicles = std::vector<boost::shared_ptr<GcVehicle> >(num_vehicles);
+		const double pi = 3.1415926535;
+		const double step = pi * 2 / 21;
+		const double radius = 50;
 		for (int i = 0; i < num_vehicles; i++) {
-			builder.setInitCoordsys(
-					ChCoordsys<>(ChVector<>(0, 5 * i, 1.0),
-							ChQuaternion<>(1, 0, 0, 0)));
-			gcVehicles.push_back(builder.buildGcVehicle());
+			const double ang = (i + 1) * step;
+			auto pos = ChVector<>(radius * std::cos(ang), radius * std::sin(ang), 1);
+			auto rot = ChQuaternion<>(std::cos((ang + pi / 2) / 2), 0, 0,
+					std::sin((ang + pi / 2) / 2));
+			builder.setInitCoordsys(ChCoordsys<>(pos, rot));
+			gcVehicles[i] = builder.buildGcVehicle();
 		}
 
-		//setup chrono vehicle
-		//set initial conditions
-// std::cout<<"Reached Line 120\n";
-
-		// ChVector<> initLoc(0, 0, 1.0);
-		// ChQuaternion<> initRot(1, 0, 0, 0);
-// std::cout<<"Reached Line 128\n";
-		//create the chrono vehicle
-
-
-		//Add the terrain mesh to Chrono
 		SetChronoDataPath("../data/");
 
 		this->updateConnection = event::Events::ConnectWorldUpdateBegin(
@@ -118,15 +116,13 @@ public:
 	}
 public:
 	void OnUpdate() {
-
-		//terrain->Update(chsys->GetChTime());
-
+		// update terrain
+		terrain->Update(chsys->GetChTime());
+		// advance each vehicle
 		for (int i = 0; i < num_vehicles; i++) {
-			gcVehicles[i]->advance_();
+			gcVehicles[i]->advance();
 		}
-
-		//terrain->Advance(step_size);
-		//std::cout<<"updating the cinderblocks\n";
+		terrain->Advance(step_size);
 	}
 
 	// custom callback queue thread
@@ -137,7 +133,9 @@ public:
 			this->queue_.callAvailable(ros::WallDuration(timeout));
 		}
 	}
+
 	~chrono_gazebo() {
+		delete this->chsys;
 		// Custom Callback Queue
 		this->queue_.clear();
 		this->queue_.disable();
@@ -147,15 +145,29 @@ public:
 	}
 
 private:
-
-	//vector of vehicle and associated models
 	int num_vehicles = 2;
-
+	// list of vehicles
 	std::vector<boost::shared_ptr<GcVehicle> > gcVehicles;
+
+	// Chrono system
+	ChSystem *chsys;
+	// terrain object
+	ChSharedPtr<vehicle::RigidTerrain> terrain;
+
+	//chrono vehicle parameters, values should not matter unless no driver
+	double maxSpeedInput = 8.333;
+
+	//define the step size
+	double step_size = 0.001;
+	double iters = 10;
 
 	ros::NodeHandle* rosnode_;
 	ros::CallbackQueue queue_;
 	boost::thread callback_queue_thread_;
+
+	physics::WorldPtr _world;
+
+	event::ConnectionPtr updateConnection;
 
 	//Chrono vehicle setups
 	////******THESE ARE BEING PULLED FROM THE DATA DIRECTORY AT
@@ -170,8 +182,7 @@ private:
 	//std::string rigidterrain_file = "terrain/RigidMesh.json";
 	std::string rigidterrain_file = "terrain/RigidPlane.json";
 
-	std::string simplepowertrain_file =
-			"generic/powertrain/SimplePowertrain.json";
+	std::string simplepowertrain_file = "generic/powertrain/SimplePowertrain.json";
 
 	// Driver input file (if not using Irrlicht)
 	std::string driver_file = "generic/driver/Sample_Maneuver.txt";
@@ -184,27 +195,10 @@ private:
 	std::string path_file = "paths/testpath.txt";
 	// std::string path_file = "paths/ISO_double_lane_change.txt";
 
-	//chrono vehicle components
-	ChSharedPtr<vehicle::RigidTerrain> terrain;
-
-	//chrono vehicle parameters, values should not matter unless no driver
-	double maxSpeedInput = 8.333;
-
-	//define the step size
-	double step_size = 0.001;
-	double iters = 10;
-
-	//pointers to reference the models shared by chrono and gazebo
-//	std::vector<ChSharedPtr<ChBody>> chCinderBlocks;
-//	std::vector<physics::ModelPtr> gzCinderBlocks;
-//	std::vector<ChSharedPtr<ChBody>> chLogs;
-//	std::vector<physics::ModelPtr> gzLogs;
-
-	//vector for gazebo's vehicles
-
-	physics::WorldPtr _world;
-
-	event::ConnectionPtr updateConnection;
+	//	std::vector<ChSharedPtr<ChBody>> chCinderBlocks;
+	//	std::vector<physics::ModelPtr> gzCinderBlocks;
+	//	std::vector<ChSharedPtr<ChBody>> chLogs;
+	//	std::vector<physics::ModelPtr> gzLogs;
 };
 
 // Register this plugin with the simulator

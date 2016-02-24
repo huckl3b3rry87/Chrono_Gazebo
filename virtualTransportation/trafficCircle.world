@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <sdf version="1.5">
-  <world name="default">
+  <world name="GcWorld">
     <scene>
       <sky>
         <clouds>
@@ -366,23 +366,59 @@
       </link>\
     </model>\
 
-
-
-
-
-    <road name="Secondary1">
+    <road name="circular_road">
       <width>7.5</width>
-      <point>0 0 0.05</point>
-      <point>20.71 0 0.05</point>
-      <point>50 29.29 0.05</point>
-      <point>50 70.71 0.05</point>
-      <point>20.71 100 0.05</point>
-      <point>-20.71 100 0.05</point>
-      <point>-50 70.71 0.05</point>
-      <point>-50 29.29 0.05</point>
-      <point>-20.71 0 0.05</point>
-      <point>0 0 0.05</point>
-
+			<point>50.00 0.00 0.05</point>
+			<point>49.61 6.27 0.05</point>
+			<point>48.43 12.43 0.05</point>
+			<point>46.49 18.41 0.05</point>
+			<point>43.82 24.09 0.05</point>
+			<point>40.45 29.39 0.05</point>
+			<point>36.45 34.23 0.05</point>
+			<point>31.87 38.53 0.05</point>
+			<point>26.79 42.22 0.05</point>
+			<point>21.29 45.24 0.05</point>
+			<point>15.45 47.55 0.05</point>
+			<point>9.37 49.11 0.05</point>
+			<point>3.14 49.90 0.05</point>
+			<point>-3.14 49.90 0.05</point>
+			<point>-9.37 49.11 0.05</point>
+			<point>-15.45 47.55 0.05</point>
+			<point>-21.29 45.24 0.05</point>
+			<point>-26.79 42.22 0.05</point>
+			<point>-31.87 38.53 0.05</point>
+			<point>-36.45 34.23 0.05</point>
+			<point>-40.45 29.39 0.05</point>
+			<point>-43.82 24.09 0.05</point>
+			<point>-46.49 18.41 0.05</point>
+			<point>-48.43 12.43 0.05</point>
+			<point>-49.61 6.27 0.05</point>
+			<point>-50.00 -0.00 0.05</point>
+			<point>-49.61 -6.27 0.05</point>
+			<point>-48.43 -12.43 0.05</point>
+			<point>-46.49 -18.41 0.05</point>
+			<point>-43.82 -24.09 0.05</point>
+			<point>-40.45 -29.39 0.05</point>
+			<point>-36.45 -34.23 0.05</point>
+			<point>-31.87 -38.53 0.05</point>
+			<point>-26.79 -42.22 0.05</point>
+			<point>-21.29 -45.24 0.05</point>
+			<point>-15.45 -47.55 0.05</point>
+			<point>-9.37 -49.11 0.05</point>
+			<point>-3.14 -49.90 0.05</point>
+			<point>3.14 -49.90 0.05</point>
+			<point>9.37 -49.11 0.05</point>
+			<point>15.45 -47.55 0.05</point>
+			<point>21.29 -45.24 0.05</point>
+			<point>26.79 -42.22 0.05</point>
+			<point>31.87 -38.53 0.05</point>
+			<point>36.45 -34.23 0.05</point>
+			<point>40.45 -29.39 0.05</point>
+			<point>43.82 -24.09 0.05</point>
+			<point>46.49 -18.41 0.05</point>
+			<point>48.43 -12.43 0.05</point>
+			<point>49.61 -6.27 0.05</point>
+			<point>50 0 0.05</point>
       <material>
         <script>
           <uri>file://../data/gazono.material</uri>

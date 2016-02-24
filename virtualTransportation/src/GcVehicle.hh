@@ -9,7 +9,7 @@
 // http://projectchrono.org/license-chrono.txt.
 //
 // =============================================================================
-// Authors: Asher Elmquist
+// Authors: Asher Elmquist, Leon Yang
 // =============================================================================
 //
 //gcVehicle defines a vehicle based on chrono_vehicle and gazebo relying on the
@@ -37,56 +37,57 @@
 #include <string>
 #include <vector>
 
-//namespace(s)
-using namespace chrono;
-using namespace gazebo;
-
 class GcVehicle {
+
+	typedef chrono::ChSharedPtr<chrono::vehicle::RigidTerrain> ChTerrainPtr;
+	typedef chrono::ChSharedPtr<chrono::vehicle::WheeledVehicle> ChWheeledVehiclePtr;
+	typedef chrono::ChSharedPtr<chrono::vehicle::SimplePowertrain> ChSimplePowertrainPtr;
+	typedef chrono::ChSharedPtr<chrono::vehicle::RigidTire> ChRigidTirePtr;
+	typedef chrono::ChSharedPtr<chrono::vehicle::ChPathFollowerDriver> ChPathFollowerDriverPtr;
+
 public:
-	//constructor
-	GcVehicle(const int id, const ChSharedPtr<vehicle::RigidTerrain> terrain,
-			const ChSharedPtr<vehicle::WheeledVehicle> vehicle,
-			const ChSharedPtr<vehicle::SimplePowertrain> powertrain,
-			const std::vector<ChSharedPtr<vehicle::RigidTire> > &tires,
-			ChSharedPtr<vehicle::ChPathFollowerDriver> driver,
-			const double maxSpeed, const sensors::RaySensorPtr raySensor,
-			const physics::ModelPtr gazeboVehicle,
-			const std::vector<physics::ModelPtr> &gazeboWheels,
+	// constructor
+	GcVehicle(const int id, const ChTerrainPtr terrain,
+			const ChWheeledVehiclePtr vehicle, const ChSimplePowertrainPtr powertrain,
+			const std::vector<ChRigidTirePtr> &tires,
+			const ChPathFollowerDriverPtr driver, const double maxSpeed,
+			const gazebo::sensors::RaySensorPtr raySensor,
+			const gazebo::physics::ModelPtr gazeboVehicle,
+			const std::vector<gazebo::physics::ModelPtr> &gazeboWheels,
 			const double stepSize);
 
-	ChSharedPtr<vehicle::WheeledVehicle> getVehicle();
-
-	//advance
+	// advance
 	void updateDriver(const std_msgs::Float64::ConstPtr& _msg);
+	void advance();
 
-	void advance_();
-
-	//other functions
-	std::string &getName();
-
+	// other functions
+	ChWheeledVehiclePtr getVehicle();
 	int getId();
-private:
-	math::Pose getPose(const ChVector<> vec, const ChQuaternion<> quat);
 
 private:
-	ChSharedPtr<vehicle::RigidTerrain> terrain;
-	ChSharedPtr<vehicle::WheeledVehicle> vehicle;
-	ChSharedPtr<vehicle::SimplePowertrain> powertrain;
-	std::vector<ChSharedPtr<vehicle::RigidTire> > tires;
-	ChSharedPtr<vehicle::ChPathFollowerDriver> driver;
+	// helper functions
+	gazebo::math::Pose getPose(const chrono::ChVector<> vec,
+			const chrono::ChQuaternion<> quat);
 
+private:
+	int id;
 	int numWheels;
 
-	sensors::RaySensorPtr raySensor;
-	physics::ModelPtr gazeboVehicle;
-	std::vector<physics::ModelPtr> gazeboWheels;
+	// chrono components
+	ChTerrainPtr terrain;
+	ChWheeledVehiclePtr vehicle;
+	ChSimplePowertrainPtr powertrain;
+	std::vector<ChRigidTirePtr> tires;
+	ChPathFollowerDriverPtr driver;
 
+	// gazebo components
+	gazebo::sensors::RaySensorPtr raySensor;
+	gazebo::physics::ModelPtr gazeboVehicle;
+	std::vector<gazebo::physics::ModelPtr> gazeboWheels;
+
+	// other members
 	double steeringInput;
-
 	double maxSpeed;
-
-	int id;
-
 	double stepSize;
 };
 
