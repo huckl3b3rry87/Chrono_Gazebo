@@ -72,26 +72,27 @@ boost::shared_ptr<GcVehicle> GcVehicleBuilder::buildGcVehicle() {
 		tires[i]->Initialize(veh->GetWheelBody(i));
 	}
 
-	// create path follower
+// create path follower
 	auto driver = ChSharedPtr<vehicle::ChPathFollowerDriver>(
 			new vehicle::ChPathFollowerDriver(*veh, steerFile, speedFile, path,
 					std::string("my_path"), 0.0));
 
-	// -- Gazebo part --
+// -- Gazebo part --
 
 	physics::ModelPtr gazeboVehicle;
 	std::vector<physics::ModelPtr> gazeboWheels(numWheels);
 	sensors::RaySensorPtr raySensor;
 
-	// retrieve vehicle model from Gazebo
-	if ((gazeboVehicle = world->GetModel("vehicle" + id)) == NULL) {
-		std::cerr << "COULD NOT FIND GAZEBO MODEL: vehicle" + id + '\n';
+// retrieve vehicle model from Gazebo
+	const std::string vehicleName = "vehicle" + id;
+	if ((gazeboVehicle = world->GetModel(vehicleName)) == NULL) {
+		std::cerr << "COULD NOT FIND GAZEBO MODEL: " + vehicleName + '\n';
 	}
 
-	// retrieve wheel models from Gazebo
+// retrieve wheel models from Gazebo
 	for (int i = 0; i < numWheels; i++) {
 		physics::ModelPtr wheelPtr;
-		const std::string wheelName = "wheel" + id + "_" + std::to_string(i);
+		const std::string wheelName = vehicleName + "::wheel" + std::to_string(i);
 		if ((wheelPtr = world->GetModel(wheelName)) != NULL) {
 			gazeboWheels[i] = wheelPtr;
 		} else {
@@ -99,28 +100,26 @@ boost::shared_ptr<GcVehicle> GcVehicleBuilder::buildGcVehicle() {
 		}
 	}
 
-	// retrieve sensor model from Gazebo
-	const std::string sensorName = world->GetName() + "::vehicle" + id
-			+ "::chassis" + id + "::laser";
+// retrieve sensor model from Gazebo
+	const std::string sensorName = world->GetName() + "::" + vehicleName
+			+ "::chassis::laser";
 	if ((raySensor = boost::dynamic_pointer_cast<sensors::RaySensor>(
 			sensors::SensorManager::Instance()->GetSensor(sensorName))) == NULL) {
-		std::cerr << "COULD NOT FIND LASER SENSOR " + id + '\n';
+		std::cerr << "COULD NOT FIND LASER SENSOR: " + sensorName + '\n';
 	}
 
-	// create a GcVehicle
+// create a GcVehicle
 	auto gcVeh = boost::shared_ptr<GcVehicle>(
-			new GcVehicle(vehId, terrain, veh, powertrain, tires, driver,
-					maxSpeed, raySensor, gazeboVehicle, gazeboWheels,
-					stepSize));
+			new GcVehicle(vehId, terrain, veh, powertrain, tires, driver, maxSpeed,
+					raySensor, gazeboVehicle, gazeboWheels, stepSize));
 
-	// subscribe the GcVehicle to ros
+// subscribe the GcVehicle to ros
 	auto opt = ros::SubscribeOptions::create<std_msgs::Float64>(
 			"/track_point" + std::to_string(vehId), 1,
-			boost::bind(&GcVehicle::updateDriver, gcVeh, _1), ros::VoidPtr(),
-			queue);
+			boost::bind(&GcVehicle::updateDriver, gcVeh, _1), ros::VoidPtr(), queue);
 	lastSub = handle->subscribe(opt);
 
-	// increase the vehicle id
+// increase the vehicle id
 	vehId++;
 
 	return gcVeh;
@@ -158,14 +157,14 @@ void GcVehicleBuilder::setMaxSpeed(const double maxSpeed) {
 	this->maxSpeed = maxSpeed;
 }
 
-void GcVehicleBuilder::setPath(ChBezierCurve *const path) {
+void GcVehicleBuilder::setPath(ChBezierCurve * const path) {
 	this->path = path;
 }
 
-void GcVehicleBuilder::setNodeHandler(ros::NodeHandle *const handle) {
+void GcVehicleBuilder::setNodeHandler(ros::NodeHandle * const handle) {
 	this->handle = handle;
 }
 
-void GcVehicleBuilder::setCallbackQueue(ros::CallbackQueue *const queue) {
+void GcVehicleBuilder::setCallbackQueue(ros::CallbackQueue * const queue) {
 	this->queue = queue;
 }

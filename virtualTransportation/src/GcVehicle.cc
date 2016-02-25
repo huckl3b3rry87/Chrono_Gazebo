@@ -112,7 +112,6 @@ void GcVehicle::advance() {
 			getPose(vehicle->GetChassisPos(), vehicle->GetChassisRot()),
 			"link");
 	auto rot = vehicle->GetChassisRot();
-	std::cout << id << ": " << rot.e0 << " " << rot.e1 << " " << rot.e2 << " " << rot.e3 << std::endl;
 	for (int i = 0; i < numWheels; i++) {
 		gazeboWheels[i]->SetWorldPose(
 				getPose(vehicle->GetWheelPos(i), vehicle->GetWheelRot(i)),
