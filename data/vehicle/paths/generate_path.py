@@ -11,7 +11,7 @@ f = open(FILE_NAME, 'w')
 
 f.write('%d 3\n' % COUNT)
 
-for i in xrange(COUNT):
+for i in xrange(COUNT + 1):
 	ang = step * i
 	x = R * math.cos(ang)
 	y = R * math.sin(ang)

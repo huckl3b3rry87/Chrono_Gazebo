@@ -42,12 +42,32 @@
 #include <ros/ros.h>
 #include "boost/thread/mutex.hpp"
 
+// others
+#include <tinyxml.h>
+
 using namespace chrono;
 using namespace gazebo;
 
 class chrono_gazebo: public WorldPlugin {
 public:
 	void Load(physics::WorldPtr _parent, sdf::ElementPtr /*_sdf*/) {
+
+		TiXmlDocument meta("../data/metadata.xml");
+		if (meta.LoadFile()) {
+			TiXmlHandle hDoc(&meta);
+			TiXmlElement *element =
+					hDoc.FirstChild("meta").FirstChild("numVehicles").Element();
+			if (!element) {
+				std::cerr << "Invalid metadata.xml: No element 'numVehicles'"
+						<< std::endl;
+			} else {
+				numVehicles = std::max(numVehicles, std::stoi(element->GetText()));
+			}
+		} else
+			std::cerr
+					<< "Metadata file does not exist. Use default number of vehicles: 1"
+					<< std::endl;
+
 		this->_world = _parent;
 		//disable the physics engine
 		_world->EnablePhysicsEngine(false);
@@ -95,11 +115,11 @@ public:
 				boost::bind(&chrono_gazebo::QueueThread, this));
 
 		// store the created vehicles
-		gcVehicles = std::vector<boost::shared_ptr<GcVehicle> >(num_vehicles);
+		gcVehicles = std::vector<boost::shared_ptr<GcVehicle> >(numVehicles);
 		const double pi = 3.1415926535;
 		const double step = pi * 2 / 21;
 		const double radius = 50;
-		for (int i = 0; i < num_vehicles; i++) {
+		for (int i = 0; i < numVehicles; i++) {
 			const double ang = (i + 1) * step;
 			auto pos = ChVector<>(radius * std::cos(ang), radius * std::sin(ang), 1);
 			auto rot = ChQuaternion<>(std::cos((ang + pi / 2) / 2), 0, 0,
@@ -119,7 +139,7 @@ public:
 		// update terrain
 		terrain->Update(chsys->GetChTime());
 		// advance each vehicle
-		for (int i = 0; i < num_vehicles; i++) {
+		for (int i = 0; i < numVehicles; i++) {
 			gcVehicles[i]->advance();
 		}
 		terrain->Advance(step_size);
@@ -145,7 +165,7 @@ public:
 	}
 
 private:
-	int num_vehicles = 2;
+	int numVehicles = 1;
 	// list of vehicles
 	std::vector<boost::shared_ptr<GcVehicle> > gcVehicles;
 
