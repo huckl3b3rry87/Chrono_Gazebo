@@ -1,4 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<meta>
+<metadata>
 	<numVehicles>4</numVehicles>
-</meta>
+	<iterations>10</iterations>
+	<stepSize>0.001</stepSize>
+	<maxSpeed>8.333</maxSpeed>
+	
+	<files>
+		<terrain>terrain/RigidPlane.json</terrain>
+		<vehicle>hmmwv/vehicle/HMMWV_Vehicle_4WD.json</vehicle>
+		<tire>generic/tire/RigidTire.json</tire>
+		<powertrain>generic/powertrain/SimplePowertrain.json</powertrain>
+		<driver>generic/driver/Sample_Maneuver.txt</driver>
+		<steeringController>
+			generic/driver/SteeringController.json
+		</steeringController>
+		<speedController>generic/driver/SpeedController.json</speedController>
+		<path>paths/testpath.txt</path>
+	</files>
+	
+</metadata>

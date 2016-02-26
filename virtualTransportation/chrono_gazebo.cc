@@ -8,14 +8,11 @@
 // in the LICENSE file at the top level of the distribution and at
 // http://projectchrono.org/license-chrono.txt.
 //
-// =============================================================================
 // Authors: Asher Elmquist, Leon Yang
-// =============================================================================
 //
 //This sets up the simulation by creating gcVehicles and loading a world for
 //these vehicles to reference
 //
-// =============================================================================
 
 // local includes
 #include <GcVehicle.hh>
@@ -50,23 +47,64 @@ using namespace gazebo;
 
 class chrono_gazebo: public WorldPlugin {
 public:
-	void Load(physics::WorldPtr _parent, sdf::ElementPtr /*_sdf*/) {
-
+	void LoadMetadata() {
 		TiXmlDocument meta("../data/metadata.xml");
 		if (meta.LoadFile()) {
-			TiXmlHandle hDoc(&meta);
-			TiXmlElement *element =
-					hDoc.FirstChild("meta").FirstChild("numVehicles").Element();
-			if (!element) {
-				std::cerr << "Invalid metadata.xml: No element 'numVehicles'"
-						<< std::endl;
-			} else {
-				numVehicles = std::max(numVehicles, std::stoi(element->GetText()));
-			}
+			TiXmlHandle root = TiXmlHandle(&meta).FirstChild("metadata");
+			TiXmlElement *element;
+
+			element = root.FirstChild("debug");
+			debug = std::stoi(element->GetText());
+
+			// program parameters
+			element = root.FirstChild("numVehicles").Element();
+			numVehicles = std::max(1, std::stoi(element->GetText()));
+			element = root.FirstChild("iterations").Element();
+			iters = std::max(1, std::stoi(element->GetText()));
+			element = root.FirstChild("stepSize").Element();
+			step_size = std::stod(element->GetText());
+			element = root.FirstChild("maxSpeed").Element();
+			maxSpeedInput = std::stod(element->GetText());
+
+			// get file locations
+			TiXmlHandle files = root.FirstChild("files");
+			rigidterrain_file = files.FirstChild("terrain").Element()->GetText();
+			vehicle_file = files.FirstChild("vehicle").Element()->GetText();
+			rigidtire_file = files.FirstChild("tire").Element()->GetText();
+			simplepowertrain_file =
+					files.FirstChild("powertrain").Element()->GetText();
+			driver_file = files.FirstChild("driver").Element()->GetText();
+			steering_controller_file =
+					files.FirstChild("steeringController").Element()->GetText();
+			speed_controller_file =
+					files.FirstChild("speedController").Element()->GetText();
+			path_file = files.FirstChild("path").Element()->GetText();
+
 		} else
-			std::cerr
-					<< "Metadata file does not exist. Use default number of vehicles: 1"
+			std::cerr << "Error: metadata file does not exist." << std::endl;
+
+#ifdef DEBUG
+			std::cout << "numVehicles: " << numVehicles << std::endl;
+			std::cout << "iters: " << iters << std::endl;
+			std::cout << "step_size: " << step_size << std::endl;
+			std::cout << "maxSpeedInput: " << maxSpeedInput << std::endl;
+			std::cout << "rigidterrain_file: " << rigidterrain_file << std::endl;
+			std::cout << "vehicle_file: " << vehicle_file << std::endl;
+			std::cout << "rigidtire_file: " << rigidtire_file << std::endl;
+			std::cout << "simplepowertrain_file: " << simplepowertrain_file
 					<< std::endl;
+			std::cout << "driver_file: " << driver_file << std::endl;
+			std::cout << "steering_controller_file: " << steering_controller_file
+					<< std::endl;
+			std::cout << "speed_controller_file: " << speed_controller_file
+					<< std::endl;
+			std::cout << "path_file: " << path_file << std::endl;
+#endif /* debug information */
+
+	}
+
+	void Load(physics::WorldPtr _parent, sdf::ElementPtr _sdf) {
+		LoadMetadata();
 
 		this->_world = _parent;
 		//disable the physics engine
@@ -145,7 +183,7 @@ public:
 		terrain->Advance(step_size);
 	}
 
-	// custom callback queue thread
+// custom callback queue thread
 	void QueueThread() {
 		static const double timeout = 0.01;
 
@@ -165,21 +203,23 @@ public:
 	}
 
 private:
-	int numVehicles = 1;
-	// list of vehicles
+	bool debug;
+
+	int numVehicles;
+// list of vehicles
 	std::vector<boost::shared_ptr<GcVehicle> > gcVehicles;
 
-	// Chrono system
+// Chrono system
 	ChSystem *chsys;
-	// terrain object
+// terrain object
 	ChSharedPtr<vehicle::RigidTerrain> terrain;
 
-	//chrono vehicle parameters, values should not matter unless no driver
-	double maxSpeedInput = 8.333;
+//chrono vehicle parameters, values should not matter unless no driver
+	double maxSpeedInput;
 
-	//define the step size
-	double step_size = 0.001;
-	double iters = 10;
+//define the step size
+	double step_size;
+	double iters;
 
 	ros::NodeHandle* rosnode_;
 	ros::CallbackQueue queue_;
@@ -189,36 +229,35 @@ private:
 
 	event::ConnectionPtr updateConnection;
 
-	//Chrono vehicle setups
-	////******THESE ARE BEING PULLED FROM THE DATA DIRECTORY AT
-	////****** Chrono_Gazebo/data
-	// JSON file for vehicle model
-	std::string vehicle_file = "hmmwv/vehicle/HMMWV_Vehicle_4WD.json";
+//Chrono vehicle setups
+////******THESE ARE BEING PULLED FROM THE DATA DIRECTORY AT
+////****** Chrono_Gazebo/data
+// JSON file for vehicle model
+	std::string vehicle_file;
 
-	// JSON files for tire models (rigid) and powertrain (simple)
-	std::string rigidtire_file = "generic/tire/RigidTire.json";
+// JSON files for tire models (rigid) and powertrain (simple)
+	std::string rigidtire_file;
 
-	//JSON file for terrain models
-	//std::string rigidterrain_file = "terrain/RigidMesh.json";
-	std::string rigidterrain_file = "terrain/RigidPlane.json";
+//JSON file for terrain models
+//std::string rigidterrain_file = "terrain/RigidMesh.json";
+	std::string rigidterrain_file;
 
-	std::string simplepowertrain_file = "generic/powertrain/SimplePowertrain.json";
+	std::string simplepowertrain_file;
 
-	// Driver input file (if not using Irrlicht)
-	std::string driver_file = "generic/driver/Sample_Maneuver.txt";
+// Driver input file (if not using Irrlicht)
+	std::string driver_file;
 
-	//driver files
-	// std::string driver_file = "generic/driver/Sample_Maneuver.txt";
-	std::string steering_controller_file =
-			"generic/driver/SteeringController.json";
-	std::string speed_controller_file = "generic/driver/SpeedController.json";
-	std::string path_file = "paths/testpath.txt";
-	// std::string path_file = "paths/ISO_double_lane_change.txt";
+//driver files
+// std::string driver_file = "generic/driver/Sample_Maneuver.txt";
+	std::string steering_controller_file;
+	std::string speed_controller_file;
+	std::string path_file;
+// std::string path_file = "paths/ISO_double_lane_change.txt";
 
-	//	std::vector<ChSharedPtr<ChBody>> chCinderBlocks;
-	//	std::vector<physics::ModelPtr> gzCinderBlocks;
-	//	std::vector<ChSharedPtr<ChBody>> chLogs;
-	//	std::vector<physics::ModelPtr> gzLogs;
+//	std::vector<ChSharedPtr<ChBody>> chCinderBlocks;
+//	std::vector<physics::ModelPtr> gzCinderBlocks;
+//	std::vector<ChSharedPtr<ChBody>> chLogs;
+//	std::vector<physics::ModelPtr> gzLogs;
 };
 
 // Register this plugin with the simulator
