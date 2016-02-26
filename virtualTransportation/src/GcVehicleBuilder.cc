@@ -49,6 +49,9 @@ GcVehicleBuilder::GcVehicleBuilder(physics::WorldPtr world, ChSystem *chsys,
 boost::shared_ptr<GcVehicle> GcVehicleBuilder::buildGcVehicle() {
 
 	const std::string id = std::to_string(vehId);
+#ifdef DEBUG
+	std::cout << "[GcVehicle] Start building vehicle " << id << "." << std::endl;
+#endif /* debug information */
 
 	// -- Chrono part --
 
@@ -56,11 +59,17 @@ boost::shared_ptr<GcVehicle> GcVehicleBuilder::buildGcVehicle() {
 	auto veh = ChSharedPtr<vehicle::WheeledVehicle>(
 			new vehicle::WheeledVehicle(chsys, vehicleFile));
 	veh->Initialize(coordsys);
+#ifdef DEBUG
+	std::cout << "[GcVehicle] Vehicle initialzied." << std::endl;
+#endif /* debug information */
 
 	// create and initialize a powertrain
 	auto powertrain = ChSharedPtr<vehicle::SimplePowertrain>(
 			new vehicle::SimplePowertrain(powertrainFile));
 	powertrain->Initialize();
+#ifdef DEBUG
+	std::cout << "[GcVehicle] Powertrain initialized." << std::endl;
+#endif /* debug information */
 
 	// create and initialize the tires
 	const int numWheels = 2 * veh->GetNumberAxles();
@@ -70,12 +79,18 @@ boost::shared_ptr<GcVehicle> GcVehicleBuilder::buildGcVehicle() {
 		tires[i] = ChSharedPtr<vehicle::RigidTire>(
 				new vehicle::RigidTire(tireFile));
 		tires[i]->Initialize(veh->GetWheelBody(i));
+#ifdef DEBUG
+		std::cout << "[GcVehicle] Tire " << i << " initialized." << std::endl;
+#endif /* debug information */
 	}
 
 // create path follower
 	auto driver = ChSharedPtr<vehicle::ChPathFollowerDriver>(
 			new vehicle::ChPathFollowerDriver(*veh, steerFile, speedFile, path,
 					std::string("my_path"), 0.0));
+#ifdef DEBUG
+	std::cout << "[GcVehicle] Path follower driver loading completes." << std::endl;
+#endif /* debug information */
 
 // -- Gazebo part --
 
@@ -87,7 +102,12 @@ boost::shared_ptr<GcVehicle> GcVehicleBuilder::buildGcVehicle() {
 	const std::string vehicleName = "vehicle" + id;
 	if ((gazeboVehicle = world->GetModel(vehicleName)) == NULL) {
 		std::cerr << "COULD NOT FIND GAZEBO MODEL: " + vehicleName + '\n';
+		return NULL;
 	}
+#ifdef DEBUG
+	std::cout << "[GcVehicle] Vehicle model loading complete." << std::endl;
+#endif /* debug information */
+
 
 // retrieve wheel models from Gazebo
 	for (int i = 0; i < numWheels; i++) {
@@ -97,7 +117,11 @@ boost::shared_ptr<GcVehicle> GcVehicleBuilder::buildGcVehicle() {
 			gazeboWheels[i] = wheelPtr;
 		} else {
 			std::cerr << "COULD NOT FIND GAZEBO MODEL: " + wheelName + '\n';
+			return NULL;
 		}
+#ifdef DEBUG
+		std::cout << "[GcVehicle] Wheel model " << id << " loading complete" << std::endl;
+#endif /* debug information */
 	}
 
 // retrieve sensor model from Gazebo
@@ -106,7 +130,11 @@ boost::shared_ptr<GcVehicle> GcVehicleBuilder::buildGcVehicle() {
 	if ((raySensor = boost::dynamic_pointer_cast<sensors::RaySensor>(
 			sensors::SensorManager::Instance()->GetSensor(sensorName))) == NULL) {
 		std::cerr << "COULD NOT FIND LASER SENSOR: " + sensorName + '\n';
+		return NULL;
 	}
+#ifdef DEBUG
+	std::cout << "[GcVehicle] Ray sensor loading complete." << std::endl;
+#endif /* debug information */
 
 // create a GcVehicle
 	auto gcVeh = boost::shared_ptr<GcVehicle>(
@@ -118,10 +146,16 @@ boost::shared_ptr<GcVehicle> GcVehicleBuilder::buildGcVehicle() {
 			"/track_point" + std::to_string(vehId), 1,
 			boost::bind(&GcVehicle::updateDriver, gcVeh, _1), ros::VoidPtr(), queue);
 	lastSub = handle->subscribe(opt);
+#ifdef DEBUG
+	std::cout << "[GcVehicle] Vehicle subscribed to ROS." << std::endl;
+#endif /* debug information */
 
 // increase the vehicle id
 	vehId++;
 
+#ifdef DEBUG
+	std::cout << "[GcVehicle] Vehicle " << id << " building complete." << std::endl;
+#endif /* debug information */
 	return gcVeh;
 }
 

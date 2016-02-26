@@ -37,15 +37,12 @@
 //gazebo_ros includes
 #include <ros/callback_queue.h>
 #include <ros/ros.h>
-#include "boost/thread/mutex.hpp"
 
 // others
 #include <tinyxml.h>
 
 using namespace chrono;
 using namespace gazebo;
-
-#define DEBUG
 
 class chrono_gazebo: public WorldPlugin {
 public:
@@ -61,43 +58,46 @@ public:
 			element = root.FirstChild("iterations").Element();
 			iters = std::max(1, std::stoi(element->GetText()));
 			element = root.FirstChild("stepSize").Element();
-			step_size = std::stod(element->GetText());
+			stepSize = std::stod(element->GetText());
 			element = root.FirstChild("maxSpeed").Element();
 			maxSpeedInput = std::stod(element->GetText());
 
 			// get file locations
 			TiXmlHandle files = root.FirstChild("files");
-			rigidterrain_file = files.FirstChild("terrain").Element()->GetText();
-			vehicle_file = files.FirstChild("vehicle").Element()->GetText();
-			rigidtire_file = files.FirstChild("tire").Element()->GetText();
-			simplepowertrain_file =
+			rigidTerrainFile = files.FirstChild("terrain").Element()->GetText();
+			vehicleFile = files.FirstChild("vehicle").Element()->GetText();
+			rigidTireFile = files.FirstChild("tire").Element()->GetText();
+			simplePowertrainFile =
 					files.FirstChild("powertrain").Element()->GetText();
-			driver_file = files.FirstChild("driver").Element()->GetText();
-			steering_controller_file =
+			driverFile = files.FirstChild("driver").Element()->GetText();
+			steeringControllerFile =
 					files.FirstChild("steeringController").Element()->GetText();
-			speed_controller_file =
+			speedControllerFile =
 					files.FirstChild("speedController").Element()->GetText();
-			path_file = files.FirstChild("path").Element()->GetText();
+			pathFile = files.FirstChild("path").Element()->GetText();
 
-		} else
+		} else {
 			std::cerr << "Error: metadata file does not exist." << std::endl;
+			return;
+		}
 
 #ifdef DEBUG
-			std::cout << "numVehicles: " << numVehicles << std::endl;
-			std::cout << "iters: " << iters << std::endl;
-			std::cout << "step_size: " << step_size << std::endl;
-			std::cout << "maxSpeedInput: " << maxSpeedInput << std::endl;
-			std::cout << "rigidterrain_file: " << rigidterrain_file << std::endl;
-			std::cout << "vehicle_file: " << vehicle_file << std::endl;
-			std::cout << "rigidtire_file: " << rigidtire_file << std::endl;
-			std::cout << "simplepowertrain_file: " << simplepowertrain_file
-					<< std::endl;
-			std::cout << "driver_file: " << driver_file << std::endl;
-			std::cout << "steering_controller_file: " << steering_controller_file
-					<< std::endl;
-			std::cout << "speed_controller_file: " << speed_controller_file
-					<< std::endl;
-			std::cout << "path_file: " << path_file << std::endl;
+		std::cout << "[GcVehicle] numVehicles: " << numVehicles << std::endl;
+		std::cout << "[GcVehicle] iters: " << iters << std::endl;
+		std::cout << "[GcVehicle] step_size: " << stepSize << std::endl;
+		std::cout << "[GcVehicle] maxSpeedInput: " << maxSpeedInput << std::endl;
+		std::cout << "[GcVehicle] rigidTerrainFile: " << rigidTerrainFile
+				<< std::endl;
+		std::cout << "[GcVehicle] vehicleFile: " << vehicleFile << std::endl;
+		std::cout << "[GcVehicle] rigidTireFile: " << rigidTireFile << std::endl;
+		std::cout << "[GcVehicle] simplepowertrainFile: " << simplePowertrainFile
+				<< std::endl;
+		std::cout << "[GcVehicle] driverFile: " << driverFile << std::endl;
+		std::cout << "[GcVehicle] steeringControllerFile: "
+				<< steeringControllerFile << std::endl;
+		std::cout << "[GcVehicle] speedControllerFile: " << speedControllerFile
+				<< std::endl;
+		std::cout << "[GcVehicle] pathFile: " << pathFile << std::endl;
 #endif /* debug information */
 
 	}
@@ -106,11 +106,11 @@ public:
 		LoadMetadata();
 
 		this->_world = _parent;
-		//disable the physics engine
+		// disable the physics engine
 		_world->EnablePhysicsEngine(false);
 		_world->GetPhysicsEngine()->SetRealTimeUpdateRate(1000);
 
-		//BEGIN LINE FOLLOW
+		// BEGIN LINE FOLLOW
 		if (!ros::isInitialized()) {
 			std::string msg =
 					"A ROS node for Gazebo has not been initialized, unable to load plugin. "
@@ -119,6 +119,10 @@ public:
 			return;
 		}
 		this->rosnode_ = new ros::NodeHandle("chrono_gazebo");
+
+#ifdef DEBUG
+		std::cout << "[GcVehicle] ROS node loaded." << std::endl;
+#endif /* debug information */
 
 		// initialize Chrono system
 		chsys = new ChSystem();
@@ -131,19 +135,26 @@ public:
 		// load and initialize terrain
 		terrain = ChSharedPtr<vehicle::RigidTerrain>(
 				new vehicle::RigidTerrain(chsys,
-						vehicle::GetDataFile(rigidterrain_file)));
+						vehicle::GetDataFile(rigidTerrainFile)));
+
+#ifdef DEBUG
+		std::cout << "[GcVehicle] Terrain file loaded." << std::endl;
+#endif /* debug information */
 
 		// create and initialize GcVehicleBuilder
-		auto builder = GcVehicleBuilder(_world, chsys, terrain, step_size);
-		builder.setVehicleFile(vehicle_file);
-		builder.setPowertrainFile(simplepowertrain_file);
-		builder.setTireFile(rigidtire_file);
-		builder.setSpeedCtrlFile(speed_controller_file);
-		builder.setSteerCtrlFile(steering_controller_file);
+		auto builder = GcVehicleBuilder(_world, chsys, terrain, stepSize);
+		builder.setVehicleFile(vehicleFile);
+		builder.setPowertrainFile(simplePowertrainFile);
+		builder.setTireFile(rigidTireFile);
+		builder.setSpeedCtrlFile(speedControllerFile);
+		builder.setSteerCtrlFile(steeringControllerFile);
 		builder.setNodeHandler(rosnode_);
 		builder.setCallbackQueue(&queue_);
-		//have chrono drive the vehicle around a circle
-		ChBezierCurve* path = ChBezierCurve::read(vehicle::GetDataFile(path_file));
+		// have chrono drive the vehicle around a circle
+		ChBezierCurve* path = ChBezierCurve::read(vehicle::GetDataFile(pathFile));
+#ifdef DEBUG
+		std::cout << "[GcVehicle] Path file loaded." << std::endl;
+#endif /* debug information */
 		builder.setPath(path);
 		builder.setMaxSpeed(maxSpeedInput);
 
@@ -170,7 +181,11 @@ public:
 		this->updateConnection = event::Events::ConnectWorldUpdateBegin(
 				boost::bind(&chrono_gazebo::OnUpdate, this));
 
+#ifdef DEBUG
+		std::cout << "[GcVehicle] chrono_gazebo loading completes." << std::endl;
+#endif /* debug information */
 	}
+
 public:
 	void OnUpdate() {
 		// update terrain
@@ -179,10 +194,10 @@ public:
 		for (int i = 0; i < numVehicles; i++) {
 			gcVehicles[i]->advance();
 		}
-		terrain->Advance(step_size);
+		terrain->Advance(stepSize);
 	}
 
-// custom callback queue thread
+	// custom callback queue thread
 	void QueueThread() {
 		static const double timeout = 0.01;
 
@@ -203,21 +218,14 @@ public:
 
 private:
 	bool debug;
-
 	int numVehicles;
-// list of vehicles
 	std::vector<boost::shared_ptr<GcVehicle> > gcVehicles;
 
-// Chrono system
 	ChSystem *chsys;
-// terrain object
 	ChSharedPtr<vehicle::RigidTerrain> terrain;
 
-//chrono vehicle parameters, values should not matter unless no driver
 	double maxSpeedInput;
-
-//define the step size
-	double step_size;
+	double stepSize;
 	double iters;
 
 	ros::NodeHandle* rosnode_;
@@ -228,35 +236,27 @@ private:
 
 	event::ConnectionPtr updateConnection;
 
-//Chrono vehicle setups
-////******THESE ARE BEING PULLED FROM THE DATA DIRECTORY AT
-////****** Chrono_Gazebo/data
-// JSON file for vehicle model
-	std::string vehicle_file;
+	// THESE ARE BEING PULLED FROM THE DATA DIRECTORY AT
+	// Chrono_Gazebo/data
 
-// JSON files for tire models (rigid) and powertrain (simple)
-	std::string rigidtire_file;
+	// JSON file for vehicle model
+	std::string vehicleFile;
 
-//JSON file for terrain models
-//std::string rigidterrain_file = "terrain/RigidMesh.json";
-	std::string rigidterrain_file;
+	// JSON files for tire models (rigid) and powertrain (simple)
+	std::string rigidTireFile;
 
-	std::string simplepowertrain_file;
+	// JSON file for terrain models
+	std::string rigidTerrainFile;
 
-// Driver input file (if not using Irrlicht)
-	std::string driver_file;
+	std::string simplePowertrainFile;
 
-//driver files
-// std::string driver_file = "generic/driver/Sample_Maneuver.txt";
-	std::string steering_controller_file;
-	std::string speed_controller_file;
-	std::string path_file;
-// std::string path_file = "paths/ISO_double_lane_change.txt";
+	// Driver input file (if not using Irrlicht)
+	std::string driverFile;
 
-//	std::vector<ChSharedPtr<ChBody>> chCinderBlocks;
-//	std::vector<physics::ModelPtr> gzCinderBlocks;
-//	std::vector<ChSharedPtr<ChBody>> chLogs;
-//	std::vector<physics::ModelPtr> gzLogs;
+	// driver files
+	std::string steeringControllerFile;
+	std::string speedControllerFile;
+	std::string pathFile;
 };
 
 // Register this plugin with the simulator
