@@ -3,7 +3,7 @@
 	xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
 
 	<xsl:output indent="yes" />
-	<xsl:variable name="numVehicles" select="meta/numVehicles" />
+	<xsl:variable name="numVehicles" select="metadata/numVehicles" />
 
 	<xsl:template name="vehicle">
 		<xsl:param name="i" />

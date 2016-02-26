@@ -45,6 +45,8 @@
 using namespace chrono;
 using namespace gazebo;
 
+#define DEBUG
+
 class chrono_gazebo: public WorldPlugin {
 public:
 	void LoadMetadata() {
@@ -52,9 +54,6 @@ public:
 		if (meta.LoadFile()) {
 			TiXmlHandle root = TiXmlHandle(&meta).FirstChild("metadata");
 			TiXmlElement *element;
-
-			element = root.FirstChild("debug");
-			debug = std::stoi(element->GetText());
 
 			// program parameters
 			element = root.FirstChild("numVehicles").Element();

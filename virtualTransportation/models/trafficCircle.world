@@ -114,6 +114,46 @@
       <uri>model://wheel</uri>
       <name>vehicle3::wheel3</name>
     </include>
+    <include>
+      <uri>model://gcVehicle</uri>
+      <name>vehicle4</name>
+    </include>
+    <include>
+      <uri>model://wheel</uri>
+      <name>vehicle4::wheel0</name>
+    </include>
+    <include>
+      <uri>model://wheel</uri>
+      <name>vehicle4::wheel1</name>
+    </include>
+    <include>
+      <uri>model://wheel</uri>
+      <name>vehicle4::wheel2</name>
+    </include>
+    <include>
+      <uri>model://wheel</uri>
+      <name>vehicle4::wheel3</name>
+    </include>
+    <include>
+      <uri>model://gcVehicle</uri>
+      <name>vehicle5</name>
+    </include>
+    <include>
+      <uri>model://wheel</uri>
+      <name>vehicle5::wheel0</name>
+    </include>
+    <include>
+      <uri>model://wheel</uri>
+      <name>vehicle5::wheel1</name>
+    </include>
+    <include>
+      <uri>model://wheel</uri>
+      <name>vehicle5::wheel2</name>
+    </include>
+    <include>
+      <uri>model://wheel</uri>
+      <name>vehicle5::wheel3</name>
+    </include>
     <road name="circular_road">
       <width>7.5</width>
       <point>50.00 0.00 0.05</point>

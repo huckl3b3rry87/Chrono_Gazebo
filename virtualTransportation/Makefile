@@ -1,6 +1,6 @@
 # top level build program
 
-.PHONY: all program model
+.PHONY: all program models
 
 all: program models
 
