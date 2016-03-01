@@ -70,6 +70,32 @@
 								</script>
 							</material>
 						</visual>
+						<sensor name="topcamera" type="camera">
+							<pose>-70 0 30 0 .62 0</pose>
+							<camera name="secCam">
+								<horizontal_fov>1.57</horizontal_fov>
+								<image>
+									<format>B8G8R8</format>
+									<width>1280</width>
+									<height>720</height>
+								</image>
+								<clip>
+									<near>0.1</near>
+									<far>500</far>
+								</clip>
+								<noise>
+									<type>gaussian</type>
+									<mean>0.0</mean>
+									<stddev>0.000</stddev>
+								</noise>
+								<save enabled="true">
+									<path>Captures/SecCam/2016_02_29</path>
+								</save>
+							</camera>
+							<always_on>1</always_on>
+							<update_rate>60</update_rate>
+							<visualize>true</visualize>
+						</sensor>
 					</link>
 				</model>
 
@@ -137,6 +163,8 @@
 						</script>
 					</material>
 				</road>
+
+
 
 				<plugin name="chrono_gazebo" filename="libchrono_gazebo.so" />
 			</world>
