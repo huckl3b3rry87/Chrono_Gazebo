@@ -46,9 +46,18 @@
 					</sky>
 				</scene>
 
-				<include>
-					<uri>model://sun</uri>
-				</include>
+				<light type="directional" name="sun">
+					<pose>100 0 100 0 -0.785 0</pose>
+					<diffuse>1 1 1 1</diffuse>
+					<specular>.1 .1 .1 1</specular>
+					<attenuation>
+						<range>5000</range>
+						<linear>0.2</linear>
+						<constant>0.8</constant>
+						<quadratic>0.01</quadratic>
+					</attenuation>
+					<cast_shadows>true</cast_shadows>
+				</light>
 
 				<model name="my_ground_plane">
 					<pose>0 0 0 0 0 0</pose>
@@ -66,18 +75,20 @@
 							<material>
 								<script>
 									<uri>file://../data/gazono.material</uri>
-									<name>Gazebo/Grass1</name>
+									<name>Gazebo/Ground01</name>
 								</script>
+
 							</material>
 						</visual>
+						<!--
 						<sensor name="topcamera" type="camera">
 							<pose>-70 0 30 0 .62 0</pose>
 							<camera name="secCam">
 								<horizontal_fov>1.57</horizontal_fov>
 								<image>
 									<format>B8G8R8</format>
-									<width>1280</width>
-									<height>720</height>
+									<width>2560</width>
+									<height>1440</height>
 								</image>
 								<clip>
 									<near>0.1</near>
@@ -89,13 +100,42 @@
 									<stddev>0.000</stddev>
 								</noise>
 								<save enabled="true">
-									<path>Captures/SecCam/2016_02_29</path>
+									<path>Captures/SecCam/2016_03_02_2k</path>
 								</save>
 							</camera>
 							<always_on>1</always_on>
 							<update_rate>60</update_rate>
 							<visualize>true</visualize>
 						</sensor>
+					-->
+					<!--
+						<sensor name="sidecamera" type="camera">
+							<pose>-55 0 2 0 .2 .6</pose>
+							<camera name="sideCam">
+								<horizontal_fov>1.57</horizontal_fov>
+								<image>
+									<format>B8G8R8</format>
+									<width>2560</width>
+									<height>1440</height>
+								</image>
+								<clip>
+									<near>0.1</near>
+									<far>500</far>
+								</clip>
+								<noise>
+									<type>gaussian</type>
+									<mean>0.0</mean>
+									<stddev>0.000</stddev>
+								</noise>
+								<save enabled="true">
+									<path>Captures/SideCam/2016_03_02_2k</path>
+								</save>
+							</camera>
+							<always_on>1</always_on>
+							<update_rate>60</update_rate>
+							<visualize>true</visualize>
+						</sensor>
+					-->
 					</link>
 				</model>
 

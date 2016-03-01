@@ -11,7 +11,7 @@ material Gazebo/Line
 
       texture_unit
       {
-        texture Line2.jpg
+        texture Line1.jpg
         filtering trilinear
       }
     }
@@ -31,7 +31,121 @@ material Gazebo/Grass1
       {
         texture Grass3.jpg
         filtering trilinear
-	scale 10.0 10.0
+	scale 0.1 0.1
+      }
+    }
+  }
+}
+material Gazebo/Stone_Soil
+{
+  technique
+  {
+    pass
+    {
+      ambient 0.5 0.5 0.5 1.0
+      diffuse 0.8 0.8 0.8 1.0
+      specular 0.5 0.5 0.5 1.0 0.5
+
+      texture_unit
+      {
+        texture stone_soil.jpg
+        filtering trilinear
+	scale 0.1 0.1
+      }
+    }
+  }
+}
+material Gazebo/Gravel
+{
+  technique
+  {
+    pass
+    {
+      ambient 0.5 0.5 0.5 1.0
+      diffuse 0.8 0.8 0.8 1.0
+      specular 0.5 0.5 0.5 1.0 0.5
+
+      texture_unit
+      {
+        texture gravel.jpg
+        filtering trilinear
+	scale 0.03 0.03
+      }
+    }
+  }
+}
+material Gazebo/Ground01
+{
+  technique
+  {
+    pass
+    {
+      ambient 0.5 0.5 0.5 1.0
+      diffuse 0.8 0.8 0.8 1.0
+      specular 0.5 0.5 0.5 1.0 0.5
+
+      texture_unit
+      {
+        texture ground01.jpg
+        filtering trilinear
+	scale 0.1 0.1
+      }
+    }
+  }
+}
+material Gazebo/Ground02
+{
+  technique
+  {
+    pass
+    {
+      ambient 0.5 0.5 0.5 1.0
+      diffuse 0.8 0.8 0.8 1.0
+      specular 0.5 0.5 0.5 1.0 0.5
+
+      texture_unit
+      {
+        texture ground02.jpg
+        filtering trilinear
+	scale 0.1 0.1
+      }
+    }
+  }
+}
+material Gazebo/Concrete
+{
+  technique
+  {
+    pass
+    {
+      ambient 0.5 0.5 0.5 1.0
+      diffuse 0.8 0.8 0.8 1.0
+      specular 0.5 0.5 0.5 1.0 0.5
+
+      texture_unit
+      {
+        texture concrete.jpg
+        filtering trilinear
+	scale 0.1 0.1
+      }
+    }
+  }
+}
+material Gazebo/Grave_Dirt
+{
+  technique
+  {
+    pass
+    {
+      ambient 0.5 0.5 0.5 1.0
+      diffuse 0.8 0.8 0.8 1.0
+      specular 0.5 0.5 0.5 1.0 0.5
+
+      texture_unit
+      {
+        texture gravel_dirt.jpg
+        filtering trilinear
+	scale 0.1 0.1
       }
     }
   }
