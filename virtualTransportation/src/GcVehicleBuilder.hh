@@ -21,10 +21,7 @@
 #ifndef SRC_GCVEHICLEBUILDER_HH_
 #define SRC_GCVEHICLEBUILDER_HH_
 
-#include <boost/smart_ptr/shared_ptr.hpp>
-#include <chrono_vehicle/terrain/RigidTerrain.h>
 #include <core/ChCoordsys.h>
-#include <core/ChSmartpointers.h>
 #include <gazebo/physics/PhysicsTypes.hh>
 #include <GcVehicle.hh>
 #include <ros/subscriber.h>
@@ -39,11 +36,11 @@ class GcVehicleBuilder {
 public:
 	// constructor
 	GcVehicleBuilder(gazebo::physics::WorldPtr world, chrono::ChSystem *chsys,
-			chrono::ChSharedPtr<chrono::vehicle::RigidTerrain> terrain,
+			GcVehicle::ChTerrainPtr terrain,
 			const double stepSize);
 
 	// build a vehicle with all the components
-	boost::shared_ptr<GcVehicle> buildGcVehicle();
+	std::shared_ptr<GcVehicle> buildGcVehicle();
 
 	ros::Subscriber &getLastRosSubscriber();
 
@@ -73,7 +70,7 @@ private:
 	gazebo::physics::WorldPtr world;
 
 	chrono::ChSystem *chsys;
-	chrono::ChSharedPtr<chrono::vehicle::RigidTerrain> terrain;
+	GcVehicle::ChTerrainPtr terrain;
 	double stepSize = 0.01;
 
 	std::string vehicleFile;

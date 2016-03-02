@@ -29,11 +29,11 @@ using namespace gazebo;
 
 //constructor
 GcVehicle::GcVehicle(const int id,
-		const ChSharedPtr<vehicle::RigidTerrain> terrain,
-		const ChSharedPtr<vehicle::WheeledVehicle> vehicle,
-		const ChSharedPtr<vehicle::SimplePowertrain> powertrain,
-		const std::vector<ChSharedPtr<vehicle::RigidTire> > &tires,
-		ChSharedPtr<vehicle::ChPathFollowerDriver> driver,
+		const GcVehicle::ChTerrainPtr terrain,
+		const GcVehicle::ChWheeledVehiclePtr vehicle,
+		const GcVehicle::ChPowertrainPtr powertrain,
+		const std::vector<GcVehicle::ChRigidTirePtr> &tires,
+		const GcVehicle::ChPathFollowerDriverPtr driver,
 		const double maxSpeed, const sensors::RaySensorPtr raySensor,
 		const physics::ModelPtr gazeboVehicle,
 		const std::vector<physics::ModelPtr> &gazeboWheels,
@@ -45,7 +45,7 @@ GcVehicle::GcVehicle(const int id,
 	numWheels = vehicle->GetNumberAxles() * 2;
 }
 
-ChSharedPtr<vehicle::WheeledVehicle> GcVehicle::getVehicle() {
+GcVehicle::ChWheeledVehiclePtr GcVehicle::getVehicle() {
 	return vehicle;
 }
 
@@ -92,12 +92,12 @@ void GcVehicle::advance() {
 	}
 
 	double time = vehicle->GetSystem()->GetChTime();
-	driver->Update(time);
-	powertrain->Update(time, throttleInput, driveshaftSpeed);
-	vehicle->Update(time, steeringInput, brakingInput, powertrainTorque,
+	driver->Synchronize(time);
+	powertrain->Synchronize(time, throttleInput, driveshaftSpeed);
+	vehicle->Synchronize(time, steeringInput, brakingInput, powertrainTorque,
 			tireForces);
 	for (int i = 0; i < numWheels; i++)
-		tires[i]->Update(time, wheelStates[i], *terrain);
+		tires[i]->Synchronize(time, wheelStates[i], *terrain);
 
 	// Advance simulation for one timestep for all modules
 	driver->Advance(stepSize);

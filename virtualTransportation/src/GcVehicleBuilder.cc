@@ -42,13 +42,14 @@ using namespace chrono;
 using namespace gazebo;
 
 GcVehicleBuilder::GcVehicleBuilder(physics::WorldPtr world, ChSystem *chsys,
-		ChSharedPtr<vehicle::RigidTerrain> terrain, const double stepSize) :
+		GcVehicle::ChTerrainPtr terrain, const double stepSize) :
 		world(world), chsys(chsys), terrain(terrain), stepSize(stepSize) {
 }
 
-boost::shared_ptr<GcVehicle> GcVehicleBuilder::buildGcVehicle() {
+std::shared_ptr<GcVehicle> GcVehicleBuilder::buildGcVehicle() {
 
 	const std::string id = std::to_string(vehId);
+
 #ifdef DEBUG
 	std::cout << "[GcVehicle] Start building vehicle " << id << "." << std::endl;
 #endif /* debug information */
@@ -56,38 +57,38 @@ boost::shared_ptr<GcVehicle> GcVehicleBuilder::buildGcVehicle() {
 	// -- Chrono part --
 
 	// create and initialize a Chrono vehicle model
-	auto veh = ChSharedPtr<vehicle::WheeledVehicle>(
-			new vehicle::WheeledVehicle(chsys, vehicleFile));
+	auto veh = std::make_shared<vehicle::WheeledVehicle>(chsys, vehicleFile);
 	veh->Initialize(coordsys);
+
 #ifdef DEBUG
 	std::cout << "[GcVehicle] Vehicle initialzied." << std::endl;
 #endif /* debug information */
 
 	// create and initialize a powertrain
-	auto powertrain = ChSharedPtr<vehicle::SimplePowertrain>(
-			new vehicle::SimplePowertrain(powertrainFile));
+	auto powertrain = std::make_shared<vehicle::SimplePowertrain>(powertrainFile);
 	powertrain->Initialize();
+
 #ifdef DEBUG
 	std::cout << "[GcVehicle] Powertrain initialized." << std::endl;
 #endif /* debug information */
 
 	// create and initialize the tires
 	const int numWheels = 2 * veh->GetNumberAxles();
-	auto tires = std::vector<ChSharedPtr<vehicle::RigidTire> >(numWheels);
+	auto tires = std::vector<GcVehicle::ChRigidTirePtr>(numWheels);
 	for (int i = 0; i < numWheels; i++) {
 		//create the tires from the tire file
-		tires[i] = ChSharedPtr<vehicle::RigidTire>(
-				new vehicle::RigidTire(tireFile));
+		tires[i] = std::make_shared<vehicle::RigidTire>(tireFile);
 		tires[i]->Initialize(veh->GetWheelBody(i));
+
 #ifdef DEBUG
 		std::cout << "[GcVehicle] Tire " << i << " initialized." << std::endl;
 #endif /* debug information */
 	}
 
 // create path follower
-	auto driver = ChSharedPtr<vehicle::ChPathFollowerDriver>(
-			new vehicle::ChPathFollowerDriver(*veh, steerFile, speedFile, path,
-					std::string("my_path"), 0.0));
+	auto driver = std::make_shared<vehicle::ChPathFollowerDriver>(*veh, steerFile,
+			speedFile, path, std::string("my_path"), 0.0, true);
+
 #ifdef DEBUG
 	std::cout << "[GcVehicle] Path follower driver loading completes." << std::endl;
 #endif /* debug information */
@@ -104,10 +105,10 @@ boost::shared_ptr<GcVehicle> GcVehicleBuilder::buildGcVehicle() {
 		std::cerr << "COULD NOT FIND GAZEBO MODEL: " + vehicleName + '\n';
 		return NULL;
 	}
+
 #ifdef DEBUG
 	std::cout << "[GcVehicle] Vehicle model loading complete." << std::endl;
 #endif /* debug information */
-
 
 // retrieve wheel models from Gazebo
 	for (int i = 0; i < numWheels; i++) {
@@ -137,9 +138,9 @@ boost::shared_ptr<GcVehicle> GcVehicleBuilder::buildGcVehicle() {
 #endif /* debug information */
 
 // create a GcVehicle
-	auto gcVeh = boost::shared_ptr<GcVehicle>(
-			new GcVehicle(vehId, terrain, veh, powertrain, tires, driver, maxSpeed,
-					raySensor, gazeboVehicle, gazeboWheels, stepSize));
+	auto gcVeh = std::make_shared<GcVehicle>(vehId, terrain, veh, powertrain,
+			tires, driver, maxSpeed, raySensor, gazeboVehicle, gazeboWheels,
+			stepSize);
 
 // subscribe the GcVehicle to ros
 	auto opt = ros::SubscribeOptions::create<std_msgs::Float64>(

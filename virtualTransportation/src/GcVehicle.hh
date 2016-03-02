@@ -24,10 +24,10 @@
 //includes
 
 #include <chrono_vehicle/driver/ChPathFollowerDriver.h>
-#include <chrono_vehicle/powertrain/SimplePowertrain.h>
-#include <chrono_vehicle/terrain/RigidTerrain.h>
-#include <chrono_vehicle/wheeled_vehicle/tire/RigidTire.h>
-#include <chrono_vehicle/wheeled_vehicle/vehicle/WheeledVehicle.h>
+#include <chrono_vehicle/powertrain/ChSimplePowertrain.h>
+#include <chrono_vehicle/ChTerrain.h>
+#include <chrono_vehicle/wheeled_vehicle/tire/ChRigidTire.h>
+#include <chrono_vehicle/wheeled_vehicle/ChWheeledVehicle.h>
 #include <core/ChQuaternion.h>
 #include <gazebo/math/Pose.hh>
 #include <gazebo/physics/Model.hh>
@@ -39,16 +39,17 @@
 
 class GcVehicle {
 
-	typedef chrono::ChSharedPtr<chrono::vehicle::RigidTerrain> ChTerrainPtr;
-	typedef chrono::ChSharedPtr<chrono::vehicle::WheeledVehicle> ChWheeledVehiclePtr;
-	typedef chrono::ChSharedPtr<chrono::vehicle::SimplePowertrain> ChSimplePowertrainPtr;
-	typedef chrono::ChSharedPtr<chrono::vehicle::RigidTire> ChRigidTirePtr;
-	typedef chrono::ChSharedPtr<chrono::vehicle::ChPathFollowerDriver> ChPathFollowerDriverPtr;
-
 public:
+
+	typedef std::shared_ptr<chrono::vehicle::ChTerrain> ChTerrainPtr;
+	typedef std::shared_ptr<chrono::vehicle::ChWheeledVehicle> ChWheeledVehiclePtr;
+	typedef std::shared_ptr<chrono::vehicle::ChPowertrain> ChPowertrainPtr;
+	typedef std::shared_ptr<chrono::vehicle::ChRigidTire> ChRigidTirePtr;
+	typedef std::shared_ptr<chrono::vehicle::ChPathFollowerDriver> ChPathFollowerDriverPtr;
+
 	// constructor
 	GcVehicle(const int id, const ChTerrainPtr terrain,
-			const ChWheeledVehiclePtr vehicle, const ChSimplePowertrainPtr powertrain,
+			const ChWheeledVehiclePtr vehicle, const ChPowertrainPtr powertrain,
 			const std::vector<ChRigidTirePtr> &tires,
 			const ChPathFollowerDriverPtr driver, const double maxSpeed,
 			const gazebo::sensors::RaySensorPtr raySensor,
@@ -76,7 +77,7 @@ private:
 	// chrono components
 	ChTerrainPtr terrain;
 	ChWheeledVehiclePtr vehicle;
-	ChSimplePowertrainPtr powertrain;
+	ChPowertrainPtr powertrain;
 	std::vector<ChRigidTirePtr> tires;
 	ChPathFollowerDriverPtr driver;
 

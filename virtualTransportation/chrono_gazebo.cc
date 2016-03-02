@@ -44,6 +44,8 @@
 using namespace chrono;
 using namespace gazebo;
 
+#define PATH_RADIUS 36.605637
+
 class chrono_gazebo: public WorldPlugin {
 public:
 	void LoadMetadata() {
@@ -55,6 +57,8 @@ public:
 			// program parameters
 			element = root.FirstChild("numVehicles").Element();
 			numVehicles = std::max(1, std::stoi(element->GetText()));
+			element = root.FirstChild("vehicleGap").Element();
+			vehicleGap = std::stof(element->GetText());
 			element = root.FirstChild("iterations").Element();
 			iters = std::max(1, std::stoi(element->GetText()));
 			element = root.FirstChild("stepSize").Element();
@@ -87,16 +91,16 @@ public:
 		std::cout << "[GcVehicle] step_size: " << stepSize << std::endl;
 		std::cout << "[GcVehicle] maxSpeedInput: " << maxSpeedInput << std::endl;
 		std::cout << "[GcVehicle] rigidTerrainFile: " << rigidTerrainFile
-				<< std::endl;
+		<< std::endl;
 		std::cout << "[GcVehicle] vehicleFile: " << vehicleFile << std::endl;
 		std::cout << "[GcVehicle] rigidTireFile: " << rigidTireFile << std::endl;
 		std::cout << "[GcVehicle] simplepowertrainFile: " << simplePowertrainFile
-				<< std::endl;
+		<< std::endl;
 		std::cout << "[GcVehicle] driverFile: " << driverFile << std::endl;
 		std::cout << "[GcVehicle] steeringControllerFile: "
-				<< steeringControllerFile << std::endl;
+		<< steeringControllerFile << std::endl;
 		std::cout << "[GcVehicle] speedControllerFile: " << speedControllerFile
-				<< std::endl;
+		<< std::endl;
 		std::cout << "[GcVehicle] pathFile: " << pathFile << std::endl;
 #endif /* debug information */
 
@@ -104,6 +108,10 @@ public:
 
 	void Load(physics::WorldPtr _parent, sdf::ElementPtr _sdf) {
 		LoadMetadata();
+		_sdf->GetParent()->PrintValues("");
+		auto models = _parent->GetModels();
+		for (int i = 0; i < models.size(); i++)
+			models[i]->GetSDF()->PrintValues("");
 
 		this->_world = _parent;
 		// disable the physics engine
@@ -133,9 +141,8 @@ public:
 		chsys->SetMaxPenetrationRecoverySpeed(10.0);
 
 		// load and initialize terrain
-		terrain = ChSharedPtr<vehicle::RigidTerrain>(
-				new vehicle::RigidTerrain(chsys,
-						vehicle::GetDataFile(rigidTerrainFile)));
+		terrain = std::make_shared<vehicle::RigidTerrain>(chsys,
+				vehicle::GetDataFile(rigidTerrainFile));
 
 #ifdef DEBUG
 		std::cout << "[GcVehicle] Terrain file loaded." << std::endl;
@@ -163,15 +170,14 @@ public:
 				boost::bind(&chrono_gazebo::QueueThread, this));
 
 		// store the created vehicles
-		gcVehicles = std::vector<boost::shared_ptr<GcVehicle> >(numVehicles);
+		gcVehicles = std::vector<std::shared_ptr<GcVehicle> >(numVehicles);
 		const double pi = 3.1415926535;
-		const double step = pi * 2 / 21;
-		const double radius = 50;
 		for (int i = 0; i < numVehicles; i++) {
-			const double ang = (i + 1) * step;
-			auto pos = ChVector<>(radius * std::cos(ang), radius * std::sin(ang), 1);
-			auto rot = ChQuaternion<>(std::cos((ang + pi / 2) / 2), 0, 0,
-					std::sin((ang + pi / 2) / 2));
+			const double ang = i * vehicleGap;
+			auto pos = ChVector<>(PATH_RADIUS * std::cos(ang),
+					PATH_RADIUS * std::sin(ang), 1);
+			auto rot = ChQuaternion<>(std::cos((ang - pi / 2) / 2), 0, 0,
+					std::sin((ang - pi / 2) / 2));
 			builder.setInitCoordsys(ChCoordsys<>(pos, rot));
 			gcVehicles[i] = builder.buildGcVehicle();
 		}
@@ -182,14 +188,14 @@ public:
 				boost::bind(&chrono_gazebo::OnUpdate, this));
 
 #ifdef DEBUG
-		std::cout << "[GcVehicle] chrono_gazebo loading completes." << std::endl;
+		std::cout << "[GcVehicle] chrono_gazebo loading complete." << std::endl;
 #endif /* debug information */
 	}
 
 public:
 	void OnUpdate() {
 		// update terrain
-		terrain->Update(chsys->GetChTime());
+		terrain->Synchronize(chsys->GetChTime());
 		// advance each vehicle
 		for (int i = 0; i < numVehicles; i++) {
 			gcVehicles[i]->advance();
@@ -219,10 +225,11 @@ public:
 private:
 	bool debug;
 	int numVehicles;
-	std::vector<boost::shared_ptr<GcVehicle> > gcVehicles;
+	double vehicleGap;
+	std::vector<std::shared_ptr<GcVehicle> > gcVehicles;
 
 	ChSystem *chsys;
-	ChSharedPtr<vehicle::RigidTerrain> terrain;
+	std::shared_ptr<vehicle::ChTerrain> terrain;
 
 	double maxSpeedInput;
 	double stepSize;
