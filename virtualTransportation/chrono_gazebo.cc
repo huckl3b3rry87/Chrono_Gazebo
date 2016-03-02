@@ -64,7 +64,7 @@ public:
 			element = root.FirstChild("stepSize").Element();
 			stepSize = std::stod(element->GetText());
 			element = root.FirstChild("maxSpeed").Element();
-			maxSpeedInput = std::stod(element->GetText());
+			maxSpeed = std::stod(element->GetText());
 
 			// get file locations
 			TiXmlHandle files = root.FirstChild("files");
@@ -87,9 +87,10 @@ public:
 
 #ifdef DEBUG
 		std::cout << "[GcVehicle] numVehicles: " << numVehicles << std::endl;
+		std::cout << "[GcVehicle] vehicleGap: " << vehicleGap << std::endl;
 		std::cout << "[GcVehicle] iters: " << iters << std::endl;
 		std::cout << "[GcVehicle] step_size: " << stepSize << std::endl;
-		std::cout << "[GcVehicle] maxSpeedInput: " << maxSpeedInput << std::endl;
+		std::cout << "[GcVehicle] maxSpeed: " << maxSpeed << std::endl;
 		std::cout << "[GcVehicle] rigidTerrainFile: " << rigidTerrainFile
 		<< std::endl;
 		std::cout << "[GcVehicle] vehicleFile: " << vehicleFile << std::endl;
@@ -108,10 +109,6 @@ public:
 
 	void Load(physics::WorldPtr _parent, sdf::ElementPtr _sdf) {
 		LoadMetadata();
-		_sdf->GetParent()->PrintValues("");
-		auto models = _parent->GetModels();
-		for (int i = 0; i < models.size(); i++)
-			models[i]->GetSDF()->PrintValues("");
 
 		this->_world = _parent;
 		// disable the physics engine
@@ -149,7 +146,8 @@ public:
 #endif /* debug information */
 
 		// create and initialize GcVehicleBuilder
-		auto builder = GcVehicleBuilder(_world, chsys, terrain, stepSize);
+		auto builder = GcVehicleBuilder(_world, chsys, terrain, PATH_RADIUS,
+				vehicleGap, maxSpeed, stepSize);
 		builder.setVehicleFile(vehicleFile);
 		builder.setPowertrainFile(simplePowertrainFile);
 		builder.setTireFile(rigidTireFile);
@@ -163,7 +161,6 @@ public:
 		std::cout << "[GcVehicle] Path file loaded." << std::endl;
 #endif /* debug information */
 		builder.setPath(path);
-		builder.setMaxSpeed(maxSpeedInput);
 
 		// Custom Callback Queue
 		this->callback_queue_thread_ = boost::thread(
@@ -171,14 +168,7 @@ public:
 
 		// store the created vehicles
 		gcVehicles = std::vector<std::shared_ptr<GcVehicle> >(numVehicles);
-		const double pi = 3.1415926535;
 		for (int i = 0; i < numVehicles; i++) {
-			const double ang = i * vehicleGap;
-			auto pos = ChVector<>(PATH_RADIUS * std::cos(ang),
-					PATH_RADIUS * std::sin(ang), 1);
-			auto rot = ChQuaternion<>(std::cos((ang - pi / 2) / 2), 0, 0,
-					std::sin((ang - pi / 2) / 2));
-			builder.setInitCoordsys(ChCoordsys<>(pos, rot));
 			gcVehicles[i] = builder.buildGcVehicle();
 		}
 
@@ -231,7 +221,7 @@ private:
 	ChSystem *chsys;
 	std::shared_ptr<vehicle::ChTerrain> terrain;
 
-	double maxSpeedInput;
+	double maxSpeed;
 	double stepSize;
 	double iters;
 

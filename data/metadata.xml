@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <metadata>
-	<numVehicles>2</numVehicles>
+	<numVehicles>22</numVehicles>
 	<vehicleGap>0.285599332</vehicleGap>
 	<iterations>10</iterations>
 	<stepSize>0.001</stepSize>

@@ -78,18 +78,16 @@
 									<uri>file://../data/gazono.material</uri>
 									<name>Gazebo/Ground01</name>
 								</script>
-
 							</material>
 						</visual>
-						<!--
-						<sensor name="topcamera" type="camera">
-							<pose>-70 0 30 0 .62 0</pose>
-							<camera name="secCam">
+						<sensor name="skycamera" type="camera">
+							<pose>0 0 45 0 1.5708 0</pose>
+							<camera name="skyCam">
 								<horizontal_fov>1.57</horizontal_fov>
 								<image>
 									<format>B8G8R8</format>
-									<width>2560</width>
-									<height>1440</height>
+									<width>720</width>
+									<height>720</height>
 								</image>
 								<clip>
 									<near>0.1</near>
@@ -101,14 +99,13 @@
 									<stddev>0.000</stddev>
 								</noise>
 								<save enabled="true">
-									<path>Captures/SecCam/2016_03_02_2k</path>
+									<path>Captures/SkyCam/2016_03_02_2k</path>
 								</save>
 							</camera>
 							<always_on>1</always_on>
-							<update_rate>60</update_rate>
+							<update_rate>100</update_rate>
 							<visualize>true</visualize>
 						</sensor>
-					-->
 					<!--
 						<sensor name="sidecamera" type="camera">
 							<pose>-55 0 2 0 .2 .6</pose>

@@ -33,7 +33,7 @@ GcVehicle::GcVehicle(const int id,
 		const GcVehicle::ChWheeledVehiclePtr vehicle,
 		const GcVehicle::ChPowertrainPtr powertrain,
 		const std::vector<GcVehicle::ChRigidTirePtr> &tires,
-		const GcVehicle::ChPathFollowerDriverPtr driver,
+		const GcVehicle::ChDriverPtr driver,
 		const double maxSpeed, const sensors::RaySensorPtr raySensor,
 		const physics::ModelPtr gazeboVehicle,
 		const std::vector<physics::ModelPtr> &gazeboWheels,
@@ -71,13 +71,7 @@ void GcVehicle::advance() {
 				minRange = ranges[i];
 		}
 	}
-	double targetSpeed = maxSpeed;
-	if (minRange < 10000.0) {
-		//linear so 6m/s at 20m at 0m/s at 2.5m
-		targetSpeed = .343 * minRange - .857;
-	}
-
-	driver->SetDesiredSpeed(targetSpeed);
+	driver->SetCurrentDistance(minRange);
 
 	double brakingInput = driver->GetBraking();
 	steeringInput = driver->GetSteering();

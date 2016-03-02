@@ -36,8 +36,8 @@ class GcVehicleBuilder {
 public:
 	// constructor
 	GcVehicleBuilder(gazebo::physics::WorldPtr world, chrono::ChSystem *chsys,
-			GcVehicle::ChTerrainPtr terrain,
-			const double stepSize);
+			GcVehicle::ChTerrainPtr terrain, const double pathRadius,
+			const double vehicleGap, const double maxSpeed, const double stepSize);
 
 	// build a vehicle with all the components
 	std::shared_ptr<GcVehicle> buildGcVehicle();
@@ -55,10 +55,6 @@ public:
 	void setSteerCtrlFile(const std::string &steerFile);
 
 	void setSpeedCtrlFile(const std::string &speedFile);
-
-	void setInitCoordsys(const chrono::ChCoordsys<> &coordsys);
-
-	void setMaxSpeed(const double maxSpeed);
 
 	void setPath(chrono::ChBezierCurve *path);
 
@@ -84,7 +80,10 @@ private:
 
 	// vehicle specific parameters
 	int vehId = 0;
-	chrono::ChCoordsys<> coordsys;
+	double pathRadius = 0;
+	double vehicleGap = 0;
+	double vehicleDist = 0;
+	double followingTime = 0;
 	double maxSpeed = 0;
 	chrono::ChBezierCurve *path = NULL;
 	ros::Subscriber lastSub;

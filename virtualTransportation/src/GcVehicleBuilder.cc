@@ -19,8 +19,9 @@
 // =============================================================================
 
 #include <boost/bind/bind.hpp>
+#include <chrono/core/ChCoordsys.h>
 #include <chrono_vehicle/ChVehicleModelData.h>
-#include <chrono_vehicle/driver/ChPathFollowerDriver.h>
+#include <chrono_vehicle/driver/ChPathFollowerACCDriver.h>
 #include <chrono_vehicle/powertrain/SimplePowertrain.h>
 #include <chrono_vehicle/wheeled_vehicle/tire/RigidTire.h>
 #include <chrono_vehicle/wheeled_vehicle/vehicle/WheeledVehicle.h>
@@ -41,9 +42,17 @@
 using namespace chrono;
 using namespace gazebo;
 
+#define PI 3.1415926535
+
 GcVehicleBuilder::GcVehicleBuilder(physics::WorldPtr world, ChSystem *chsys,
-		GcVehicle::ChTerrainPtr terrain, const double stepSize) :
-		world(world), chsys(chsys), terrain(terrain), stepSize(stepSize) {
+		GcVehicle::ChTerrainPtr terrain, const double pathRadius,
+		const double vehicleGap, const double maxSpeed, const double stepSize) :
+		world(world), chsys(chsys), terrain(terrain), pathRadius(pathRadius), vehicleGap(
+				vehicleGap), maxSpeed(maxSpeed), stepSize(stepSize) {
+	vehicleDist = pathRadius * vehicleGap;
+	followingTime = vehicleDist / maxSpeed;
+	std::cout << "vehicleDist: " << vehicleDist << std::endl;
+	std::cout << "followingTime: " << followingTime << std::endl;
 }
 
 std::shared_ptr<GcVehicle> GcVehicleBuilder::buildGcVehicle() {
@@ -58,7 +67,13 @@ std::shared_ptr<GcVehicle> GcVehicleBuilder::buildGcVehicle() {
 
 	// create and initialize a Chrono vehicle model
 	auto veh = std::make_shared<vehicle::WheeledVehicle>(chsys, vehicleFile);
-	veh->Initialize(coordsys);
+
+	const double ang = vehId * vehicleGap;
+	auto pos = ChVector<>(pathRadius * std::cos(ang), pathRadius * std::sin(ang),
+			1);
+	auto rot = ChQuaternion<>(std::cos((ang - PI / 2) / 2), 0, 0,
+			std::sin((ang - PI / 2) / 2));
+	veh->Initialize(ChCoordsys<>(pos, rot));
 
 #ifdef DEBUG
 	std::cout << "[GcVehicle] Vehicle initialzied." << std::endl;
@@ -86,8 +101,9 @@ std::shared_ptr<GcVehicle> GcVehicleBuilder::buildGcVehicle() {
 	}
 
 // create path follower
-	auto driver = std::make_shared<vehicle::ChPathFollowerDriver>(*veh, steerFile,
-			speedFile, path, std::string("my_path"), 0.0, true);
+	auto driver = std::make_shared<vehicle::ChPathFollowerACCDriver>(*veh,
+			steerFile, speedFile, path, std::string("my_path"), maxSpeed,
+			followingTime, vehicleDist * 0.8, vehicleDist, true);
 
 #ifdef DEBUG
 	std::cout << "[GcVehicle] Path follower driver loading completes." << std::endl;
@@ -182,14 +198,6 @@ void GcVehicleBuilder::setSteerCtrlFile(const std::string &steerFile) {
 
 void GcVehicleBuilder::setSpeedCtrlFile(const std::string &speedFile) {
 	this->speedFile = vehicle::GetDataFile(speedFile);
-}
-
-void GcVehicleBuilder::setInitCoordsys(const ChCoordsys<> &coordsys) {
-	this->coordsys = coordsys;
-}
-
-void GcVehicleBuilder::setMaxSpeed(const double maxSpeed) {
-	this->maxSpeed = maxSpeed;
 }
 
 void GcVehicleBuilder::setPath(ChBezierCurve * const path) {

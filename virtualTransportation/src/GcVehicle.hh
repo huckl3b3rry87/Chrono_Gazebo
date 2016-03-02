@@ -23,7 +23,7 @@
 
 //includes
 
-#include <chrono_vehicle/driver/ChPathFollowerDriver.h>
+#include <chrono_vehicle/driver/ChPathFollowerACCDriver.h>
 #include <chrono_vehicle/powertrain/ChSimplePowertrain.h>
 #include <chrono_vehicle/ChTerrain.h>
 #include <chrono_vehicle/wheeled_vehicle/tire/ChRigidTire.h>
@@ -45,13 +45,13 @@ public:
 	typedef std::shared_ptr<chrono::vehicle::ChWheeledVehicle> ChWheeledVehiclePtr;
 	typedef std::shared_ptr<chrono::vehicle::ChPowertrain> ChPowertrainPtr;
 	typedef std::shared_ptr<chrono::vehicle::ChRigidTire> ChRigidTirePtr;
-	typedef std::shared_ptr<chrono::vehicle::ChPathFollowerDriver> ChPathFollowerDriverPtr;
+	typedef std::shared_ptr<chrono::vehicle::ChPathFollowerACCDriver> ChDriverPtr;
 
 	// constructor
 	GcVehicle(const int id, const ChTerrainPtr terrain,
 			const ChWheeledVehiclePtr vehicle, const ChPowertrainPtr powertrain,
 			const std::vector<ChRigidTirePtr> &tires,
-			const ChPathFollowerDriverPtr driver, const double maxSpeed,
+			const ChDriverPtr driver, const double maxSpeed,
 			const gazebo::sensors::RaySensorPtr raySensor,
 			const gazebo::physics::ModelPtr gazeboVehicle,
 			const std::vector<gazebo::physics::ModelPtr> &gazeboWheels,
@@ -79,7 +79,7 @@ private:
 	ChWheeledVehiclePtr vehicle;
 	ChPowertrainPtr powertrain;
 	std::vector<ChRigidTirePtr> tires;
-	ChPathFollowerDriverPtr driver;
+	ChDriverPtr driver;
 
 	// gazebo components
 	gazebo::sensors::RaySensorPtr raySensor;
