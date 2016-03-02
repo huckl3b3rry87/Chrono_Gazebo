@@ -1,3 +1,6 @@
+.autotools
+.project
+.cproject
 models/trafficCircle.world
 build
 build/*

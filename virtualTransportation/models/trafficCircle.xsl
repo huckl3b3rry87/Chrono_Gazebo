@@ -63,6 +63,7 @@
 					<pose>0 0 0 0 0 0</pose>
 					<static>true</static>
 					<link name="link">
+						<frame name="ground" />
 						<pose>0 0 0 0 0 0</pose>
 						<visual name="visual">
 							<cast_shadows>true</cast_shadows>
@@ -145,57 +146,57 @@
 
 				<road name="circular_road">
 					<width>7.5</width>
-					<point>50.00 0.00 0.05</point>
-					<point>49.61 6.27 0.05</point>
-					<point>48.43 12.43 0.05</point>
-					<point>46.49 18.41 0.05</point>
-					<point>43.82 24.09 0.05</point>
-					<point>40.45 29.39 0.05</point>
-					<point>36.45 34.23 0.05</point>
-					<point>31.87 38.53 0.05</point>
-					<point>26.79 42.22 0.05</point>
-					<point>21.29 45.24 0.05</point>
-					<point>15.45 47.55 0.05</point>
-					<point>9.37 49.11 0.05</point>
-					<point>3.14 49.90 0.05</point>
-					<point>-3.14 49.90 0.05</point>
-					<point>-9.37 49.11 0.05</point>
-					<point>-15.45 47.55 0.05</point>
-					<point>-21.29 45.24 0.05</point>
-					<point>-26.79 42.22 0.05</point>
-					<point>-31.87 38.53 0.05</point>
-					<point>-36.45 34.23 0.05</point>
-					<point>-40.45 29.39 0.05</point>
-					<point>-43.82 24.09 0.05</point>
-					<point>-46.49 18.41 0.05</point>
-					<point>-48.43 12.43 0.05</point>
-					<point>-49.61 6.27 0.05</point>
-					<point>-50.00 -0.00 0.05</point>
-					<point>-49.61 -6.27 0.05</point>
-					<point>-48.43 -12.43 0.05</point>
-					<point>-46.49 -18.41 0.05</point>
-					<point>-43.82 -24.09 0.05</point>
-					<point>-40.45 -29.39 0.05</point>
-					<point>-36.45 -34.23 0.05</point>
-					<point>-31.87 -38.53 0.05</point>
-					<point>-26.79 -42.22 0.05</point>
-					<point>-21.29 -45.24 0.05</point>
-					<point>-15.45 -47.55 0.05</point>
-					<point>-9.37 -49.11 0.05</point>
-					<point>-3.14 -49.90 0.05</point>
-					<point>3.14 -49.90 0.05</point>
-					<point>9.37 -49.11 0.05</point>
-					<point>15.45 -47.55 0.05</point>
-					<point>21.29 -45.24 0.05</point>
-					<point>26.79 -42.22 0.05</point>
-					<point>31.87 -38.53 0.05</point>
-					<point>36.45 -34.23 0.05</point>
-					<point>40.45 -29.39 0.05</point>
-					<point>43.82 -24.09 0.05</point>
-					<point>46.49 -18.41 0.05</point>
-					<point>48.43 -12.43 0.05</point>
-					<point>49.61 -6.27 0.05</point>
-					<point>50.00 0.00 0.05</point>
+					<point>36.605637 0.000000 0.05</point>
+					<point>36.316991 4.587903 0.05</point>
+					<point>35.455604 9.103452 0.05</point>
+					<point>34.035061 13.475434 0.05</point>
+					<point>32.077764 17.634900 0.05</point>
+					<point>29.614582 21.516254 0.05</point>
+					<point>26.684361 25.058283 0.05</point>
+					<point>23.333311 28.205128 0.05</point>
+					<point>19.614281 30.907162 0.05</point>
+					<point>15.585922 33.121771 0.05</point>
+					<point>11.311764 34.814030 0.05</point>
+					<point>6.859212 35.957251 0.05</point>
+					<point>2.298487 36.533404 0.05</point>
+					<point>-2.298487 36.533404 0.05</point>
+					<point>-6.859212 35.957251 0.05</point>
+					<point>-11.311764 34.814030 0.05</point>
+					<point>-15.585922 33.121771 0.05</point>
+					<point>-19.614281 30.907162 0.05</point>
+					<point>-23.333311 28.205128 0.05</point>
+					<point>-26.684361 25.058283 0.05</point>
+					<point>-29.614582 21.516254 0.05</point>
+					<point>-32.077764 17.634900 0.05</point>
+					<point>-34.035061 13.475434 0.05</point>
+					<point>-35.455604 9.103452 0.05</point>
+					<point>-36.316991 4.587903 0.05</point>
+					<point>-36.605637 -0.000000 0.05</point>
+					<point>-36.316991 -4.587903 0.05</point>
+					<point>-35.455604 -9.103452 0.05</point>
+					<point>-34.035061 -13.475434 0.05</point>
+					<point>-32.077764 -17.634900 0.05</point>
+					<point>-29.614582 -21.516254 0.05</point>
+					<point>-26.684361 -25.058283 0.05</point>
+					<point>-23.333311 -28.205128 0.05</point>
+					<point>-19.614281 -30.907162 0.05</point>
+					<point>-15.585922 -33.121771 0.05</point>
+					<point>-11.311764 -34.814030 0.05</point>
+					<point>-6.859212 -35.957251 0.05</point>
+					<point>-2.298487 -36.533404 0.05</point>
+					<point>2.298487 -36.533404 0.05</point>
+					<point>6.859212 -35.957251 0.05</point>
+					<point>11.311764 -34.814030 0.05</point>
+					<point>15.585922 -33.121771 0.05</point>
+					<point>19.614281 -30.907162 0.05</point>
+					<point>23.333311 -28.205128 0.05</point>
+					<point>26.684361 -25.058283 0.05</point>
+					<point>29.614582 -21.516254 0.05</point>
+					<point>32.077764 -17.634900 0.05</point>
+					<point>34.035061 -13.475434 0.05</point>
+					<point>35.455604 -9.103452 0.05</point>
+					<point>36.316991 -4.587903 0.05</point>
+					<point>36.605637 0 0.05</point>
 					<material>
 						<script>
 							<uri>file://../data/gazono.material</uri>

@@ -3,7 +3,9 @@
 	<model name="wheel">
 		<pose>0 0 0 0 0 0</pose>
 		<link name="link">
-			<pose>0 0 0 0 0 0</pose>
+			<frame name="wheel">
+				<pose frame="wheel">0 0 0 0 0 0</pose>
+			</frame>
 			<visual name="visual">
 				<geometry>
 					<mesh>

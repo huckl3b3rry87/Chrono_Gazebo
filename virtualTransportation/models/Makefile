@@ -2,7 +2,7 @@
 meta = ../../data/metadata.xml
 world = trafficCircle
 
-all: trafficCircle.world
+all: $(world).world
 
 $(world).world: $(meta) $(world).xsl
 	xsltproc $(world).xsl $(meta) > $(world).world
