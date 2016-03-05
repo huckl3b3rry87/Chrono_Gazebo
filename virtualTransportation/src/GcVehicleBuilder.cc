@@ -39,6 +39,8 @@
 #include <iostream>
 #include <vector>
 
+#define DEBUG
+
 using namespace chrono;
 using namespace gazebo;
 
@@ -50,7 +52,7 @@ GcVehicleBuilder::GcVehicleBuilder(physics::WorldPtr world, ChSystem *chsys,
 		world(world), chsys(chsys), terrain(terrain), pathRadius(pathRadius), vehicleGap(
 				vehicleGap), maxSpeed(maxSpeed), stepSize(stepSize) {
 	vehicleDist = pathRadius * vehicleGap;
-	followingTime = vehicleDist / maxSpeed;
+	followingTime = 2.0;//vehicleDist / maxSpeed;
 	std::cout << "vehicleDist: " << vehicleDist << std::endl;
 	std::cout << "followingTime: " << followingTime << std::endl;
 }
@@ -68,11 +70,14 @@ std::shared_ptr<GcVehicle> GcVehicleBuilder::buildGcVehicle() {
 	// create and initialize a Chrono vehicle model
 	auto veh = std::make_shared<vehicle::WheeledVehicle>(chsys, vehicleFile);
 
-	const double ang = vehId * vehicleGap;
+	const double ang = (vehId) * vehicleGap;
 	auto pos = ChVector<>(pathRadius * std::cos(ang), pathRadius * std::sin(ang),
 			1);
-	auto rot = ChQuaternion<>(std::cos((ang - PI / 2) / 2), 0, 0,
-			std::sin((ang - PI / 2) / 2));
+	auto rot = Q_from_AngZ(ang - (CH_C_PI/2.0));
+	std::cout<<"rotation Quaternion: "<<rot.e0<<", "<<rot.e1<<", "<<rot.e2<<", "<<rot.e3<<std::endl;
+
+			//ChQuaternion<>(std::cos((ang - PI / 2) / 2), 0, 0,
+			//std::sin((ang - PI / 2) / 2));
 	veh->Initialize(ChCoordsys<>(pos, rot));
 
 #ifdef DEBUG
@@ -103,7 +108,7 @@ std::shared_ptr<GcVehicle> GcVehicleBuilder::buildGcVehicle() {
 // create path follower
 	auto driver = std::make_shared<vehicle::ChPathFollowerACCDriver>(*veh,
 			steerFile, speedFile, path, std::string("my_path"), maxSpeed,
-			followingTime, vehicleDist * 0.8, vehicleDist, true);
+			followingTime, 5.0, vehicleDist, true);
 
 #ifdef DEBUG
 	std::cout << "[GcVehicle] Path follower driver loading completes." << std::endl;

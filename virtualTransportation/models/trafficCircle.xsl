@@ -81,9 +81,9 @@
 							</material>
 						</visual>
 						<sensor name="skycamera" type="camera">
-							<pose>0 0 45 0 1.5708 0</pose>
+							<pose>0 0 90 0 1.5708 0</pose>
 							<camera name="skyCam">
-								<horizontal_fov>1.57</horizontal_fov>
+								<horizontal_fov>.873</horizontal_fov>
 								<image>
 									<format>B8G8R8</format>
 									<width>720</width>
@@ -99,11 +99,11 @@
 									<stddev>0.000</stddev>
 								</noise>
 								<save enabled="true">
-									<path>Captures/SkyCam/2016_03_02_2k</path>
+									<path>Captures/SkyCam/2016_03_05_720_c</path>
 								</save>
 							</camera>
 							<always_on>1</always_on>
-							<update_rate>100</update_rate>
+							<update_rate>30</update_rate>
 							<visualize>true</visualize>
 						</sensor>
 					<!--
@@ -194,6 +194,7 @@
 					<point>35.455604 -9.103452 0.05</point>
 					<point>36.316991 -4.587903 0.05</point>
 					<point>36.605637 0 0.05</point>
+					<point>36.316991 4.587903 0.05</point>
 					<material>
 						<script>
 							<uri>file://../data/gazono.material</uri>

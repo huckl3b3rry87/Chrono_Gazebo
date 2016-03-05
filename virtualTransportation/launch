@@ -7,6 +7,6 @@ export GAZEBO_RESOURCE_PATH=${GAZEBO_RESOURCE_PATH}:$PWD
 
 # run each process in its own shell
 terminator -e "roscore" &
-terminator -e "python ./OpenCV/follower_opencv0.py" &
-terminator -e "python ./OpenCV/follower_opencv1.py" &
+#terminator -e "python ./OpenCV/follower_opencv0.py" &
+#terminator -e "python ./OpenCV/follower_opencv1.py" &
 terminator -e "rosrun gazebo_ros gzserver -s libgazebo_ros_api_plugin.so models/trafficCircle.world --verbose" &

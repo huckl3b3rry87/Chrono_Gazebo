@@ -113,7 +113,8 @@ public:
 		this->_world = _parent;
 		// disable the physics engine
 		_world->EnablePhysicsEngine(false);
-		_world->GetPhysicsEngine()->SetRealTimeUpdateRate(1000);
+		_world->GetPhysicsEngine()->SetRealTimeUpdateRate(100);
+		_world->GetPhysicsEngine()->SetMaxStepSize(stepSize);
 
 		// BEGIN LINE FOLLOW
 		if (!ros::isInitialized()) {
@@ -191,6 +192,8 @@ public:
 			gcVehicles[i]->advance();
 		}
 		terrain->Advance(stepSize);
+		gcVehicles[0]->getVehicle()->Advance(stepSize);
+		//std::cout<<std::endl;
 	}
 
 	// custom callback queue thread

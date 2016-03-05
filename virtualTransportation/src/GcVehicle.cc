@@ -62,15 +62,17 @@ math::Pose GcVehicle::getPose(const ChVector<> vec, const ChQuaternion<> quat) {
 //advance
 void GcVehicle::advance() {
 	std::vector<double> ranges;
+	raySensor->Update(true);
 	raySensor->GetRanges(ranges);
-	double center = steeringInput * 50 + 50;
+	//double center = steeringInput * 50 + 50;
 	double minRange = 100000.0;
 	for (int i = 0; i < ranges.size(); i++) {
-		if (ranges[i] * sin(abs(i - center) * 3.14159 / 180.0) <= 2.5) {
+		//if (ranges[i] * sin(abs(i - center) * 3.14159 / 180.0) <= 2.5) {
 			if (ranges[i] < minRange)
 				minRange = ranges[i];
-		}
+		//}
 	}
+
 	driver->SetCurrentDistance(minRange);
 
 	double brakingInput = driver->GetBraking();
@@ -96,7 +98,7 @@ void GcVehicle::advance() {
 	// Advance simulation for one timestep for all modules
 	driver->Advance(stepSize);
 	powertrain->Advance(stepSize);
-	vehicle->Advance(stepSize);
+	//vehicle->Advance(stepSize);
 	for (int i = 0; i < numWheels; i++) {
 		tires[i]->Advance(stepSize);
 	}
@@ -111,6 +113,9 @@ void GcVehicle::advance() {
 				getPose(vehicle->GetWheelPos(i), vehicle->GetWheelRot(i)),
 				"link");
 	}
+	////////////////DEBUG LINE////////////
+//	std::cout<<"Vehicle "<<this->id<<": \t"<<"range: "<<minRange<<"\tVelocity: "<<vehicle->GetVehicleSpeedCOM()<<"\tbrakeInput: "
+//				<<brakingInput<<"\twheelSpeed: "<<vehicle->GetWheelOmega(0)<<"\tbrakeTorque: "<<vehicle->GetBrake(0)->GetBrakeTorque()<<"\t";
 }
 
 int GcVehicle::getId() {
