@@ -28,97 +28,85 @@ using namespace chrono;
 using namespace gazebo;
 
 //constructor
-GcVehicle::GcVehicle(const int id,
-		const GcVehicle::ChTerrainPtr terrain,
+GcVehicle::GcVehicle(const int id, const GcVehicle::ChTerrainPtr terrain,
 		const GcVehicle::ChWheeledVehiclePtr vehicle,
 		const GcVehicle::ChPowertrainPtr powertrain,
 		const std::vector<GcVehicle::ChRigidTirePtr> &tires,
-		const GcVehicle::ChDriverPtr driver,
-		const double maxSpeed, const sensors::RaySensorPtr raySensor,
+		const GcVehicle::ChDriverPtr driver, const double maxSpeed,
+		const sensors::RaySensorPtr raySensor,
 		const physics::ModelPtr gazeboVehicle,
-		const std::vector<physics::ModelPtr> &gazeboWheels,
-		const double stepSize) :
-		id(id), terrain(terrain), vehicle(vehicle), powertrain(powertrain), tires(
-				tires), driver(driver), maxSpeed(maxSpeed), raySensor(
-				raySensor), gazeboVehicle(gazeboVehicle), gazeboWheels(
-				gazeboWheels), steeringInput(0), stepSize(stepSize) {
-	numWheels = vehicle->GetNumberAxles() * 2;
+		const std::vector<physics::ModelPtr> &gazeboWheels) :
+		m_id(id), m_terrain(terrain), m_vehicle(vehicle), m_powertrain(powertrain), m_tires(
+				tires), m_driver(driver), m_maxSpeed(maxSpeed), m_raySensor(raySensor), m_gazeboVehicle(
+				gazeboVehicle), m_gazeboWheels(gazeboWheels), m_steeringInput(0) {
+	m_numWheels = vehicle->GetNumberAxles() * 2;
 }
 
-GcVehicle::ChWheeledVehiclePtr GcVehicle::getVehicle() {
-	return vehicle;
-}
-
-void GcVehicle::updateDriver(const std_msgs::Float64::ConstPtr& _msg) {
-	steeringInput = _msg->data;
+void GcVehicle::UpdateDriver(const std_msgs::Float64::ConstPtr& _msg) {
+	m_steeringInput = _msg->data;
 }
 
 //private functions
-math::Pose GcVehicle::getPose(const ChVector<> vec, const ChQuaternion<> quat) {
+math::Pose GcVehicle::GetPose(const ChVector<> vec, const ChQuaternion<> quat) {
 	return math::Pose(math::Vector3(vec.x, vec.y, vec.z),
 			math::Quaternion(quat.e0, quat.e1, quat.e2, quat.e3));
 }
 
 //advance
-void GcVehicle::advance() {
+
+void GcVehicle::Synchronize(const double time) {
 	std::vector<double> ranges;
-	raySensor->Update(true);
-	raySensor->GetRanges(ranges);
+	m_raySensor->GetRanges(ranges);
 	//double center = steeringInput * 50 + 50;
 	double minRange = 100000.0;
 	for (int i = 0; i < ranges.size(); i++) {
 		//if (ranges[i] * sin(abs(i - center) * 3.14159 / 180.0) <= 2.5) {
-			if (ranges[i] < minRange)
-				minRange = ranges[i];
+		if (ranges[i] < minRange)
+			minRange = ranges[i];
 		//}
 	}
 
-	driver->SetCurrentDistance(minRange);
+	m_driver->SetCurrentDistance(minRange);
 
-	double brakingInput = driver->GetBraking();
-	steeringInput = driver->GetSteering();
-	double throttleInput = driver->GetThrottle();
-	double powertrainTorque = powertrain->GetOutputTorque();
-	double driveshaftSpeed = vehicle->GetDriveshaftSpeed();
-	vehicle::TireForces tireForces(numWheels);
-	vehicle::WheelStates wheelStates(numWheels);
-	for (int i = 0; i < numWheels; i++) {
-		tireForces[i] = tires[i]->GetTireForce();
-		wheelStates[i] = vehicle->GetWheelState(i);
+	double brakingInput = m_driver->GetBraking();
+	m_steeringInput = m_driver->GetSteering();
+	double throttleInput = m_driver->GetThrottle();
+	double powertrainTorque = m_powertrain->GetOutputTorque();
+	double driveshaftSpeed = m_vehicle->GetDriveshaftSpeed();
+	vehicle::TireForces tireForces(m_numWheels);
+	vehicle::WheelStates wheelStates(m_numWheels);
+	for (int i = 0; i < m_numWheels; i++) {
+		tireForces[i] = m_tires[i]->GetTireForce();
+		wheelStates[i] = m_vehicle->GetWheelState(i);
 	}
 
-	double time = vehicle->GetSystem()->GetChTime();
-	driver->Synchronize(time);
-	powertrain->Synchronize(time, throttleInput, driveshaftSpeed);
-	vehicle->Synchronize(time, steeringInput, brakingInput, powertrainTorque,
+	m_driver->Synchronize(time);
+	for (int i = 0; i < m_numWheels; i++)
+		m_tires[i]->Synchronize(time, wheelStates[i], *m_terrain);
+	m_powertrain->Synchronize(time, throttleInput, driveshaftSpeed);
+	m_vehicle->Synchronize(time, m_steeringInput, brakingInput, powertrainTorque,
 			tireForces);
-	for (int i = 0; i < numWheels; i++)
-		tires[i]->Synchronize(time, wheelStates[i], *terrain);
+}
 
+void GcVehicle::Advance(const double step) {
 	// Advance simulation for one timestep for all modules
-	driver->Advance(stepSize);
-	powertrain->Advance(stepSize);
-	//vehicle->Advance(stepSize);
-	for (int i = 0; i < numWheels; i++) {
-		tires[i]->Advance(stepSize);
+	m_driver->Advance(step);
+	for (int i = 0; i < m_numWheels; i++) {
+		m_tires[i]->Advance(step);
 	}
+	m_powertrain->Advance(step);
+	// Since advance a vehicle will advance the whole system, it is advanced in the top level outside the loop.
 
 	//Communication and updates between Chrono and Gazebo
-	gazeboVehicle->SetWorldPose(
-			getPose(vehicle->GetChassisPos(), vehicle->GetChassisRot()),
-			"link");
-	auto rot = vehicle->GetChassisRot();
-	for (int i = 0; i < numWheels; i++) {
-		gazeboWheels[i]->SetWorldPose(
-				getPose(vehicle->GetWheelPos(i), vehicle->GetWheelRot(i)),
-				"link");
+	m_gazeboVehicle->SetWorldPose(
+			GetPose(m_vehicle->GetChassisPos(), m_vehicle->GetChassisRot()), "link");
+	auto rot = m_vehicle->GetChassisRot();
+	for (int i = 0; i < m_numWheels; i++) {
+		m_gazeboWheels[i]->SetWorldPose(
+				GetPose(m_vehicle->GetWheelPos(i), m_vehicle->GetWheelRot(i)), "link");
 	}
 	////////////////DEBUG LINE////////////
 //	std::cout<<"Vehicle "<<this->id<<": \t"<<"range: "<<minRange<<"\tVelocity: "<<vehicle->GetVehicleSpeedCOM()<<"\tbrakeInput: "
 //				<<brakingInput<<"\twheelSpeed: "<<vehicle->GetWheelOmega(0)<<"\tbrakeTorque: "<<vehicle->GetBrake(0)->GetBrakeTorque()<<"\t";
-}
-
-int GcVehicle::getId() {
-	return this->id;
 }
 

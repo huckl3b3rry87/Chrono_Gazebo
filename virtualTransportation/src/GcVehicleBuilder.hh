@@ -35,58 +35,75 @@ class GcVehicleBuilder {
 
 public:
 	// constructor
-	GcVehicleBuilder(gazebo::physics::WorldPtr world, chrono::ChSystem *chsys,
-			GcVehicle::ChTerrainPtr terrain, const double pathRadius,
-			const double vehicleGap, const double maxSpeed, const double stepSize);
+	GcVehicleBuilder(gazebo::physics::WorldPtr world,
+			std::shared_ptr<chrono::ChSystem> chsys, GcVehicle::ChTerrainPtr terrain,
+			const double pathRadius, const double vehicleGap, const double maxSpeed);
 
 	// build a vehicle with all the components
-	std::shared_ptr<GcVehicle> buildGcVehicle();
+	std::shared_ptr<GcVehicle> BuildGcVehicle();
 
-	ros::Subscriber &getLastRosSubscriber();
+	ros::Subscriber &GetLastRosSubscriber() {
+		return m_lastSub;
+	}
 
 	// parameter setters
 
-	void setVehicleFile(const std::string &vehicleFile);
+	void SetVehicleFile(const std::string &vehicleFile) {
+		m_vehicleFile = vehicleFile;
+	}
 
-	void setPowertrainFile(const std::string &powertrainFile);
+	void SetPowertrainFile(const std::string &powertrainFile) {
+		m_powertrainFile = powertrainFile;
+	}
 
-	void setTireFile(const std::string &tireFile);
+	void SetTireFile(const std::string &tireFile) {
+		m_tireFile = tireFile;
+	}
 
-	void setSteerCtrlFile(const std::string &steerFile);
+	void SetSteerCtrlFile(const std::string &steerFile) {
+		m_steerFile = steerFile;
+	}
 
-	void setSpeedCtrlFile(const std::string &speedFile);
+	void SetSpeedCtrlFile(const std::string &speedFile) {
+		m_speedFile = speedFile;
+	}
 
-	void setPath(chrono::ChBezierCurve *path);
+	void SetPath(chrono::ChBezierCurve *path) {
+		m_path = path;
+	}
 
-	void setNodeHandler(ros::NodeHandle *handle);
+	void SetNodeHandler(ros::NodeHandle *handle) {
+		m_handle = handle;
+	}
 
-	void setCallbackQueue(ros::CallbackQueue *queue);
+	void SetCallbackQueue(ros::CallbackQueue *queue) {
+		m_queue = queue;
+	}
 
 private:
-	gazebo::physics::WorldPtr world;
+	gazebo::physics::WorldPtr m_world;
 
-	chrono::ChSystem *chsys;
-	GcVehicle::ChTerrainPtr terrain;
-	double stepSize = 0.01;
+	std::shared_ptr<chrono::ChSystem> m_chsys;
+	GcVehicle::ChTerrainPtr m_terrain;
 
-	std::string vehicleFile;
-	std::string powertrainFile;
-	std::string tireFile;
-	std::string steerFile;
-	std::string speedFile;
+	std::string m_vehicleFile;
+	std::string m_powertrainFile;
+	std::string m_tireFile;
+	std::string m_steerFile;
+	std::string m_speedFile;
 
-	ros::NodeHandle *handle = NULL;
-	ros::CallbackQueue *queue = NULL;
+	ros::NodeHandle *m_handle = NULL;
+	ros::CallbackQueue *m_queue = NULL;
 
 	// vehicle specific parameters
-	int vehId = 0;
-	double pathRadius = 0;
-	double vehicleGap = 0;
-	double vehicleDist = 0;
-	double followingTime = 0;
-	double maxSpeed = 0;
-	chrono::ChBezierCurve *path = NULL;
-	ros::Subscriber lastSub;
+	int m_vehId = 0;
+	double m_pathRadius = 0;
+	double m_vehicleGap = 0;
+	double m_vehicleDist = 0;
+	double m_followingTime = 0;
+	double m_maxSpeed = 0;
+	chrono::ChBezierCurve *m_path = NULL;
+	ros::Subscriber m_lastSub;
 };
 
 #endif /* SRC_GCVEHICLEBUILDER_HH_ */

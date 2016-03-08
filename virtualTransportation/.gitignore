@@ -2,6 +2,8 @@
 .project
 .cproject
 models/trafficCircle.world
+Captures
+Captures/*
 build
 build/*
 images

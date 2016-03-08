@@ -33,6 +33,7 @@
 #include "gazebo/physics/physics.hh"
 #include "gazebo/common/common.hh"
 #include "gazebo/gazebo.hh"
+#include "gazebo/sensors/SensorManager.hh"
 
 //gazebo_ros includes
 #include <ros/callback_queue.h>
@@ -68,18 +69,22 @@ public:
 
 			// get file locations
 			TiXmlHandle files = root.FirstChild("files");
-			rigidTerrainFile = files.FirstChild("terrain").Element()->GetText();
-			vehicleFile = files.FirstChild("vehicle").Element()->GetText();
-			rigidTireFile = files.FirstChild("tire").Element()->GetText();
-			simplePowertrainFile =
-					files.FirstChild("powertrain").Element()->GetText();
-			driverFile = files.FirstChild("driver").Element()->GetText();
-			steeringControllerFile =
-					files.FirstChild("steeringController").Element()->GetText();
-			speedControllerFile =
-					files.FirstChild("speedController").Element()->GetText();
-			pathFile = files.FirstChild("path").Element()->GetText();
-
+			rigidTerrainFile = vehicle::GetDataFile(
+					files.FirstChild("terrain").Element()->GetText());
+			vehicleFile = vehicle::GetDataFile(
+					files.FirstChild("vehicle").Element()->GetText());
+			rigidTireFile = vehicle::GetDataFile(
+					files.FirstChild("tire").Element()->GetText());
+			simplePowertrainFile = vehicle::GetDataFile(
+					files.FirstChild("powertrain").Element()->GetText());
+			driverFile = vehicle::GetDataFile(
+					files.FirstChild("driver").Element()->GetText());
+			steeringControllerFile = vehicle::GetDataFile(
+					files.FirstChild("steeringController").Element()->GetText());
+			speedControllerFile = vehicle::GetDataFile(
+					files.FirstChild("speedController").Element()->GetText());
+			pathFile = vehicle::GetDataFile(
+					files.FirstChild("path").Element()->GetText());
 		} else {
 			std::cerr << "Error: metadata file does not exist." << std::endl;
 			return;
@@ -131,7 +136,7 @@ public:
 #endif /* debug information */
 
 		// initialize Chrono system
-		chsys = new ChSystem();
+		chsys = std::make_shared<ChSystem>();
 		chsys->Set_G_acc(ChVector<>(0, 0, -9.81));
 		chsys->SetLcpSolverType(ChSystem::LCP_ITERATIVE_SOR);
 		chsys->SetIterLCPmaxItersSpeed(iters);
@@ -139,8 +144,8 @@ public:
 		chsys->SetMaxPenetrationRecoverySpeed(10.0);
 
 		// load and initialize terrain
-		terrain = std::make_shared<vehicle::RigidTerrain>(chsys,
-				vehicle::GetDataFile(rigidTerrainFile));
+		terrain = std::make_shared<vehicle::RigidTerrain>(chsys.get(),
+				rigidTerrainFile);
 
 #ifdef DEBUG
 		std::cout << "[GcVehicle] Terrain file loaded." << std::endl;
@@ -148,20 +153,22 @@ public:
 
 		// create and initialize GcVehicleBuilder
 		auto builder = GcVehicleBuilder(_world, chsys, terrain, PATH_RADIUS,
-				vehicleGap, maxSpeed, stepSize);
-		builder.setVehicleFile(vehicleFile);
-		builder.setPowertrainFile(simplePowertrainFile);
-		builder.setTireFile(rigidTireFile);
-		builder.setSpeedCtrlFile(speedControllerFile);
-		builder.setSteerCtrlFile(steeringControllerFile);
-		builder.setNodeHandler(rosnode_);
-		builder.setCallbackQueue(&queue_);
+				vehicleGap, maxSpeed);
+		builder.SetVehicleFile(vehicleFile);
+		builder.SetPowertrainFile(simplePowertrainFile);
+		builder.SetTireFile(rigidTireFile);
+		builder.SetSpeedCtrlFile(speedControllerFile);
+		builder.SetSteerCtrlFile(steeringControllerFile);
+		builder.SetNodeHandler(rosnode_);
+		builder.SetCallbackQueue(&queue_);
 		// have chrono drive the vehicle around a circle
-		ChBezierCurve* path = ChBezierCurve::read(vehicle::GetDataFile(pathFile));
+		ChBezierCurve* path = ChBezierCurve::read(pathFile);
+
 #ifdef DEBUG
 		std::cout << "[GcVehicle] Path file loaded." << std::endl;
 #endif /* debug information */
-		builder.setPath(path);
+
+		builder.SetPath(path);
 
 		// Custom Callback Queue
 		this->callback_queue_thread_ = boost::thread(
@@ -170,7 +177,7 @@ public:
 		// store the created vehicles
 		gcVehicles = std::vector<std::shared_ptr<GcVehicle> >(numVehicles);
 		for (int i = 0; i < numVehicles; i++) {
-			gcVehicles[i] = builder.buildGcVehicle();
+			gcVehicles[i] = builder.BuildGcVehicle();
 		}
 
 		SetChronoDataPath("../data/");
@@ -181,18 +188,23 @@ public:
 #ifdef DEBUG
 		std::cout << "[GcVehicle] chrono_gazebo loading complete." << std::endl;
 #endif /* debug information */
+
 	}
 
 public:
 	void OnUpdate() {
 		// update terrain
-		terrain->Synchronize(chsys->GetChTime());
+		const double time = chsys->GetChTime();
+		terrain->Synchronize(time);
 		// advance each vehicle
 		for (int i = 0; i < numVehicles; i++) {
-			gcVehicles[i]->advance();
+			gcVehicles[i]->Synchronize(time);
 		}
 		terrain->Advance(stepSize);
-		gcVehicles[0]->getVehicle()->Advance(stepSize);
+		for (int i = 0; i < numVehicles; i++) {
+			gcVehicles[i]->Advance(stepSize);
+		}
+		gcVehicles[0]->GetVehicle()->Advance(stepSize);
 		//std::cout<<std::endl;
 	}
 
@@ -206,7 +218,6 @@ public:
 	}
 
 	~chrono_gazebo() {
-		delete this->chsys;
 		// Custom Callback Queue
 		this->queue_.clear();
 		this->queue_.disable();
@@ -216,13 +227,12 @@ public:
 	}
 
 private:
-	bool debug;
 	int numVehicles;
 	double vehicleGap;
-	std::vector<std::shared_ptr<GcVehicle> > gcVehicles;
+	std::vector<std::shared_ptr<GcVehicle>> gcVehicles;
 
-	ChSystem *chsys;
-	std::shared_ptr<vehicle::ChTerrain> terrain;
+	std::shared_ptr<ChSystem> chsys;
+	GcVehicle::ChTerrainPtr terrain;
 
 	double maxSpeed;
 	double stepSize;

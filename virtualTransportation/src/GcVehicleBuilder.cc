@@ -20,7 +20,6 @@
 
 #include <boost/bind/bind.hpp>
 #include <chrono/core/ChCoordsys.h>
-#include <chrono_vehicle/ChVehicleModelData.h>
 #include <chrono_vehicle/driver/ChPathFollowerACCDriver.h>
 #include <chrono_vehicle/powertrain/SimplePowertrain.h>
 #include <chrono_vehicle/wheeled_vehicle/tire/RigidTire.h>
@@ -39,27 +38,21 @@
 #include <iostream>
 #include <vector>
 
-#define DEBUG
-
 using namespace chrono;
 using namespace gazebo;
 
-#define PI 3.1415926535
-
-GcVehicleBuilder::GcVehicleBuilder(physics::WorldPtr world, ChSystem *chsys,
-		GcVehicle::ChTerrainPtr terrain, const double pathRadius,
-		const double vehicleGap, const double maxSpeed, const double stepSize) :
-		world(world), chsys(chsys), terrain(terrain), pathRadius(pathRadius), vehicleGap(
-				vehicleGap), maxSpeed(maxSpeed), stepSize(stepSize) {
-	vehicleDist = pathRadius * vehicleGap;
-	followingTime = 2.0;//vehicleDist / maxSpeed;
-	std::cout << "vehicleDist: " << vehicleDist << std::endl;
-	std::cout << "followingTime: " << followingTime << std::endl;
+GcVehicleBuilder::GcVehicleBuilder(physics::WorldPtr world,
+		std::shared_ptr<chrono::ChSystem> chsys, GcVehicle::ChTerrainPtr terrain,
+		const double pathRadius, const double vehicleGap, const double maxSpeed) :
+		m_world(world), m_chsys(chsys), m_terrain(terrain), m_pathRadius(
+				pathRadius), m_vehicleGap(vehicleGap), m_maxSpeed(maxSpeed) {
+	m_vehicleDist = pathRadius * vehicleGap;
+	m_followingTime = 2.0;
 }
 
-std::shared_ptr<GcVehicle> GcVehicleBuilder::buildGcVehicle() {
+std::shared_ptr<GcVehicle> GcVehicleBuilder::BuildGcVehicle() {
 
-	const std::string id = std::to_string(vehId);
+	const std::string id = std::to_string(m_vehId);
 
 #ifdef DEBUG
 	std::cout << "[GcVehicle] Start building vehicle " << id << "." << std::endl;
@@ -68,16 +61,19 @@ std::shared_ptr<GcVehicle> GcVehicleBuilder::buildGcVehicle() {
 	// -- Chrono part --
 
 	// create and initialize a Chrono vehicle model
-	auto veh = std::make_shared<vehicle::WheeledVehicle>(chsys, vehicleFile);
+	auto veh = std::make_shared<vehicle::WheeledVehicle>(m_chsys.get(),
+			m_vehicleFile);
 
-	const double ang = (vehId) * vehicleGap;
-	auto pos = ChVector<>(pathRadius * std::cos(ang), pathRadius * std::sin(ang),
-			1);
-	auto rot = Q_from_AngZ(ang - (CH_C_PI/2.0));
-	std::cout<<"rotation Quaternion: "<<rot.e0<<", "<<rot.e1<<", "<<rot.e2<<", "<<rot.e3<<std::endl;
+	const double ang = m_vehId * m_vehicleGap;
+	auto pos = ChVector<>(m_pathRadius * std::cos(ang),
+			m_pathRadius * std::sin(ang), 1);
+	auto rot = Q_from_AngZ(ang - (CH_C_PI / 2.0));
 
-			//ChQuaternion<>(std::cos((ang - PI / 2) / 2), 0, 0,
-			//std::sin((ang - PI / 2) / 2));
+#ifdef DEBUG
+	std::cout << "[GcVehicle] Rotation Quaternion: " << rot.e0 << ", " << rot.e1
+	<< ", " << rot.e2 << ", " << rot.e3 << std::endl;
+#endif /* debug information */
+
 	veh->Initialize(ChCoordsys<>(pos, rot));
 
 #ifdef DEBUG
@@ -85,7 +81,8 @@ std::shared_ptr<GcVehicle> GcVehicleBuilder::buildGcVehicle() {
 #endif /* debug information */
 
 	// create and initialize a powertrain
-	auto powertrain = std::make_shared<vehicle::SimplePowertrain>(powertrainFile);
+	auto powertrain = std::make_shared<vehicle::SimplePowertrain>(
+			m_powertrainFile);
 	powertrain->Initialize();
 
 #ifdef DEBUG
@@ -97,21 +94,23 @@ std::shared_ptr<GcVehicle> GcVehicleBuilder::buildGcVehicle() {
 	auto tires = std::vector<GcVehicle::ChRigidTirePtr>(numWheels);
 	for (int i = 0; i < numWheels; i++) {
 		//create the tires from the tire file
-		tires[i] = std::make_shared<vehicle::RigidTire>(tireFile);
+		tires[i] = std::make_shared<vehicle::RigidTire>(m_tireFile);
 		tires[i]->Initialize(veh->GetWheelBody(i));
 
 #ifdef DEBUG
 		std::cout << "[GcVehicle] Tire " << i << " initialized." << std::endl;
 #endif /* debug information */
+
 	}
 
 // create path follower
 	auto driver = std::make_shared<vehicle::ChPathFollowerACCDriver>(*veh,
-			steerFile, speedFile, path, std::string("my_path"), maxSpeed,
-			followingTime, 5.0, vehicleDist, true);
+			m_steerFile, m_speedFile, m_path, std::string("my_path"), m_maxSpeed,
+			m_followingTime, 5.0, m_vehicleDist, true);
 
 #ifdef DEBUG
-	std::cout << "[GcVehicle] Path follower driver loading completes." << std::endl;
+	std::cout << "[GcVehicle] Path follower driver loading completes."
+	<< std::endl;
 #endif /* debug information */
 
 // -- Gazebo part --
@@ -122,7 +121,7 @@ std::shared_ptr<GcVehicle> GcVehicleBuilder::buildGcVehicle() {
 
 // retrieve vehicle model from Gazebo
 	const std::string vehicleName = "vehicle" + id;
-	if ((gazeboVehicle = world->GetModel(vehicleName)) == NULL) {
+	if ((gazeboVehicle = m_world->GetModel(vehicleName)) == NULL) {
 		std::cerr << "COULD NOT FIND GAZEBO MODEL: " + vehicleName + '\n';
 		return NULL;
 	}
@@ -135,84 +134,54 @@ std::shared_ptr<GcVehicle> GcVehicleBuilder::buildGcVehicle() {
 	for (int i = 0; i < numWheels; i++) {
 		physics::ModelPtr wheelPtr;
 		const std::string wheelName = vehicleName + "::wheel" + std::to_string(i);
-		if ((wheelPtr = world->GetModel(wheelName)) != NULL) {
+		if ((wheelPtr = m_world->GetModel(wheelName)) != NULL) {
 			gazeboWheels[i] = wheelPtr;
 		} else {
 			std::cerr << "COULD NOT FIND GAZEBO MODEL: " + wheelName + '\n';
 			return NULL;
 		}
+
 #ifdef DEBUG
-		std::cout << "[GcVehicle] Wheel model " << id << " loading complete" << std::endl;
+		std::cout << "[GcVehicle] Wheel model " << id << " loading complete"
+		<< std::endl;
 #endif /* debug information */
+
 	}
 
 // retrieve sensor model from Gazebo
-	const std::string sensorName = world->GetName() + "::" + vehicleName
+	const std::string sensorName = m_world->GetName() + "::" + vehicleName
 			+ "::chassis::laser";
 	if ((raySensor = boost::dynamic_pointer_cast<sensors::RaySensor>(
 			sensors::SensorManager::Instance()->GetSensor(sensorName))) == NULL) {
 		std::cerr << "COULD NOT FIND LASER SENSOR: " + sensorName + '\n';
 		return NULL;
 	}
+
 #ifdef DEBUG
 	std::cout << "[GcVehicle] Ray sensor loading complete." << std::endl;
 #endif /* debug information */
 
 // create a GcVehicle
-	auto gcVeh = std::make_shared<GcVehicle>(vehId, terrain, veh, powertrain,
-			tires, driver, maxSpeed, raySensor, gazeboVehicle, gazeboWheels,
-			stepSize);
+	auto gcVeh = std::make_shared<GcVehicle>(m_vehId, m_terrain, veh, powertrain,
+			tires, driver, m_maxSpeed, raySensor, gazeboVehicle, gazeboWheels);
 
 // subscribe the GcVehicle to ros
 	auto opt = ros::SubscribeOptions::create<std_msgs::Float64>(
-			"/track_point" + std::to_string(vehId), 1,
-			boost::bind(&GcVehicle::updateDriver, gcVeh, _1), ros::VoidPtr(), queue);
-	lastSub = handle->subscribe(opt);
+			"/track_point" + id, 1, boost::bind(&GcVehicle::UpdateDriver, gcVeh, _1),
+			ros::VoidPtr(), m_queue);
+	m_lastSub = m_handle->subscribe(opt);
+
 #ifdef DEBUG
 	std::cout << "[GcVehicle] Vehicle subscribed to ROS." << std::endl;
 #endif /* debug information */
 
 // increase the vehicle id
-	vehId++;
+	m_vehId++;
 
 #ifdef DEBUG
-	std::cout << "[GcVehicle] Vehicle " << id << " building complete." << std::endl;
+	std::cout << "[GcVehicle] Vehicle " << id << " building complete."
+	<< std::endl;
 #endif /* debug information */
+
 	return gcVeh;
-}
-
-ros::Subscriber &GcVehicleBuilder::getLastRosSubscriber() {
-	return lastSub;
-}
-
-void GcVehicleBuilder::setVehicleFile(const std::string &vehicleFile) {
-	this->vehicleFile = vehicle::GetDataFile(vehicleFile);
-}
-
-void GcVehicleBuilder::setPowertrainFile(const std::string &powertrainFile) {
-	this->powertrainFile = vehicle::GetDataFile(powertrainFile);
-}
-
-void GcVehicleBuilder::setTireFile(const std::string &tireFile) {
-	this->tireFile = vehicle::GetDataFile(tireFile);
-}
-
-void GcVehicleBuilder::setSteerCtrlFile(const std::string &steerFile) {
-	this->steerFile = vehicle::GetDataFile(steerFile);
-}
-
-void GcVehicleBuilder::setSpeedCtrlFile(const std::string &speedFile) {
-	this->speedFile = vehicle::GetDataFile(speedFile);
-}
-
-void GcVehicleBuilder::setPath(ChBezierCurve * const path) {
-	this->path = path;
-}
-
-void GcVehicleBuilder::setNodeHandler(ros::NodeHandle * const handle) {
-	this->handle = handle;
-}
-
-void GcVehicleBuilder::setCallbackQueue(ros::CallbackQueue * const queue) {
-	this->queue = queue;
 }

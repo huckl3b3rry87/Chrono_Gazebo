@@ -50,46 +50,48 @@ public:
 	// constructor
 	GcVehicle(const int id, const ChTerrainPtr terrain,
 			const ChWheeledVehiclePtr vehicle, const ChPowertrainPtr powertrain,
-			const std::vector<ChRigidTirePtr> &tires,
-			const ChDriverPtr driver, const double maxSpeed,
-			const gazebo::sensors::RaySensorPtr raySensor,
+			const std::vector<ChRigidTirePtr> &tires, const ChDriverPtr driver,
+			const double maxSpeed, const gazebo::sensors::RaySensorPtr raySensor,
 			const gazebo::physics::ModelPtr gazeboVehicle,
-			const std::vector<gazebo::physics::ModelPtr> &gazeboWheels,
-			const double stepSize);
+			const std::vector<gazebo::physics::ModelPtr> &gazeboWheels);
 
 	// advance
-	void updateDriver(const std_msgs::Float64::ConstPtr& _msg);
-	void advance();
+	void UpdateDriver(const std_msgs::Float64::ConstPtr& _msg);
+	void Synchronize(const double time);
+	void Advance(const double step);
 
 	// other functions
-	ChWheeledVehiclePtr getVehicle();
-	int getId();
+	ChWheeledVehiclePtr GetVehicle() {
+		return m_vehicle;
+	}
+	int GetId() {
+		return m_id;
+	}
 
 private:
 	// helper functions
-	gazebo::math::Pose getPose(const chrono::ChVector<> vec,
+	gazebo::math::Pose GetPose(const chrono::ChVector<> vec,
 			const chrono::ChQuaternion<> quat);
 
 private:
-	int id;
-	int numWheels;
+	int m_id;
+	int m_numWheels;
 
 	// chrono components
-	ChTerrainPtr terrain;
-	ChWheeledVehiclePtr vehicle;
-	ChPowertrainPtr powertrain;
-	std::vector<ChRigidTirePtr> tires;
-	ChDriverPtr driver;
+	ChTerrainPtr m_terrain;
+	ChWheeledVehiclePtr m_vehicle;
+	ChPowertrainPtr m_powertrain;
+	std::vector<ChRigidTirePtr> m_tires;
+	ChDriverPtr m_driver;
 
 	// gazebo components
-	gazebo::sensors::RaySensorPtr raySensor;
-	gazebo::physics::ModelPtr gazeboVehicle;
-	std::vector<gazebo::physics::ModelPtr> gazeboWheels;
+	gazebo::sensors::RaySensorPtr m_raySensor;
+	gazebo::physics::ModelPtr m_gazeboVehicle;
+	std::vector<gazebo::physics::ModelPtr> m_gazeboWheels;
 
 	// other members
-	double steeringInput;
-	double maxSpeed;
-	double stepSize;
+	double m_steeringInput;
+	double m_maxSpeed;
 };
 
 #endif /* SRC_GCVEHICLE_HH_ */
