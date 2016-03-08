@@ -56,7 +56,9 @@ math::Pose GcVehicle::GetPose(const ChVector<> vec, const ChQuaternion<> quat) {
 
 void GcVehicle::Synchronize(const double time) {
 	std::vector<double> ranges;
+	m_raySensor->SetActive(false);
 	m_raySensor->GetRanges(ranges);
+	m_raySensor->SetActive(true);
 	//double center = steeringInput * 50 + 50;
 	double minRange = 100000.0;
 	for (int i = 0; i < ranges.size(); i++) {
