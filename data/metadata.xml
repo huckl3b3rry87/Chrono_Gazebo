@@ -1,13 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <metadata>
-	<numVehicles>22</numVehicles>
-	<vehicleGap>0.250</vehicleGap>
+	<network>
+		<serveraddr>0.0.0.0</serveraddr>
+	</network>
+	
+	<numVehicles>3</numVehicles>
+
+	<!-- Driver parameters -->
+	<maxSpeed>11</maxSpeed>
+	<followingTime>1.2</followingTime>
+	<minDist>4</minDist>
+	<vehicleGap>.4</vehicleGap>
+
 	<iterations>10</iterations>
 	<stepSize>0.001</stepSize>
-	<maxSpeed>8.333</maxSpeed>
 
 	<files>
-		<terrain>terrain/RigidPlane.json</terrain>
+<!-- 		<citymap>../madison</citymap>
+ -->		<terrain>terrain/RigidPlane.json</terrain>
 		<vehicle>hmmwv/vehicle/HMMWV_Vehicle_4WD.json</vehicle>
 		<tire>generic/tire/RigidTire.json</tire>
 		<powertrain>generic/powertrain/SimplePowertrain.json</powertrain>
@@ -16,7 +26,7 @@
 			generic/driver/SteeringController.json
 		</steeringController>
 		<speedController>generic/driver/SpeedController.json</speedController>
-		<path>paths/testpath.txt</path>
+		<path>paths/madison.txt</path>
 	</files>
 
 </metadata>

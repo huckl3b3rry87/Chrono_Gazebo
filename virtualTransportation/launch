@@ -6,7 +6,11 @@ export GAZEBO_MODEL_PATH=${GAZEBO_MODEL_PATH}:$PWD/models
 export GAZEBO_RESOURCE_PATH=${GAZEBO_RESOURCE_PATH}:$PWD
 
 # run each process in its own shell
-terminator -e "roscore" &
+#terminator -e "roscore" &
 #terminator -e "python ./OpenCV/follower_opencv0.py" &
 #terminator -e "python ./OpenCV/follower_opencv1.py" &
-terminator -e "rosrun gazebo_ros gzserver -s libgazebo_ros_api_plugin.so models/trafficCircle.world --verbose" &
+#terminator -e "rosrun --debug gazebo_ros gazebo -u -s libgazebo_ros_api_plugin.so models/trafficCircle.world --verbose" &
+
+xterm -hold -e "export GAZEBO_MASTER_URI=http://localhost:11346 ; gazebo models/trafficCircle.world --verbose" &
+xterm -hold -e "export GAZEBO_MASTER_URI=http://localhost:11347 ; gazebo models/trafficCircle.world --verbose" &
+./build/GcServer 2

@@ -21,11 +21,17 @@
 #ifndef SRC_GCVEHICLEBUILDER_HH_
 #define SRC_GCVEHICLEBUILDER_HH_
 
-#include <core/ChCoordsys.h>
 #include <gazebo/physics/PhysicsTypes.hh>
-#include <GcVehicle.hh>
-#include <ros/subscriber.h>
+#include <cstdbool>
+#include <memory>
 #include <string>
+
+#include "GcTypes.hh"
+#include "GcVehicle.hh"
+
+namespace chrono {
+class ChSystem;
+} /* namespace chrono */
 
 namespace chrono {
 class ChBezierCurve;
@@ -36,17 +42,30 @@ class GcVehicleBuilder {
 public:
 	// constructor
 	GcVehicleBuilder(gazebo::physics::WorldPtr world,
-			std::shared_ptr<chrono::ChSystem> chsys, GcVehicle::ChTerrainPtr terrain,
-			const double pathRadius, const double vehicleGap, const double maxSpeed);
+			std::shared_ptr<chrono::ChSystem> chsys,
+			gc::ChTerrainPtr terrain,
+			double pathRadius,
+			double maxSpeed,
+			double followingTime,
+			double minDist,
+			double vehicleGap);
 
 	// build a vehicle with all the components
 	std::shared_ptr<GcVehicle> BuildGcVehicle();
 
-	ros::Subscriber &GetLastRosSubscriber() {
-		return m_lastSub;
-	}
+//	ros::Subscriber &GetLastRosSubscriber() {
+//		return m_lastSub;
+//	}
 
 	// parameter setters
+
+	void SetNetworkVehicle(bool networkVehicle) {
+		m_networkVehicle = networkVehicle;
+	}
+
+	void SetSockfd(int sockfd) {
+		m_sockfd = sockfd;
+	}
 
 	void SetVehicleFile(const std::string &vehicleFile) {
 		m_vehicleFile = vehicleFile;
@@ -72,19 +91,25 @@ public:
 		m_path = path;
 	}
 
-	void SetNodeHandler(ros::NodeHandle *handle) {
-		m_handle = handle;
-	}
-
-	void SetCallbackQueue(ros::CallbackQueue *queue) {
-		m_queue = queue;
-	}
+//	void SetNodeHandler(ros::NodeHandle *handle) {
+//		m_handle = handle;
+//	}
+//
+//	void SetCallbackQueue(ros::CallbackQueue *queue) {
+//		m_queue = queue;
+//	}
 
 private:
+	std::shared_ptr<GcVehicle> BuildLocalGcVehicle();
+	std::shared_ptr<GcVehicle> BuildNetworkGcVehicle();
+
+private:
+	bool m_networkVehicle;
+	int m_sockfd = -1;
 	gazebo::physics::WorldPtr m_world;
 
 	std::shared_ptr<chrono::ChSystem> m_chsys;
-	GcVehicle::ChTerrainPtr m_terrain;
+	gc::ChTerrainPtr m_terrain;
 
 	std::string m_vehicleFile;
 	std::string m_powertrainFile;
@@ -92,18 +117,18 @@ private:
 	std::string m_steerFile;
 	std::string m_speedFile;
 
-	ros::NodeHandle *m_handle = NULL;
-	ros::CallbackQueue *m_queue = NULL;
+//	ros::NodeHandle *m_handle = NULL;
+//	ros::CallbackQueue *m_queue = NULL;
 
 	// vehicle specific parameters
-	int m_vehId = 0;
-	double m_pathRadius = 0;
-	double m_vehicleGap = 0;
-	double m_vehicleDist = 0;
-	double m_followingTime = 0;
-	double m_maxSpeed = 0;
+	int m_vehId;
+	double m_pathRadius;
+	double m_maxSpeed;
+	double m_followingTime;
+	double m_minDist;
+	double m_vehicleGap;
 	chrono::ChBezierCurve *m_path = NULL;
-	ros::Subscriber m_lastSub;
+//	ros::Subscriber m_lastSub;
 };
 
 #endif /* SRC_GCVEHICLEBUILDER_HH_ */

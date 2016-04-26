@@ -17,7 +17,7 @@ material Gazebo/Line
     }
   }
 }
-material Gazebo/Grass1
+material Gazebo/Asphalt0
 {
   technique
   {
@@ -29,9 +29,123 @@ material Gazebo/Grass1
 
       texture_unit
       {
-        texture Grass3.jpg
+        texture asphalt.jpg
         filtering trilinear
-	scale 0.1 0.1
+	scale 0.001 0.001
+      }
+    }
+  }
+}
+material Gazebo/Building0
+{
+  technique
+  {
+    pass
+    {
+      ambient 0.5 0.5 0.5 1.0
+      diffuse 0.8 0.8 0.8 1.0
+      specular 0.5 0.5 0.5 1.0 0.5
+
+      texture_unit
+      {
+        texture building0.jpg
+        filtering trilinear
+	scale 0.001 0.001
+      }
+    }
+  }
+}
+material Gazebo/Building1
+{
+  technique
+  {
+    pass
+    {
+      ambient 0.5 0.5 0.5 1.0
+      diffuse 0.8 0.8 0.8 1.0
+      specular 0.5 0.5 0.5 1.0 0.5
+
+      texture_unit
+      {
+        texture building1.jpg
+        filtering trilinear
+	scale 0.001 0.001
+      }
+    }
+  }
+}
+material Gazebo/Building2
+{
+  technique
+  {
+    pass
+    {
+      ambient 0.5 0.5 0.5 1.0
+      diffuse 0.8 0.8 0.8 1.0
+      specular 0.5 0.5 0.5 1.0 0.5
+
+      texture_unit
+      {
+        texture building2.jpg
+        filtering trilinear
+	scale 0.001 0.001
+      }
+    }
+  }
+}
+material Gazebo/Building3
+{
+  technique
+  {
+    pass
+    {
+      ambient 0.5 0.5 0.5 1.0
+      diffuse 0.8 0.8 0.8 1.0
+      specular 0.5 0.5 0.5 1.0 0.5
+
+      texture_unit
+      {
+        texture building3.jpg
+        filtering trilinear
+	scale 0.001 0.001
+      }
+    }
+  }
+}
+material Gazebo/Grass5
+{
+  technique
+  {
+    pass
+    {
+      ambient 0.5 0.5 0.5 1.0
+      diffuse 0.8 0.8 0.8 1.0
+      specular 0.5 0.5 0.5 1.0 0.5
+
+      texture_unit
+      {
+        texture Grass5.jpg
+        filtering trilinear
+	scale 0.005 0.005
+      }
+    }
+  }
+}
+material Gazebo/Grass6
+{
+  technique
+  {
+    pass
+    {
+      ambient 0.5 0.5 0.5 1.0
+      diffuse 0.8 0.8 0.8 1.0
+      specular 0.5 0.5 0.5 1.0 0.5
+
+      texture_unit
+      {
+        texture Grass6.jpg
+        filtering trilinear
+	scale 0.05 0.05
       }
     }
   }

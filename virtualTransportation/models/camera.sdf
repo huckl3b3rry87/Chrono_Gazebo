@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<sdf version="1.5">
+	<link name="camRef">
+		<frame name="camRef" />
+		<pose frame="body">5 -2.5 5 0 0 0</pose>
+		<sensor name="camera" type="camera">
+			<pose frame="camRef">0 0 0 0 0.7297 2.678</pose>
+			<camera name="vehicleCam">
+				<horizontal_fov>0.873</horizontal_fov>
+				<image>
+					<format>B8G8R8</format>
+					<width>1680</width>
+					<height>1050</height>
+				</image>
+				<clip>
+					<near>1</near>
+					<far>750</far>
+				</clip>
+				<noise>
+					<type>gaussian</type>
+					<mean>0.0</mean>
+					<stddev>0.000</stddev>
+				</noise>
+				<save enabled="false">
+					<path>Captures/vehicleCam/2016_04_720</path>
+				</save>
+			</camera>
+			<always_on>0</always_on>
+			<update_rate>60</update_rate>
+			<visualize>true</visualize>
+		</sensor>
+	</link>
+</sdf>
