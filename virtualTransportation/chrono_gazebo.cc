@@ -39,6 +39,7 @@
 #include "gazebo/physics/physics.hh"
 #include "gazebo/common/common.hh"
 #include "gazebo/gazebo.hh"
+#include <gazebo/sensors/SensorManager.hh>
 
 //gazebo_ros includes
 //#include <ros/callback_queue.h>
@@ -56,13 +57,13 @@ using namespace gazebo;
 class chrono_gazebo: public WorldPlugin {
 
 private:
+	/* Load metadata from metadata.xml */
 	void LoadMetadata() {
 		TiXmlDocument meta("../data/metadata.xml");
 		if (meta.LoadFile()) {
 			TiXmlHandle root = TiXmlHandle(&meta).FirstChild("metadata");
 			TiXmlElement *element;
 			// program parameters
-			fprintf(stderr, "loading metadata\n");
 			if (root.FirstChild("network").ToNode()) {
 				networkMode = true;
 				serveraddr =
@@ -82,8 +83,6 @@ private:
 			iters = std::max(1, std::stoi(element->GetText()));
 			element = root.FirstChild("stepSize").Element();
 			stepSize = std::stod(element->GetText());
-
-			fprintf(stderr, "first part loaded\n");
 
 			// get file locations
 			TiXmlHandle files = root.FirstChild("files");
@@ -145,37 +144,34 @@ public:
 		SetChronoDataPath("../data/");
 		this->_world = _parent;
 
+		// if under network mode, create a socket connected with the server
 		if (networkMode) {
 			fprintf(stderr, "connecting to server\n");
 			sockfd = gc::ConnectGcServer(serveraddr, &networkId, &numVehicles);
 			printf("networkId: %d, numVehicles: %d\n", networkId, numVehicles);
 		}
 
-		// add camera to the first vehicle
-//		TiXmlDocument doc("models/gcVehicle/model.sdf");
-//		assert(doc.LoadFile());
-//		sdf::ElementPtr vehiclePtr(new sdf::Element);
-//		sdf::initFile("model.sdf", vehiclePtr);
-//		sdf::readDoc(&doc, vehiclePtr, "models/gcVehicle/model.sdf");
-//		for (int i = numVehicles - 1; i >= 0; i--) {
-//			vehiclePtr->GetAttribute("name")->SetFromString(
-//					"vehicle_" + std::to_string(i));
-//			if (i == 0) {
-//				sdf::ElementPtr ptr(new sdf::Element);
-//				sdf::initFile("link.sdf", ptr);
-//				TiXmlDocument doc1("models/camera.sdf");
-//				doc1.LoadFile();
-//				sdf::readDoc(&doc1, ptr, "models/camera.sdf");
-//				vehiclePtr->InsertElement(ptr);
-//			}
-//			sdf::SDFPtr newSDF(new sdf::SDF);
-//			newSDF->Root(vehiclePtr->Clone());
-//			_world->InsertModelSDF(*newSDF);
-//		}
+		// dynamically add vehicles to the world
+		TiXmlDocument doc("models/gcVehicle/model.sdf");
+		assert(doc.LoadFile());
+		sdf::ElementPtr vehiclePtr(new sdf::Element);
+		sdf::initFile("model.sdf", vehiclePtr); // initialize the "model" template
+		sdf::readDoc(&doc, vehiclePtr, "models/gcVehicle/model.sdf"); // read the vehicle model into the template
+		for (int i = numVehicles - 1; i >= 0; i--) {
+			// make sure each vehicle model has a different name
+			vehiclePtr->GetAttribute("name")->SetFromString(
+					"vehicle_" + std::to_string(i));
+			// insert a different SDF object for each vehicle, because inserting is
+			// done lazily
+			sdf::SDFPtr newSDF(new sdf::SDF);
+			newSDF->Root(vehiclePtr->Clone());
+			_world->InsertModelSDF(*newSDF);
+		}
 
-		// load city file
+		// load city file if the path is not empty
 		if (citymapFile != "") {
 			OSM2Gc importer(citymapFile);
+			// the city contains one combined road model and one building model for each building
 			_world->InsertModelSDF(*importer.GetRoadModel());
 			auto buildingModels = importer.GetBuildingModels();
 			for (auto model : buildingModels)
@@ -187,6 +183,7 @@ public:
 		_world->GetPhysicsEngine()->SetRealTimeUpdateRate(300);
 		_world->GetPhysicsEngine()->SetMaxStepSize(stepSize);
 
+		// disable ros functionalities for now
 //		// BEGIN LINE FOLLOW
 //		if (!ros::isInitialized()) {
 //			std::string msg =
@@ -201,7 +198,7 @@ public:
 //		std::cout << "[GcLocalVehicle] ROS node loaded." << std::endl;
 //#endif /* debug information */
 
-// initialize Chrono system
+		// initialize Chrono system, referred to ChVehicle.cpp. All vehicles use this same chsys
 		chsys = std::make_shared<ChSystem>();
 		chsys->Set_G_acc(ChVector<>(0, 0, -9.81));
 		chsys->SetLcpSolverType(ChSystem::LCP_ITERATIVE_SOR);
@@ -230,12 +227,6 @@ public:
 //		builder.SetCallbackQueue(&queue_);
 		// have chrono drive the vehicle around a circle
 		ChBezierCurve* path = ChBezierCurve::read(pathFile);
-//		for (int i = 0; i < path->getNumPoints() - 1; i++) {
-//			for (double j = 0; j < 1; j += 0.05) {
-//				auto pt = path->eval(i, j);
-//				printf("%.3f %.3f\n", pt.x, pt.y);
-//			}
-//		}
 
 #ifdef DEBUG
 		std::cout << "[GcLocalVehicle] Path file loaded." << std::endl;
@@ -250,6 +241,9 @@ public:
 		// store the created vehicles
 		gcVehicles = std::vector<std::shared_ptr<GcVehicle>>(numVehicles);
 		for (int i = 0; i < numVehicles; i++) {
+			// the next vehicle to be built is a network-vehicle iff program is under
+			// network mode, and the next vehicle is not the local vehicle (the one
+			// with networkId as index)
 			builder.SetNetworkVehicle(networkMode && i != networkId);
 			gcVehicles[i] = builder.BuildGcVehicle();
 		}
@@ -265,7 +259,7 @@ public:
 
 public:
 	void OnUpdate() {
-		// make sure initialized
+		// make sure all vehicles models are initialized
 		if (!initialized) {
 			initialized = true;
 			for (auto &veh : gcVehicles) {
@@ -274,20 +268,40 @@ public:
 			if (!initialized)
 				return;
 		}
+		// make sure the sensors are also initialized (have expected values)
+		// since "expected values" are hard to generalized, we might want to remove
+		// these lines of code
+		if (!sensorsInitialized) {
+			int count = 0;
+			for (auto &veh : gcVehicles) {
+				if (veh->InitSensor()) {
+					count++;
+				}
+			}
+			if (count >= numVehicles - 1) {
+				sensorsInitialized = true;
+			} else {
+				return;
+			}
+		}
 
 		// update terrain
 		const double time = chsys->GetChTime();
 		terrain->Synchronize(time);
-		// advance each vehicle
+		// synchronize each vehicle (driver)
 		for (int i = 0; i < numVehicles; i++) {
 			gcVehicles[i]->Synchronize(time);
 		}
 		terrain->Advance(stepSize);
 
+		// different behavior under network mode
 		if (networkMode) {
+			// advance the local vehicle
 			gcVehicles[networkId]->Advance(stepSize);
 			auto veh = std::dynamic_pointer_cast<GcLocalVehicle>(
 					gcVehicles[networkId])->GetVehicle();
+			// send a gcPacket containing the position of the local vehicle's chassis
+			// and four wheels to the server
 			struct gcPacket packet;
 			std::vector<math::Pose> poses(5);
 			for (int i = 0; i < 4; i++) {
@@ -298,19 +312,20 @@ public:
 			gc::Send(sockfd, (char*) &packet, sizeof(packet));
 		}
 
+		// advance all the vehicles except the local vehicle under network mode
+		// If not under network mode, the if statement will have not effect (networkId == -1)
 		for (int i = 0; i < numVehicles; i++) {
 			if (i == networkId)
 				continue;
 			gcVehicles[i]->Advance(stepSize);
 		}
-//		gcVehicles[0]->GetVehicle()->Advance(stepSize);
+		// update the Chrono system, with reference to ChVehicle.cpp::Advance
 		double t = 0;
 		while (t < stepSize) {
 			double h = std::min<>(1e-3, stepSize - t);
 			chsys->DoStepDynamics(h);
 			t += h;
 		}
-		//std::cout<<std::endl;
 	}
 
 // custom callback queue thread
@@ -339,8 +354,8 @@ private:
 	std::string serveraddr;
 	int networkId = -1;
 	int sockfd = -1;
-	int numVehicles;
-	std::vector<std::shared_ptr<GcVehicle>> gcVehicles;bool initialized = false;
+	int numVehicles;bool sensorsInitialized = false;bool initialized = false;
+	std::vector<std::shared_ptr<GcVehicle>> gcVehicles;
 
 	std::shared_ptr<ChSystem> chsys;
 	gc::ChTerrainPtr terrain;

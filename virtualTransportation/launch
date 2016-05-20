@@ -11,6 +11,6 @@ export GAZEBO_RESOURCE_PATH=${GAZEBO_RESOURCE_PATH}:$PWD
 #terminator -e "python ./OpenCV/follower_opencv1.py" &
 #terminator -e "rosrun --debug gazebo_ros gazebo -u -s libgazebo_ros_api_plugin.so models/trafficCircle.world --verbose" &
 
-xterm -hold -e "export GAZEBO_MASTER_URI=http://localhost:11346 ; gazebo models/trafficCircle.world --verbose" &
-xterm -hold -e "export GAZEBO_MASTER_URI=http://localhost:11347 ; gazebo models/trafficCircle.world --verbose" &
-./build/GcServer 2
+xterm -hold -e "export GAZEBO_MASTER_URI=http://localhost:11346 ; gdb -arg gzserver models/trafficCircle.world --verbose" &
+#xterm -hold -e "export GAZEBO_MASTER_URI=http://localhost:11347 ; gazebo models/trafficCircle.world --verbose" &
+#./build/GcServer 2

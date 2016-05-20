@@ -56,6 +56,7 @@ GcVehicleBuilder::GcVehicleBuilder(physics::WorldPtr world,
 	m_vehId = 0;
 }
 
+/* Build a local vehicle using the current configuration */
 std::shared_ptr<GcVehicle> GcVehicleBuilder::BuildLocalGcVehicle() {
 
 	const std::string id = std::to_string(m_vehId);
@@ -66,16 +67,15 @@ std::shared_ptr<GcVehicle> GcVehicleBuilder::BuildLocalGcVehicle() {
 
 	// -- Chrono part --
 
-	// create and initialize a Chrono vehicle model
+	// create and initialize a Chrono vehicle
 	auto veh = std::make_shared<vehicle::WheeledVehicle>(m_chsys.get(),
 			m_vehicleFile);
 
+	// initial position of the vehicle
 	const double ang = m_vehId * m_vehicleGap;
-//	auto pos = ChVector<>(m_pathRadius * std::cos(ang),
-//			m_pathRadius * std::sin(ang), 1);
-//	auto rot = Q_from_AngZ(ang - (CH_C_PI / 2.0));
-	auto pos = ChVector<>(-180-6 * m_vehId, 206, 0.5);
-	auto rot = Q_from_AngZ(0);
+	auto pos = ChVector<>(m_pathRadius * std::cos(ang),
+			m_pathRadius * std::sin(ang), 1);
+	auto rot = Q_from_AngZ(ang - (CH_C_PI / 2.0));
 
 #ifdef DEBUG
 	std::cout << "[GcVehicle] Rotation Quaternion: " << rot.e0 << ", " << rot.e1
@@ -151,10 +151,12 @@ std::shared_ptr<GcVehicle> GcVehicleBuilder::BuildLocalGcVehicle() {
 	return gcVeh;
 }
 
+/* Build a network vehicle */
 std::shared_ptr<GcVehicle> GcVehicleBuilder::BuildNetworkGcVehicle() {
 	return std::make_shared<GcNetworkVehicle>(m_vehId++, m_sockfd, m_world);
 }
 
+/* Build a local or network vehicle depending on whether the builder is under network mode. */
 std::shared_ptr<GcVehicle> GcVehicleBuilder::BuildGcVehicle() {
 	if (m_networkVehicle) {
 		return BuildNetworkGcVehicle();

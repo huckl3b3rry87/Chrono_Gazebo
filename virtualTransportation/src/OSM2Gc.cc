@@ -21,6 +21,7 @@
 #include <utility>
 #include <vector>
 
+// simple road model. ROAD_VIS with different geometries will be added to the link
 #define ROAD_MODEL "\
 	<sdf version='1.5'>\
 		<model name='roads'>\
@@ -31,6 +32,7 @@
 		</model>\
 	</sdf>"
 
+// road segment visualization. the geometry will be changed for different road segments
 #define ROAD_VIS "\
 	<sdf version='1.5'>\
 		<visual name='roadblock'>\
@@ -49,6 +51,7 @@
 		</visual>\
 	</sdf>"
 
+// simple building model. building geometry is constructed by extruding a polygon
 #define BUILDING_MODEL "\
 	<sdf version='1.5'>\
 		<model name='building'>\
@@ -72,16 +75,19 @@
 		</model>\
 	</sdf>"
 
+// road configuration
 struct RoadConf {
 	std::string material;
 	double width;
 };
 
+// building configuration
 struct BuildingConf {
 	std::string material;
 	double height;
 };
 
+// mapping of different types of road to configurations
 const static std::map<std::string, struct RoadConf> RoadConfMap = {
 		{ "motorway", { "Gazebo/Motorway", 16 } },
 		{ "trunk", { "Gazebo/Motorway", 16 } },
@@ -99,6 +105,10 @@ const static std::map<std::string, struct RoadConf> RoadConfMap = {
 		{ "cycleway", { "Gazebo/Residential", 3 } },
 		{ "step", { "Gazebo/Steps", 2 } } };
 
+/*
+ * Get the cartesian coordinate given a latitude/longitude pair and a bounding box.
+ * The effect of changing latitude radius is taken into account.
+ */
 std::pair<double, double> GetCartesian(osmscout::GeoCoord coord,
 		osmscout::GeoBox box) {
 	osmscout::GeoCoord center = box.GetCenter();
@@ -112,12 +122,14 @@ std::pair<double, double> GetCartesian(osmscout::GeoCoord coord,
 	return std::make_pair(x, y);
 }
 
+/* Get distance between two points */
 double GetDist(std::pair<double, double> p1, std::pair<double, double> p2) {
 	return std::sqrt(
 			(p1.first - p2.first) * (p1.first - p2.first)
 					+ (p1.second - p2.second) * (p1.second - p2.second));
 }
 
+/* Create the OSM2Gc object with the given path to the osm preprocessed data */
 OSM2Gc::OSM2Gc(const std::string& path) {
 	osmscout::DatabaseParameter param;
 	database = std::make_shared<osmscout::Database>(param);
@@ -131,6 +143,7 @@ OSM2Gc::OSM2Gc(const std::string& path) {
 	box.minCoord.lat += latSpan * 0.2;
 }
 
+/* libosmscout processed the osm data such that types and its sub-types are separated by '_' */
 void ParseType(const std::string &type, std::string parsed[2]) {
 	int underscore = type.find('_');
 	if (underscore == type.npos) {
@@ -141,6 +154,7 @@ void ParseType(const std::string &type, std::string parsed[2]) {
 	}
 }
 
+/* Construct the road model from the preprocessed osm data */
 sdf::SDFPtr OSM2Gc::GetRoadModel() {
 	// get the way references from the database
 	osmscout::AreaWayIndexRef areaWayIndex = database->GetAreaWayIndex();
@@ -151,6 +165,7 @@ sdf::SDFPtr OSM2Gc::GetRoadModel() {
 	std::vector<osmscout::WayRef> ways;
 	database->GetWaysByOffset(offsets, ways);
 
+	// initialize the road model
 	sdf::SDFPtr roadsSDF(new sdf::SDF);
 	sdf::initFile("model.sdf", roadsSDF);
 	sdf::readString(ROAD_MODEL, roadsSDF->Root());
@@ -166,11 +181,12 @@ sdf::SDFPtr OSM2Gc::GetRoadModel() {
 		auto way = ways[i];
 
 		std::string type[2];
+		// get the type of the road
 		ParseType(way->GetType()->GetName(), type);
 		RoadConf conf;
 		std::string materialName;
+		// currently only work with highway
 		if (type[0] == "highway") {
-//			printf("highway_%s\n", type[1].c_str());
 			std::map<std::string, RoadConf>::const_iterator itr;
 			if ((itr = RoadConfMap.find(type[1])) != RoadConfMap.end()) {
 				conf = itr->second;
@@ -182,22 +198,28 @@ sdf::SDFPtr OSM2Gc::GetRoadModel() {
 
 		std::pair<double, double> from;
 		bool hasFrom = false;
-		for (int j = 1; j < way->nodes.size(); j++) {
+		for (int j = 0; j < way->nodes.size(); j++) {
 			auto to = GetCartesian(way->nodes[j].GetCoord(), box);
+			// find the starting point of the road. can add constraints here so that
+			// the first point is inside some bounding box
 			if (!hasFrom) {
 				from = to;
 				hasFrom = true;
 				continue;
 			}
 			sprintf(name, "roadblock_%d_%d", i, j);
+			// make sure each road segment has a different name
 			visPtr->GetAttribute("name")->SetFromString(name);
+			// use the material defined in the configuration
 			visPtr->GetElement("material")->GetElement("script")->GetElement("name")->Set(
 					conf.material);
+			// the length of the road semgnt is the distance between the from and to points
 			double length = GetDist(from, to);
 			visPtr->GetElement("geometry")->GetElement("plane")->GetElement("size")->Set(
 					gazebo::math::Vector2d(conf.width, length + conf.width / 4));
 			double x = (from.first + to.first) / 2.0;
 			double y = (from.second + to.second) / 2.0;
+			// lift each road segment a slightly different height to avoid depth fighting
 			double z = 0.01 * conf.width + 0.0005 * (j + i);
 			double yaw =
 					to.second == from.second ?
@@ -214,7 +236,9 @@ sdf::SDFPtr OSM2Gc::GetRoadModel() {
 	return roadsSDF;
 }
 
+/* Construct a list of building models from the preprocessed osm data */
 std::vector<sdf::SDFPtr> OSM2Gc::GetBuildingModels() {
+	// get the building references from the database
 	auto areaAreaIndex = database->GetAreaAreaIndex();
 	osmscout::TypeInfoSet areaTypeInfos(
 			database->GetTypeConfig()->GetAreaTypes());
@@ -224,13 +248,13 @@ std::vector<sdf::SDFPtr> OSM2Gc::GetBuildingModels() {
 			areaTypeInfos, areaSpans, loadedAreaTypes);
 	std::vector<osmscout::AreaRef> areas;
 
+	// initialize building models
 	std::vector<sdf::SDFPtr> buildingModels;
-//	return buildingModels;
 	sdf::SDFPtr buildingSDF(new sdf::SDF);
 	sdf::initFile("model.sdf", buildingSDF);
 	sdf::readString(BUILDING_MODEL, buildingSDF->Root());
 
-// write the area data to the road sdf
+// write the area data to the building sdf
 	sdf::ElementPtr visPtr = buildingSDF->Root()->GetElement("link")->GetElement(
 			"visual");
 	sdf::ElementPtr polylinePtr = visPtr->GetElement("geometry")->GetElement(
@@ -244,22 +268,13 @@ std::vector<sdf::SDFPtr> OSM2Gc::GetBuildingModels() {
 		areas[i]->GetBoundingBox(areaBox);
 		if (!areaBox.Intersects(box))
 			continue;
-//		if (areaBox.maxCoord.lon + areaBox.maxCoord.lat - areaBox.minCoord.lon
-//				- areaBox.minCoord.lat > 0.0001) {
-//			printf("idx: %d, type: %s, size: %lu\n", i,
-//					areas[i]->GetType()->GetName().c_str(),
-//					areas[i]->rings[0].nodes.size());
-//			printf("lon diff: %.8f, lat diff: %.8f\n",
-//					areaBox.maxCoord.lon - areaBox.minCoord.lon,
-//					areaBox.maxCoord.lat - areaBox.minCoord.lat);
-//		}
-//
-//		printf("\n");
 		std::string type[2];
 		BuildingConf conf;
 		ParseType(areas[i]->GetType()->GetName(), type);
+		// it seems that boundary in osm usually should not be visualized
 		if (type[0] == "boundary" && type[1] == "administrative")
 			continue;
+		// it seems that landuse in osm usually should not be visualized
 		if (type[0] == "landuse" && type[1] != "grass")
 			continue;
 		if (type[1] == "grass") {
@@ -276,23 +291,6 @@ std::vector<sdf::SDFPtr> OSM2Gc::GetBuildingModels() {
 		polylinePtr->ClearElements();
 		materialNamePtr->Set(conf.material);
 		for (int j = 0; j < areas[i]->rings.size(); j++) {
-//			printf("feature of area %d ring %d\n", i, j);
-//			for (auto f : areas[i]->rings[j].GetType()->GetFeatures()) {
-//				printf("%s: ", f.GetFeature()->GetName().c_str());
-//				if (!f.GetFeature()->HasValue()) {
-//					printf("no value;    ");
-//					continue;
-//				}
-//				char buf[1024];
-//				auto val = f.GetFeature()->AllocateValue(buf);
-//				if (dynamic_cast<osmscout::NameFeatureValue*>(val) == NULL) {
-//					printf("not name;    ");
-//					continue;
-//				}
-//				auto nval = dynamic_cast<osmscout::NameFeatureValue*>(val);
-//				printf("%s;    ", nval->GetName().c_str());
-//			}
-//			printf("\n");
 			auto nodes = areas[i]->rings[j].nodes;
 			if (nodes.size() < 3)
 				continue;
@@ -309,6 +307,5 @@ std::vector<sdf::SDFPtr> OSM2Gc::GetBuildingModels() {
 			buildingModels.push_back(newSDF);
 		}
 	}
-//	printf("%s\n", buildingsSDF->Root()->ToString("").c_str());
 	return buildingModels;
 }

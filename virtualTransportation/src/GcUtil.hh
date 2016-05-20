@@ -16,9 +16,11 @@
 
 namespace gc {
 
+/* Get a Gazebo Pose from a Chrono vector and Chrono quaternion. */
 gazebo::math::Pose GetGcPose(const chrono::ChVector<> vec,
 		const chrono::ChQuaternion<> quat);
 
+/* Get a Gazebo Pose from 7 doubles in the order of a vector (3d) and a quaternion (4d). */
 gazebo::math::Pose GetGcPose(const double posrot[7]);
 
 }

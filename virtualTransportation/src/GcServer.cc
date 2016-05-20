@@ -6,6 +6,10 @@
 
 #include "GcNetworkUtil.hh"
 
+/*
+ * A simple server that listen to simulation clients. It collects position information
+ * from different clients and re-distribute them.
+ */
 int main(int argc, char *argv[]) {
 
 	struct addrinfo hints, *res;
@@ -27,6 +31,9 @@ int main(int argc, char *argv[]) {
 
 	sockfd = gc::ListenGcClients(numClients);
 
+	// Initialize connections with clients. For each client, store its corresponding
+	// file descriptor, and then send a packet containing its network-id and the
+	// total number of clients.
 	for (int i = 0; i < numClients; i++) {
 		struct sockaddr_storage client_addr;
 		socklen_t addr_size = sizeof client_addr;
@@ -36,12 +43,13 @@ int main(int argc, char *argv[]) {
 		send(clientFds[i], &pkg, sizeof(pkg), 0); // notify the client of its id and number of clients
 	}
 
+	// Synchronize the update loop between clients.
 	while (true) {
-		// get packages from the clients
+		// get position packets from the clients
 		for (int i = 0; i < numClients; i++) {
 			gc::Recv(clientFds[i], (char *) &clientPkts[i], sizeof(gcPacket));
 		}
-		// send the packages to each client
+		// send the position packet of each client to all other clients
 		for (int i = 0; i < numClients; i++) {
 			for (int j = 0; j < numClients; j++) {
 				// a client won't receive the package it just sent to the server

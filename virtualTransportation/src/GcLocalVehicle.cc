@@ -65,6 +65,20 @@ GcLocalVehicle::GcLocalVehicle(int id,
 	m_numWheels = vehicle->GetNumberAxles() * 2;
 }
 
+bool GcLocalVehicle::InitSensor() {
+	std::vector<double> ranges;
+	m_raySensor->Update(false);
+	m_raySensor->SetActive(false);
+	m_raySensor->GetRanges(ranges);
+	m_raySensor->SetActive(true);
+	for (double range : ranges) {
+		if (range < 100000) {
+			return true;
+		}
+	}
+	return false;
+}
+
 bool GcLocalVehicle::Init() {
 	if (m_initialized)
 		return true;
@@ -84,13 +98,21 @@ bool GcLocalVehicle::Init() {
 		return false;
 	}
 
-	m_initialized = true;
 	for (int i = 0; i < m_numWheels; i++) {
 		m_gazeboWheels.push_back(
 				m_gazeboVehicle->GetLink("wheel_" + std::to_string(i)));
 		assert(m_gazeboWheels[i] != NULL);
 	}
 
+	m_gazeboVehicle->SetWorldPose(
+			gc::GetGcPose(m_vehicle->GetChassisPos(), m_vehicle->GetChassisRot()));
+	auto rot = m_vehicle->GetChassisRot();
+	for (int i = 0; i < m_numWheels; i++) {
+		m_gazeboWheels[i]->SetWorldPose(
+				gc::GetGcPose(m_vehicle->GetWheelPos(i), m_vehicle->GetWheelRot(i)));
+	}
+
+	m_initialized = true;
 	return true;
 }
 
@@ -115,25 +137,8 @@ void GcLocalVehicle::Synchronize(double time) {
 	}
 	m_driver->SetCurrentDistance(m_currDist);
 
-	auto sent = m_driver->GetSteeringController().GetSentinelLocation();
-	sent.z = 0;
-	auto target = m_driver->GetSteeringController().GetTargetLocation();
-	target.z = 0;
-	auto err = target - sent;
-	auto sent_vec = (sent - m_vehicle->GetChassisPos());
-	sent_vec.z = 0;
-	sent_vec.Normalize();
-	auto target_vec = (target - m_vehicle->GetChassisPos());
-	target_vec.z = 0;
-	target_vec.Normalize();
-	double target_ang = Vdot(Vcross(sent_vec, target_vec), ChVector<>(0, 0, 1));
-	auto tang = m_driver->GetSteeringController().GetTargetDirection();
-	tang.z = 0;
-	tang.Normalize();
-	double tang_ang = Vdot(Vcross(sent_vec, tang), ChVector<>(0, 0, 1));
-
 	double brakingInput = m_driver->GetBraking();
-	m_steeringInput = m_driver->GetSteering() * 0.6;
+	m_steeringInput = m_driver->GetSteering();
 	double throttleInput = m_driver->GetThrottle();
 	double powertrainTorque = m_powertrain->GetOutputTorque();
 	double driveshaftSpeed = m_vehicle->GetDriveshaftSpeed();
@@ -144,25 +149,12 @@ void GcLocalVehicle::Synchronize(double time) {
 		wheelStates[i] = m_vehicle->GetWheelState(i);
 	}
 
-	double factor = m_vehicle->GetVehicleSpeed() / m_maxSpeed;
-	throttleInput += (rand() / (double) RAND_MAX - 0.5) * 0.2;
-	throttleInput = std::max(0.0,
-			std::min(throttleInput, 0.6 - fabs(m_steeringInput) * factor));
-	brakingInput += std::max(0.0, fabs(m_steeringInput) * factor);
-	brakingInput = std::min(1.0, brakingInput);
-
 	m_driver->Synchronize(time);
 	for (int i = 0; i < m_numWheels; i++)
 		m_tires[i]->Synchronize(time, wheelStates[i], *m_terrain);
 	m_powertrain->Synchronize(time, throttleInput, driveshaftSpeed);
 	m_vehicle->Synchronize(time, m_steeringInput, brakingInput, powertrainTorque,
 			tireForces);
-
-//	err.z = 0;
-//	printf(
-//			"sent: %.2f, %.2f    target: %.2f, %.2f    tang: %.2f, %.2f    len: %.2f    target_ang: %.2f    tang_ang: %.2f    steering: %.2f    brake:%.2f    throttle:%.2f\n",
-//			sent.x, sent.y, target.x, target.y, tang.x, tang.y, err.Length(),
-//			target_ang, tang_ang, m_steeringInput, brakingInput, throttleInput);
 }
 
 void GcLocalVehicle::Advance(double step) {
@@ -181,13 +173,6 @@ void GcLocalVehicle::Advance(double step) {
 	for (int i = 0; i < m_numWheels; i++) {
 		m_gazeboWheels[i]->SetWorldPose(
 				gc::GetGcPose(m_vehicle->GetWheelPos(i), m_vehicle->GetWheelRot(i)));
-	}
-	if (m_id == 0) {
-		auto camLink = m_gazeboVehicle->GetLink("camRef");
-		auto pose = camLink->GetRelativePose();
-		pose.pos += gazebo::math::Vector3(1.0, -0.5, 1.0) * 0.006
-				/ std::cbrt(m_vehicle->GetSystem()->GetChTime() + 1.0);
-		camLink->SetRelativePose(pose);
 	}
 	////////////////DEBUG LINE////////////
 //	std::cout<<"Vehicle "<<this->id<<": \t"<<"range: "<<minRange<<"\tVelocity: "<<vehicle->GetVehicleSpeedCOM()<<"\tbrakeInput: "

@@ -43,6 +43,10 @@ GcNetworkVehicle::GcNetworkVehicle(int id,
 		m_id(id), m_sockfd(sockfd), m_world(world) {
 }
 
+/*
+ * Initialize the vehicle models. Sensor is not initialized because network
+ * vehicles do not have that.
+ */
 bool GcNetworkVehicle::Init() {
 	if (m_initialized)
 		return true;
@@ -66,6 +70,11 @@ bool GcNetworkVehicle::Init() {
 	return true;
 }
 
+/*
+ * Get the next gcPacket from the server and update the model position with
+ * that. Since the server sends out packets in order of network id, this function
+ * must be called in order of the indices of the vehicles.
+ */
 void GcNetworkVehicle::Advance(double step) {
 	struct gcPacket packet;
 	gc::Recv(m_sockfd, (char*) &packet, sizeof(packet));

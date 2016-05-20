@@ -7,6 +7,7 @@ public:
 	virtual void Synchronize(double time) {};
 	virtual void Advance(double step) {};
 	virtual bool Init() { return true; }
+	virtual bool InitSensor() { return false; }
 
 	virtual int GetId() const { return -1; }
 

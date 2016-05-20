@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <metadata>
-	<network>
+<!-- 	<network>
 		<serveraddr>0.0.0.0</serveraddr>
-	</network>
+	</network> -->
 	
-	<numVehicles>3</numVehicles>
+	<numVehicles>22</numVehicles>
 
 	<!-- Driver parameters -->
-	<maxSpeed>11</maxSpeed>
-	<followingTime>1.2</followingTime>
+	<maxSpeed>8.333</maxSpeed>
+	<followingTime>0.8</followingTime>
 	<minDist>4</minDist>
-	<vehicleGap>.4</vehicleGap>
+	<vehicleGap>.25</vehicleGap>
 
 	<iterations>10</iterations>
 	<stepSize>0.001</stepSize>
@@ -26,7 +26,7 @@
 			generic/driver/SteeringController.json
 		</steeringController>
 		<speedController>generic/driver/SpeedController.json</speedController>
-		<path>paths/madison.txt</path>
+		<path>paths/testpath.txt</path>
 	</files>
 
 </metadata>

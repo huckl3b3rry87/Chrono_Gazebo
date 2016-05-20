@@ -44,7 +44,14 @@ public:
 
 	// advance
 //	void UpdateDriver(const std_msgs::Float64::ConstPtr& _msg);
+
+	/* Synchronize the driver and other Chrono components */
 	void Synchronize(double time) override;
+
+	/*
+	 * Advance Chrono components except for the vehicle itself. It will be advanced
+	 * with the ChSystem outside the update loop for all vehicles.
+	 */
 	void Advance(double step) override;
 
 	// other functions
@@ -52,7 +59,19 @@ public:
 		return m_vehicle;
 	}
 
+	/*
+	 * Initialized the vehicle models (because they are added after the world plugin
+	 * has been loaded). This functional could be called multiple times.
+	 */
 	bool Init() override;
+
+
+	/*
+	 * Try to get sensor ranges. Return true iff some range value is not infinite.
+	 * This might not work if a vehicle has no other vehicle in front of it. Need
+	 * more consideration on this function.
+	 */
+	bool InitSensor() override;
 
 	double GetCurrDist() {
 		return m_currDist;
