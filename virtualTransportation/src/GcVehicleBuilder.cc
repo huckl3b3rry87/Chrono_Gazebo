@@ -20,10 +20,14 @@
 
 #include "GcVehicleBuilder.hh"
 
+#include "chrono_vehicle/ChConfigVehicle.h"
+#include "chrono_vehicle/ChVehicleModelData.h"
+
 #include <chrono_vehicle/driver/ChPathFollowerACCDriver.h>
 #include <chrono_vehicle/powertrain/SimplePowertrain.h>
 #include <chrono_vehicle/wheeled_vehicle/tire/RigidTire.h>
 #include <chrono_vehicle/wheeled_vehicle/vehicle/WheeledVehicle.h>
+
 #include <core/ChCoordsys.h>
 #include <core/ChMathematics.h>
 #include <core/ChQuaternion.h>
@@ -91,7 +95,7 @@ std::shared_ptr<GcVehicle> GcVehicleBuilder::BuildLocalGcVehicle() {
 	// create and initialize a powertrain
 	auto powertrain = std::make_shared<vehicle::SimplePowertrain>(
 			m_powertrainFile);
-	powertrain->Initialize();
+	powertrain->Initialize(veh->GetChassis(),veh->GetDriveshaft());
 
 #ifdef DEBUG
 	std::cout << "[GcVehicle] Powertrain initialized." << std::endl;
@@ -103,7 +107,7 @@ std::shared_ptr<GcVehicle> GcVehicleBuilder::BuildLocalGcVehicle() {
 	for (int i = 0; i < numWheels; i++) {
 		//create the tires from the tire file
 		tires[i] = std::make_shared<vehicle::RigidTire>(m_tireFile);
-		tires[i]->Initialize(veh->GetWheelBody(i));
+		tires[i]->Initialize(veh->GetWheelBody(i), vehicle::VehicleSide(i % 2));
 
 #ifdef DEBUG
 		std::cout << "[GcVehicle] Tire " << i << " initialized." << std::endl;

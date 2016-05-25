@@ -71,6 +71,7 @@ bool GcLocalVehicle::InitSensor() {
 	m_raySensor->SetActive(false);
 	m_raySensor->GetRanges(ranges);
 	m_raySensor->SetActive(true);
+
 	for (double range : ranges) {
 		if (range < 100000) {
 			return true;
@@ -135,6 +136,7 @@ void GcLocalVehicle::Synchronize(double time) {
 			m_currDist = ranges[i];
 		//}
 	}
+	std::cout<<"vehicle"<<m_id<<" range: "<<m_currDist<<std::endl;
 	m_driver->SetCurrentDistance(m_currDist);
 
 	double brakingInput = m_driver->GetBraking();

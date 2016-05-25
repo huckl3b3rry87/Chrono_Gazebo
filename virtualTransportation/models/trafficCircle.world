@@ -61,7 +61,7 @@
               <stddev>0.000</stddev>
             </noise>
             <save enabled="true">
-              <path>Captures/SkyCam/2016_03_05_720_c</path>
+              <path>Captures/SkyCam/2016_05_25_720_c</path>
             </save>
           </camera>
           <always_on>1</always_on>

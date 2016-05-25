@@ -199,12 +199,16 @@ public:
 //#endif /* debug information */
 
 		// initialize Chrono system, referred to ChVehicle.cpp. All vehicles use this same chsys
-		chsys = std::make_shared<ChSystem>();
+		chsys = std::shared_ptr<ChSystem>(new ChSystemDEM);
 		chsys->Set_G_acc(ChVector<>(0, 0, -9.81));
-		chsys->SetLcpSolverType(ChSystem::LCP_ITERATIVE_SOR);
-		chsys->SetIterLCPmaxItersSpeed(iters);
-		chsys->SetIterLCPmaxItersStab(150);
+		chsys->SetSolverType(ChSystem::SOLVER_SOR);
+
+
+	    chsys->SetMaxItersSolverSpeed(iters);
+	    chsys->SetMaxItersSolverStab(150);
+
 		chsys->SetMaxPenetrationRecoverySpeed(10.0);
+
 
 		// load and initialize terrain
 		terrain = std::make_shared<vehicle::RigidTerrain>(chsys.get(),
