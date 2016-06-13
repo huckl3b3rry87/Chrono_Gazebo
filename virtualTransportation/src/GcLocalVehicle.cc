@@ -69,7 +69,7 @@ bool GcLocalVehicle::InitSensor() {
 	std::vector<double> ranges;
 	m_raySensor->Update(false);
 	m_raySensor->SetActive(false);
-	m_raySensor->GetRanges(ranges);
+	m_raySensor->Ranges(ranges);
 	m_raySensor->SetActive(true);
 
 	for (double range : ranges) {
@@ -84,10 +84,12 @@ bool GcLocalVehicle::Init() {
 	if (m_initialized)
 		return true;
 	const std::string vehicleName = "vehicle_" + std::to_string(m_id);
-	const std::string sensorName = m_world->GetName() + "::" + vehicleName
+	std::string sensorName = m_world->GetName() + "::" + vehicleName
 			+ "::chassis::";
 
-	if ((m_raySensor = boost::dynamic_pointer_cast<sensors::RaySensor>(
+	//sensorName = sensorName + "laser";
+	std::cout<<"SensorName: "<<sensorName<<std::endl;
+	if ((m_raySensor = std::dynamic_pointer_cast<sensors::RaySensor>(
 			sensors::SensorManager::Instance()->GetSensor(sensorName + "laser")))
 			== NULL) {
 		std::cerr << "COULD NOT FIND LASER SENSOR: " + sensorName + '\n';
@@ -126,7 +128,7 @@ bool GcLocalVehicle::Init() {
 void GcLocalVehicle::Synchronize(double time) {
 	std::vector<double> ranges;
 	m_raySensor->SetActive(false);
-	m_raySensor->GetRanges(ranges);
+	m_raySensor->Ranges(ranges);
 	m_raySensor->SetActive(true);
 	//double center = steeringInput * 50 + 50;
 	m_currDist = 100000.0;

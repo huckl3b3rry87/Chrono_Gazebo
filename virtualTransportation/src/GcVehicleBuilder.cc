@@ -119,7 +119,7 @@ std::shared_ptr<GcVehicle> GcVehicleBuilder::BuildLocalGcVehicle() {
 	auto driver = std::make_shared<vehicle::ChPathFollowerACCDriver>(*veh,
 			m_steerFile, m_speedFile, m_path, std::string("my_path"), m_maxSpeed,
 			m_followingTime, m_minDist, 100000.0,
-			false);
+			true);
 	driver->GetSteeringController().CalcTargetLocation();
 
 #ifdef DEBUG
