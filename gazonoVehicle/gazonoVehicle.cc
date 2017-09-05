@@ -128,23 +128,23 @@ class GazonoVehicle : public WorldPlugin
     ChQuaternion<> initRot(1, 0, 0, 0);
 
     //create the chrono vehicle
-    veh = ChSharedPtr<vehicle::WheeledVehicle>(new vehicle::WheeledVehicle(vehicle::GetDataFile(vehicle_file)));
+    veh = std::shared_ptr<vehicle::WheeledVehicle>(new vehicle::WheeledVehicle(vehicle::GetDataFile(vehicle_file)));
     veh->Initialize(ChCoordsys<>(initLoc, initRot));
 
-    terrain = ChSharedPtr<vehicle::RigidTerrain>(new vehicle::RigidTerrain(veh->GetSystem(), vehicle::GetDataFile(rigidterrain_file)));
+    terrain = std::shared_ptr<vehicle::RigidTerrain>(new vehicle::RigidTerrain(veh->GetSystem(), vehicle::GetDataFile(rigidterrain_file)));
     std::cout<<"added terrain mesh"<<std::endl;
 
-    powertrain = ChSharedPtr<vehicle::SimplePowertrain>(new vehicle::SimplePowertrain(vehicle::GetDataFile(simplepowertrain_file)));
+    powertrain = std::shared_ptr<vehicle::SimplePowertrain>(new vehicle::SimplePowertrain(vehicle::GetDataFile(simplepowertrain_file)));
 
     powertrain->Initialize();
 
     num_axles = veh->GetNumberAxles();
     num_wheels = 2 * num_axles;
-    tires = std::vector<ChSharedPtr<vehicle::RigidTire>>(num_wheels);
+    tires = std::vector<std::shared_ptr<vehicle::RigidTire>>(num_wheels);
 
     for (int i = 0; i < num_wheels; i++) {
         //create the tires from the tire file
-        tires[i] = ChSharedPtr<vehicle::RigidTire>(new vehicle::RigidTire(vehicle::GetDataFile(rigidtire_file)));
+        tires[i] = std::shared_ptr<vehicle::RigidTire>(new vehicle::RigidTire(vehicle::GetDataFile(rigidtire_file)));
         tires[i]->Initialize(veh->GetWheelBody(i));
     }
 
@@ -162,7 +162,7 @@ class GazonoVehicle : public WorldPlugin
 
     //**********No longer needed for terrain mesh but this****************
     //****************is how to load mesh into chrono*********************
-    // ChSharedPtr<ChBody> gTerrain(new ChBody());
+    // std::shared_ptr<ChBody> gTerrain(new ChBody());
     // geometry::ChTriangleMeshConnected terrainMesh;//(new geometry::ChTriangleMeshConnected());
     // terrainMesh.LoadWavefrontMesh(GetChronoDataFile("gazonoTerrain.obj"));
     //
@@ -175,20 +175,20 @@ class GazonoVehicle : public WorldPlugin
     // veh->GetSystem()->Add(gTerrain);
 
     //correct for dip in terrain
-    ChSharedPtr<ChBodyEasyBox>gndBox(new ChBodyEasyBox(50, 60, .2, 8000, true, false));
+    std::shared_ptr<ChBodyEasyBox>gndBox(new ChBodyEasyBox(50, 60, .2, 8000, true, false));
     gndBox->SetPos({-62, 5, 0.045});
     gndBox->SetBodyFixed(true);
     veh->GetSystem()->Add(gndBox);
 
     //add boxes and speed bumps to display vehicle dynamics
     for(int i=0;i<8;i++){
-      ChSharedPtr<ChBodyEasyBox>box1(new ChBodyEasyBox(0.5, 3, 0.2, 5000, true, false));
+      std::shared_ptr<ChBodyEasyBox>box1(new ChBodyEasyBox(0.5, 3, 0.2, 5000, true, false));
       box1->SetBodyFixed(true);
       box1->SetPos(ChVector<>(2*i-25, 3.5*(i%2)-51.75, 0.15));
       veh->GetSystem()->Add(box1);
     }
     for(int i=0;i<10;i++){
-      ChSharedPtr<ChBodyEasyCylinder>cylinder1(new ChBodyEasyCylinder(0.25, 3.0, 5000, true, false));
+      std::shared_ptr<ChBodyEasyCylinder>cylinder1(new ChBodyEasyCylinder(0.25, 3.0, 5000, true, false));
       cylinder1->SetBodyFixed(true);
       cylinder1->SetRot(Q_from_AngAxis(1.57, {0, 1, 0}));
       cylinder1->SetPos(ChVector<>(i+5, 3.5*(i%2)-51.75, 0.03));
@@ -198,7 +198,7 @@ class GazonoVehicle : public WorldPlugin
 
     //Add blocks (cinderblocks) into chrono
     for(int i=0; i<50; i++){
-      ChSharedPtr<ChBodyEasyBox>cinderblock(new ChBodyEasyBox(.37, .17, .2, 1000, true, false));
+      std::shared_ptr<ChBodyEasyBox>cinderblock(new ChBodyEasyBox(.37, .17, .2, 1000, true, false));
       cinderblock->SetBodyFixed(false);
       cinderblock->SetRot(Q_from_AngAxis(0, {0, 0, 0}));
       cinderblock->SetPos(ChVector<>(78 + (i%5), -15, .2*i));
@@ -207,7 +207,7 @@ class GazonoVehicle : public WorldPlugin
     }
     //Add logs (square) into chrono
     for(int i=0; i<10; i++){
-      ChSharedPtr<ChBodyEasyBox>log(new ChBodyEasyBox(5, .2, .2, 1000, true, false));
+      std::shared_ptr<ChBodyEasyBox>log(new ChBodyEasyBox(5, .2, .2, 1000, true, false));
       log->SetBodyFixed(false);
       //log->SetRot(Q_from_AngAxis(1.57, {0, 1, 0}));
       log->SetPos(ChVector<>(78 + 3*(i%2), 6+.25*i, .2*i));
@@ -394,11 +394,11 @@ private: ros::NodeHandle* rosnode_;
     std::string driver_file = "generic/driver/Sample_Maneuver.txt";
 
     //chrono vehicle components
-    ChSharedPtr<vehicle::WheeledVehicle> veh;
-    ChSharedPtr<vehicle::RigidTerrain> terrain;
-    ChSharedPtr<vehicle::SimplePowertrain> powertrain;
-    std::vector<ChSharedPtr<vehicle::RigidTire> > tires;
-    //ChSharedPtr<ChDataDriver> driver;
+    std::shared_ptr<chrono::vehicle::WheeledVehicle> veh;
+    std::shared_ptr<chrono::vehicle::RigidTerrain> terrain;
+    std::shared_ptr<chrono::vehicle::SimplePowertrain> powertrain;
+    std::vector<std::shared_ptr<chrono::vehicle::RigidTire>> tires;
+    //std::shared_ptr<ChDataDriver> driver;
     //std::unique_ptr<PurePursuitDriver> pursuitDriver; //*****************
 
     std::vector<double> ranges;
@@ -423,10 +423,10 @@ private: ros::NodeHandle* rosnode_;
 
     //pointers to reference the models shared by chrono and gazebo
     boost::shared_ptr<sensors::RaySensor> raySensor;
-    std::vector<ChSharedPtr<ChBody>> chronoModels;
-    std::vector<ChSharedPtr<ChBody>> chCinderBlocks;
+    std::vector<std::shared_ptr<ChBody>> chronoModels;
+    std::vector<std::shared_ptr<ChBody>> chCinderBlocks;
     std::vector<physics::ModelPtr> gzCinderBlocks;
-    std::vector<ChSharedPtr<ChBody>> chLogs;
+    std::vector<std::shared_ptr<ChBody>> chLogs;
     std::vector<physics::ModelPtr> gzLogs;
     std::vector<physics::ModelPtr> wheels;
     physics::WorldPtr _world;
