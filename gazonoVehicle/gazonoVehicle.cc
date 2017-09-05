@@ -28,8 +28,8 @@
 ///the chrono-engine includes
 #include "assets/ChTexture.h"
 #include "assets/ChColorAsset.h"
-#include "geometry/ChCTriangleMesh.h"
-#include "geometry/ChCTriangleMeshConnected.h"
+#include "geometry/ChTriangleMesh.h"
+#include "geometry/ChTriangleMeshConnected.h"
 #include "core/ChFileutils.h"
 #include "core/ChStream.h"
 #include "core/ChRealtimeStep.h"
