@@ -1,10 +1,10 @@
 /*
  * This is a library (world plugin) for gazebo. It will add a vehicle in
- *chrono and use the OnUpdate() loop to run a step(s) of the chrono simulation
- *loop. It will then update the vehicel model pose in gazebo. The goal of this
- *is to have chrono simulate the vehicle and have gazebo output the results as
+ *chrono and use the OnUpdate() loop to run a step(s) of the Chrono simulation
+ *loop. It will then update the vehicle model pose in Gazebo. The goal of this
+ *is to have Chrono simulate the vehicle and have gazebo output the results as
  *well as simulate sensors and provide feedback in the form of driving
- *parameters into chrono.
+ *parameters into Chrono.
  *
  * Created by Asher Elmquist (UW SBEL and OSRF)
 */
